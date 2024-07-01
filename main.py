@@ -25,4 +25,5 @@ app.include_router(chat_suno.router, '/suno/v1')
 if __name__ == '__main__':
     app.run()
 
+
 # python3 -m meutils.clis.server gunicorn-run smooth_app:app --pythonpath python3 --port 39006
