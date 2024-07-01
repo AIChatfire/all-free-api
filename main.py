@@ -16,14 +16,14 @@ from free_api.routers import polling_openai
 
 app = App()
 
-app.include_router(files.router, '/files-extraction/v1')
-app.include_router(polling_openai.router, '/polling/v1')
+app.include_router(polling_openai.router, '/polling/v1', tags=['OpenAI轮询'])
 
-app.include_router(chat_yuanbao.router, '/yuanbao/v1')
-app.include_router(chat_suno.router, '/suno/v1')
+app.include_router(chat_yuanbao.router, '/yuanbao/v1', tags=['腾讯混元'])
+app.include_router(chat_suno.router, '/suno/v1', tags=['SunoAI'])
+
+app.include_router(files.router, '/files-extraction/v1', tags=['文档智能'])
 
 if __name__ == '__main__':
     app.run()
-
 
 # python3 -m meutils.clis.server gunicorn-run smooth_app:app --pythonpath python3 --port 39006
