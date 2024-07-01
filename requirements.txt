@@ -17,3 +17,4 @@ jsonpath
 json_repair
 
 tabulate
+tenacity

@@ -10,7 +10,7 @@
 
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
-from meutils.llm.openai_utils import create_chat_completion_chunk
+from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk
 from meutils.schemas.openai_types import ChatCompletionRequest
 
 from fastapi import APIRouter, Depends, BackgroundTasks
@@ -33,7 +33,10 @@ async def generate_music_for_chat(
 
     chunks = await Completions(api_key=api_key).acreate(request)
 
-    return EventSourceResponse(create_chat_completion_chunk(chunks))
+    if request.stream:
+        return EventSourceResponse(create_chat_completion_chunk(chunks))
+
+    return create_chat_completion("suno模型请切换为stream")
 
 
 if __name__ == '__main__':

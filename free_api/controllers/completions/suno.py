@@ -39,12 +39,12 @@ class Completions(object):
         self.api_key = api_key
 
     async def acreate(self, request: ChatCompletionRequest):
+
         if request.model.startswith("suno-chat"):
             payload = SunoAIRequest(gpt_description_prompt=request.last_content).model_dump()
 
             task_info = await generate_music(self.api_key, payload)
             return create_chunks(task_info)
-
         data = json_repair.repair_json(f"{{{request.last_content}}}", return_objects=True)
         if isinstance(data, dict) and data:
             payload = SunoAIRequest(**data).model_dump()
