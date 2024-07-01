@@ -39,7 +39,7 @@ async def create_chat_completions(
     logger.debug(feishu_url)
 
     raw_model = request.model
-    if any(i in base_url for i in {"xinghuo", "siliconflow", "bigmodel", "lingyiwanwu"}):  # 实际调用
+    if any(i in base_url for i in {"xinghuo", "siliconflow", "lingyiwanwu"}):  # 实际调用
         request.model = REDIRECT_MODEL.get(request.model, request.model)
 
     api_key = auth and auth.credentials or None
@@ -65,11 +65,3 @@ if __name__ == '__main__':
     app.include_router(router, '/v1')
 
     app.run()
-
-#
-# 选择请求的模型版本
-# general指向Lite版本；
-# generalv2指向V2.0版本；
-# generalv3指向Pro版本；
-# generalv3.5指向Max版本；
-# 4.0Ultra指向4.0 Ultra版本；
