@@ -69,8 +69,10 @@ class Completions(object):
 
     async def get_next_api_key(self):
         if self.redis_key:  # 优先轮询 redis里的 keys
-            api_key = await redis_aclient.lpop(self.redis_key).decode()  # b""
+            api_key = await redis_aclient.lpop(self.redis_key)
             if api_key:
+                api_key = api_key.decode()  # b""
+
                 await redis_aclient.rpush(self.redis_key, api_key)
             else:
                 send_message(f"redis_key为空，请检查\n\n{self.redis_key}")
