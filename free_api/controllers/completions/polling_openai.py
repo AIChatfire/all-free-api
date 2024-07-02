@@ -58,11 +58,13 @@ class Completions(object):
             except APIStatusError as e:  # {'detail': 'Insufficient Balance'}
                 logger.error(e)
 
-                if e.status_code == 400:
-                    send_message(f"{e.response}\n\n{e}", title=self.base_url)
+                if e.status_code == 400:  # todo: 细分错误
+                    send_message(f"{e.response}\n\n{e}\n\n{request.model_dump()}", title=self.base_url)
 
                     chat_completion.choices[0].message.content = chat_completion_chunk.choices[0].delta.content = str(e)
                     return chat_completion_chunk if request.stream else chat_completion
+
+                    # e.code=='1210' # {'error': {'code': '1210', 'message': 'API 调用参数有误，请检查文档。'}}
 
                 if i > 3:
                     send_message(f"{client and client.api_key}\n\n{e}\n\n{self.feishu_url}", title=self.base_url)
