@@ -16,6 +16,21 @@ from meutils.schemas.openai_types import ChatCompletionRequest
 from meutils.schemas.suno_types import SunoAIRequest
 
 template = """
+
+
+- 自动歌词懒人模式
+```
+gpt_description_prompt: 写首中国风的歌曲
+```
+
+- 自定义歌词模式(每行逗号分割)
+```
+mv: chirp-v3-5,
+title: "这里是歌词标题",
+prompt: "这里是你的自定义歌词：吧啦吧啦"
+```
+
+- 官网的标准模式(json结构)
 ```json
 {
     "prompt": "",
@@ -40,11 +55,11 @@ class Completions(object):
 
     async def acreate(self, request: ChatCompletionRequest):
 
-        if request.model.startswith("suno-chat"):
+        if "chat" in request.model:
             payload = SunoAIRequest(gpt_description_prompt=request.last_content).model_dump()
-
             task_info = await generate_music(self.api_key, payload)
             return create_chunks(task_info)
+
         data = json_repair.repair_json(f"{{{request.last_content}}}", return_objects=True)
         if isinstance(data, dict) and data:
             payload = SunoAIRequest(**data).model_dump()
@@ -123,10 +138,11 @@ async def create_chunks(task_info):
     for i in range(100):
         await asyncio.sleep(1) if i < 10 else await asyncio.sleep(3)
 
-        clips = await get_suno_task(task_id)
-        # logger.debug(clips)
+        # 监听歌曲
+        clips = (await get_suno_task(task_id)) or []
 
-        if not clips:
+        STATUS = {"streaming", "complete", "error"}  # submitted queued streaming complete/error
+        if all(clip in STATUS for clip in clips):  # 可提前返回
             yield f"""{'🎵' if i % 2 else '🔥'}"""
         else:
             yield f""") ✅\n\n"""

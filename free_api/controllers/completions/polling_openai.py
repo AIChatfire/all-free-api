@@ -62,12 +62,13 @@ class Completions(object):
                     send_message(f"{e.response}\n\n{e}\n\n{request.model_dump()}", title=self.base_url)
 
                     chat_completion.choices[0].message.content = chat_completion_chunk.choices[0].delta.content = str(e)
-                    return chat_completion_chunk if request.stream else chat_completion
+                    return [chat_completion_chunk] if request.stream else chat_completion
 
                     # e.code=='1210' # {'error': {'code': '1210', 'message': 'API 调用参数有误，请检查文档。'}}
 
                 if i > 3:
-                    send_message(f"{client and client.api_key}\n\n{e}\n\n{self.feishu_url}", title=self.base_url)
+                    send_message(f"{client and client.api_key}\n\n轮询{i}次\n\n{e}\n\n{self.feishu_url}",
+                                 title=self.base_url)
 
     async def get_next_api_key(self):
         if self.redis_key:  # 优先轮询 redis里的 keys
