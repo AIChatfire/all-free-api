@@ -142,7 +142,7 @@ async def create_chunks(task_info):
         clips = (await get_suno_task(task_id)) or []
 
         STATUS = {"streaming", "complete", "error"}  # submitted queued streaming complete/error
-        if all(clip in STATUS for clip in clips):  # 可提前返回
+        if all(clip.get('status') in STATUS for clip in clips):  # 可提前返回
             yield f"""{'🎵' if i % 2 else '🔥'}"""
         else:
             yield f""") ✅\n\n"""

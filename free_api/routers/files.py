@@ -33,6 +33,7 @@ client = OpenAI(
 
 class Purpose(str, Enum):
     # 文档智能
+    chatfire_fileparser = "textin-fileparser"
     moonshot_fileparser = "moonshot-fileparser"
     textin_fileparser = "textin-fileparser"
 
@@ -99,7 +100,7 @@ async def upload_files(
 ):
     api_key = auth and auth.credentials or None
 
-    if purpose == purpose.textin_fileparser:
+    if purpose in {purpose.textin_fileparser, purpose.chatfire_fileparser}:
 
         response_data = await textin_fileparser(file.file.read())
         markdown_text = jsonpath.jsonpath(response_data, "$..markdown")  # False or []
