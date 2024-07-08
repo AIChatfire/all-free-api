@@ -53,9 +53,9 @@ async def create_chat_completions(
 
         bucket_name = "files"
         file = UploadFile(
-            file=io.BytesIO(stream.content),
+            file=io.BytesIO(),
             filename=f"{shortuuid.random()}.mp3",
-            size=1,
+            size=len(stream.content),
         )
         file_object = await Minio().put_object_for_openai(file=file, bucket_name=bucket_name)
 
