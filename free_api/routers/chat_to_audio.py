@@ -32,7 +32,10 @@ async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         tts_model: str = Query("tts-1"),
-        is_html: bool = Query(False)
+        is_html: bool = Query(False),
+        is_async: bool = Query(False),
+
+        background_tasks: BackgroundTasks = BackgroundTasks(),
 
 ):
     api_key = auth and auth.credentials or None
@@ -57,9 +60,13 @@ async def create_chat_completions(
             filename=f"{shortuuid.random()}.mp3",
             size=len(stream.content),
         )
-        file_object = await Minio().put_object_for_openai(file=file, bucket_name=bucket_name)
-
+        file_object = await Minio().put_object_for_openai(file=file, bucket_name=bucket_name)  # todo: 异步
         url = file_object.filename
+
+        if is_async:
+            background_tasks.add_task(Minio().put_object_for_openai, file=file, bucket_name=bucket_name)
+            url = Minio().get_file_url(file.filename)
+
         audio = f"\n\n[🎧音频-点击播放]({url})"
         if is_html:
             audio = f"""\n\n
