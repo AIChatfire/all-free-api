@@ -18,3 +18,4 @@ json_repair
 
 tabulate
 tenacity
+edge_tts
