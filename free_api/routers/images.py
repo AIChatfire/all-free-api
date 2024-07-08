@@ -11,7 +11,6 @@
 
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
-from meutils.llm.openai_utils import ppu_flow
 from meutils.schemas.openai_types import ImageRequest
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
 from meutils.apis.siliconflow import text_to_image
@@ -36,19 +35,14 @@ async def generate(
         redis_key: Optional[str] = Query(None),
 ):
     logger.debug(request)
-    logger.debug(base_url)
-    logger.debug(feishu_url)
 
-    raw_model = request.model
     if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
         request.model = REDIRECT_MODEL.get(request.model, request.model)
 
-    api_key = auth and auth.credentials or None
 
-    async with ppu_flow(api_key, post=f"ppu-0{request.n}"):
-        response = await text_to_image.create_image(request)
+    response = await text_to_image.create_image(request)
 
-        return ImagesResponse(created=int(time.time()), data=response.get('images', []))
+    return ImagesResponse(created=int(time.time()), data=response.get('images', []))
 
 
 if __name__ == '__main__':

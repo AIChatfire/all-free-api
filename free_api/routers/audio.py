@@ -23,7 +23,7 @@ from openai import AsyncOpenAI
 from meutils.schemas.openai_types import TTSRequest
 
 router = APIRouter()
-TAGS = ["audio"]
+TAGS = ["Audio"]
 
 
 @router.post("/audio/speech")

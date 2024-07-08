@@ -13,6 +13,7 @@ from meutils.notice.feishu import send_message
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ChatCompletionRequest, ImageRequest
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, chat_completion
+from meutils.llm.openai_utils import to_openai_images_params
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 from sse_starlette import EventSourceResponse
@@ -32,6 +33,7 @@ async def create_chat_completions(
         backgroundtasks: BackgroundTasks = ...,
 ):
     logger.debug(request)
+
     image_request = ImageRequest(
         prompt=request.last_content,
         model=request.model.strip('chat-'),
@@ -39,8 +41,9 @@ async def create_chat_completions(
     )
 
     api_key = auth and auth.credentials or None
+    data = to_openai_images_params(image_request)
 
-    response = await AsyncOpenAI(api_key=api_key).images.generate(**image_request.model_dump())
+    response = await AsyncOpenAI(api_key=api_key).images.generate(**data)
 
     if request.stream:
         async def gen():
