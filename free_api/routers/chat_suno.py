@@ -16,7 +16,7 @@ from meutils.schemas.openai_types import ChatCompletionRequest
 from fastapi import APIRouter, Depends, BackgroundTasks
 from sse_starlette import EventSourceResponse
 
-from free_api.controllers.completions.suno import Completions
+from free_api.resources.completions.suno import Completions
 
 router = APIRouter()
 

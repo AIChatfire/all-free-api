@@ -127,7 +127,7 @@ class Completions(object):
         file: Union[UploadFile] = File(...),  # 文件链接
     ):
         # 强制转换为mp3
-        tmp_filename = f"{file.filename or shortuuid.random()}.mp3"
+        tmp_filename = f"{shortuuid.random()}.mp3"
         with open(tmp_filename, 'wb') as f:
             f.write(file.file.read())
 
@@ -177,3 +177,4 @@ if __name__ == '__main__':
     import openai
 
     # openai.OpenAI.chat.completions.create()
+

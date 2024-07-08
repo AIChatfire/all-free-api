@@ -30,8 +30,8 @@ redis_client.decode_responses = True
 class Completions(object):
     def __init__(
             self,
-            base_url: str,
-            api_key: str,
+            base_url: Optional[str] = None,
+            api_key: Optional[str] = None,
             feishu_url: Optional[str] = None,
             redis_key: Optional[str] = None
     ):
@@ -66,9 +66,12 @@ class Completions(object):
 
                     # e.code=='1210' # {'error': {'code': '1210', 'message': 'API 调用参数有误，请检查文档。'}}
 
-                if i > 3:
+                if i > 3:  # 兜底策略
                     send_message(f"{client and client.api_key}\n\n轮询{i}次\n\n{e}\n\n{self.feishu_url}",
                                  title=self.base_url)
+
+
+        return [chat_completion_chunk] if request.stream else chat_completion
 
     async def get_next_api_key(self):
         if self.redis_key:  # 优先轮询 redis里的 keys
@@ -94,7 +97,10 @@ class Completions(object):
 
     @staticmethod
     def calculate_tokens(request: ChatCompletionRequest, completion, alfa: float = 1.1):
-        if request.stream: return completion
+        if isinstance(completion, str):
+            send_message(f"{request}\n\n{completion}", title="completion is str 很奇怪")
+
+        if request.stream or isinstance(completion, str): return completion
 
         # 非流&一般逆向api需要重新计算
         if completion.usage is None or (completion.usage and completion.usage.completion_tokens == 1):

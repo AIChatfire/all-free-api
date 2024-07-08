@@ -17,7 +17,7 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, 
 from sse_starlette import EventSourceResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
-from free_api.controllers.completions.yuanbao import Completions
+from free_api.resources.completions.yuanbao import Completions
 
 router = APIRouter()
 

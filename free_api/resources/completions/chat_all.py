@@ -109,15 +109,17 @@ if __name__ == '__main__':
             'role': 'user',
             'content': [
                 {'type': 'text', 'text': '解释下这张照片'},
-                {'type': 'image_url', 'image_url': 'https://img-home.csdnimg.cn/images/20201124032511.png'}] # 不标准
+                {'type': 'image_url', 'image_url': 'https://img-home.csdnimg.cn/images/20201124032511.png'}]  # 不标准
         }
     ]
 
     request = ChatCompletionRequest(model="step-1", messages=messages)  # 针对all
     print(Completions().create(request))
 
+
     # async def main():
     #     async for i in Completions().acreate(request):
     #         print(i)
     #
     # arun(main())
+

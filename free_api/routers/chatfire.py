@@ -30,13 +30,7 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        base_url: Optional[str] = Query("https://api.siliconflow.cn/v1"),
-        feishu_url: Optional[str] = Query(None),
-        redis_key: Optional[str] = Query(None),
 ):
-    logger.debug(request)
-    logger.debug(base_url)
-    logger.debug(feishu_url)
 
     raw_model = request.model
     if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用

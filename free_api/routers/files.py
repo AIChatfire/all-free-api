@@ -14,6 +14,8 @@ from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import appu
 from meutils.apis.textin import textin_fileparser
+from meutils.apis import fish
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
 from enum import Enum
@@ -36,6 +38,8 @@ class Purpose(str, Enum):
     chatfire_fileparser = "textin-fileparser"
     moonshot_fileparser = "moonshot-fileparser"
     textin_fileparser = "textin-fileparser"
+    # 语音克隆 tts  Voice clone
+    tts = "tts"
 
     file_extract = "file-extract"
     assistants = "assistants"
@@ -73,7 +77,6 @@ async def get_file_content(
     if Purpose.textin_fileparser in file_id:
         file_content = await redis_aclient.get(file_id)
     else:
-
         file_content = client.files.content(file_id=file_id).text
 
     await appu("ppu-1", api_key)  # 计费
@@ -90,7 +93,7 @@ async def delete_file(
     return client.files.delete(file_id=file_id)
 
 
-@router.post("/files")  # 同名文件会被覆盖
+@router.post("/files")  # 核心
 async def upload_files(
         file: UploadFile = File(...),
         purpose: Purpose = Form(...),
@@ -124,6 +127,9 @@ async def upload_files(
         if markdown_text:
             file_object.id = f"file:{file_object.purpose}-{file_object.id}"
             await redis_aclient.set(file_object.id, markdown_text, ex=3600 * 24 * 7)
+
+    elif purpose == purpose.tts:
+        file_object = await fish.create_file_for_openai(file)
 
     else:  # 其他走 kimi
 

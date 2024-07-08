@@ -17,7 +17,7 @@ from sse_starlette import EventSourceResponse
 
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
-from free_api.controllers.completions.step import Completions
+from free_api.resources.completions.step import Completions
 from chatllm.schemas.openai_api_protocol import ChatCompletionRequest
 
 router = APIRouter()

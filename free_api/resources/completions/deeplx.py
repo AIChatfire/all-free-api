@@ -10,7 +10,7 @@
 
 from meutils.pipe import *
 from meutils.notice.feishu import send_message
-from meutils.api.deeplx import translate
+from meutils.apis.deeplx import translate
 
 from chatllm.schemas.openai_types import chat_completion, chat_completion_chunk as _chat_completion_chunk
 from chatllm.schemas.openai_api_protocol import ChatCompletionRequest, UsageInfo

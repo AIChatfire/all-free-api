@@ -13,6 +13,7 @@ from free_api.routers import chat_yuanbao
 from free_api.routers import chat_suno
 from free_api.routers import files
 from free_api.routers import polling_openai
+from free_api.routers import reranker
 
 app = App()
 
@@ -22,6 +23,8 @@ app.include_router(chat_yuanbao.router, '/yuanbao/v1', tags=['腾讯混元'])
 app.include_router(chat_suno.router, '/suno/v1', tags=['SunoAI'])
 
 app.include_router(files.router, '/files-extraction/v1', tags=['文档智能'])
+
+app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)
 
 if __name__ == '__main__':
     app.run()
