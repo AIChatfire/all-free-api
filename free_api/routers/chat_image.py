@@ -11,14 +11,14 @@
 from meutils.pipe import *
 from meutils.notice.feishu import send_message
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
+from meutils.schemas.openai_types import ChatCompletionRequest, ImageRequest
+from meutils.llm.openai_utils import create_chat_completion_chunk
 
-from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status
+from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 from sse_starlette import EventSourceResponse
-
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
-from free_api.resources.completions.step import Completions
-from meutils.schemas.openai_types import ChatCompletionRequest
+from free_api.routers import images
 
 router = APIRouter()
 
@@ -29,15 +29,23 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        base_url: Optional[str] = Query(None),
+        backgroundtasks: BackgroundTasks = ...,
 ):
     logger.debug(request)
-    logger.debug(base_url)
 
-    api_key = auth and auth.credentials or None
-    api_key = np.random.choice(api_key.strip().split(','))  # 随机轮询
+    if request.model == "chat-stable-diffusion-3":
+        image_request = ImageRequest(
+            prompt=request.last_content,
+            model=request.model.strip('chat-'),
+            n=2,
+        )
+        response = await images.generate(image_request, auth)
 
-    response = await Completions(api_key=api_key).acreate(request)
+        # backgroundtasks.add_task(func)
+
+        chunks = await create_chat_completion_chunk(
+            [r.url for r in response.data]
+        )
 
     if request.stream:
         return EventSourceResponse(response)

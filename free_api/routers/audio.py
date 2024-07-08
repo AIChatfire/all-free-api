@@ -18,10 +18,14 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from chatllm.schemas.openai_types import SpeechCreateRequest  #
 
 router = APIRouter()
+TAGS = ["audio"]
 
 
 @router.post("/audio/speech")
-async def create_speech(request: SpeechCreateRequest):
+async def create_speech(
+        request: SpeechCreateRequest,
+        voice: Optional[str] = Query(None),
+):
     logger.debug(request)
 
     # media_types = {
@@ -35,6 +39,8 @@ async def create_speech(request: SpeechCreateRequest):
     # media_types.get(request.response_format)
 
     data = request.model_dump()
+    data["voice"] = voice or data["voice"]  # 支持很多种声音
+
     stream = await EdgeTTS().acreate_for_openai(**data)
 
     return StreamingResponse(stream, media_type="text/event-stream")

@@ -39,27 +39,6 @@ class Images(Completions):
     def create(self, request: ImageRequest):
         pass
 
-    async def get_next_api_key(self):
-        if self.redis_key:  # 优先轮询 redis里的 keys
-            api_key = await redis_aclient.lpop(self.redis_key)
-            if api_key:
-                api_key = api_key.decode()
-
-                await redis_aclient.rpush(self.redis_key, api_key)
-            else:
-                send_message(f"redis_key为空，请检查\n\n{self.redis_key}")
-
-            return api_key
-
-        if self.feishu_url:  # 轮询飞书里的 keys
-            api_keys = (await aget_spreadsheet_values(feishu_url=self.feishu_url, to_dataframe=True))[0]
-            api_keys = [k for k in api_keys if k]  # 过滤空值
-
-        else:
-            api_keys = self.api_key.split(',')  # 轮询请求体里的 keys
-
-        api_key = np.random.choice(api_keys)  # 随机轮询
-        return api_key
 
 
 if __name__ == '__main__':

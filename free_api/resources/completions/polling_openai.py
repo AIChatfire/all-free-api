@@ -53,6 +53,10 @@ class Completions(object):
                 )
                 completion = await client.chat.completions.create(**data)
 
+                if isinstance(completion, str):
+                    send_message(f"{request}\n\ncompletion: {completion}", title=f"completion is str 很奇怪")
+                    continue
+
                 return self.calculate_tokens(request, completion)
 
             except APIStatusError as e:  # {'detail': 'Insufficient Balance'}
@@ -69,7 +73,6 @@ class Completions(object):
                 if i > 3:  # 兜底策略
                     send_message(f"{client and client.api_key}\n\n轮询{i}次\n\n{e}\n\n{self.feishu_url}",
                                  title=self.base_url)
-
 
         return [chat_completion_chunk] if request.stream else chat_completion
 
@@ -97,8 +100,6 @@ class Completions(object):
 
     @staticmethod
     def calculate_tokens(request: ChatCompletionRequest, completion, alfa: float = 1.1):
-        if isinstance(completion, str):
-            send_message(f"{request}\n\n{completion}", title="completion is str 很奇怪")
 
         if request.stream or isinstance(completion, str): return completion
 

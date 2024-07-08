@@ -26,6 +26,7 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, BackgroundTasks, D
 from fastapi.responses import Response, FileResponse
 
 router = APIRouter()
+TAGS = ['文档智能']
 
 client = OpenAI(
     api_key=os.getenv('MOONSHOT_API_KEY'),
