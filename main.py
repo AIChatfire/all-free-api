@@ -9,16 +9,18 @@
 # @Description  :
 
 from meutils.serving.fastapi import App
-from free_api.routers import chat_yuanbao
-from free_api.routers import chat_suno
+from free_api.routers import chat_yuanbao, chat_suno
+from free_api.routers import polling_openai, chat_image, chat_to_audio
+
 from free_api.routers import files, images
-from free_api.routers import polling_openai
 from free_api.routers import audio
 from free_api.routers import reranker
 
 app = App()
 
-app.include_router(polling_openai.router, '/polling/v1', tags=['OpenAI轮询'])
+app.include_router(polling_openai.router, '/polling/v1', tags=polling_openai.TAGS)
+app.include_router(chat_image.router, '/chat_image/v1', tags=chat_image.TAGS)
+app.include_router(chat_to_audio.router, '/chat_image/v1', tags=chat_image.TAGS)
 
 app.include_router(chat_yuanbao.router, '/yuanbao/v1', tags=['腾讯混元'])
 app.include_router(chat_suno.router, '/suno/v1', tags=['SunoAI'])

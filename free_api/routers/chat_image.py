@@ -12,15 +12,15 @@ from meutils.pipe import *
 from meutils.notice.feishu import send_message
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ChatCompletionRequest, ImageRequest
-from meutils.llm.openai_utils import create_chat_completion_chunk
+from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, chat_completion
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 from sse_starlette import EventSourceResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
-
-from free_api.routers import images
+from openai import AsyncOpenAI
 
 router = APIRouter()
+TAGS = ["文本生成", "文生图"]
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
@@ -32,24 +32,26 @@ async def create_chat_completions(
         backgroundtasks: BackgroundTasks = ...,
 ):
     logger.debug(request)
+    image_request = ImageRequest(
+        prompt=request.last_content,
+        model=request.model.strip('chat-'),
+        n=2,
+    )
 
-    if request.model == "chat-stable-diffusion-3":
-        image_request = ImageRequest(
-            prompt=request.last_content,
-            model=request.model.strip('chat-'),
-            n=2,
-        )
-        response = await images.generate(image_request, auth)
+    api_key = auth and auth.credentials or None
 
-        # backgroundtasks.add_task(func)
-
-        chunks = await create_chat_completion_chunk(
-            [r.url for r in response.data]
-        )
+    response = await AsyncOpenAI(api_key=api_key).images.generate(**image_request.model_dump())
 
     if request.stream:
-        return EventSourceResponse(response)
-    return response
+        async def gen():
+            for image in response.data:
+                yield f"![{image.revised_prompt}]({image.url})"
+
+        chunks = create_chat_completion_chunk(gen())
+        return EventSourceResponse(chunks)
+    else:
+        chat_completion.choices[0].message.content = response
+        return create_chat_completion(chat_completion)
 
 
 if __name__ == '__main__':

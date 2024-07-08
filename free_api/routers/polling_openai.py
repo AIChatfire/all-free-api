@@ -22,6 +22,7 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, 
 from free_api.resources.completions.polling_openai import Completions
 
 router = APIRouter()
+TAGS = ["文本生成", "轮询"]
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
