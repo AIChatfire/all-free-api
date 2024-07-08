@@ -31,7 +31,8 @@ async def create_reranker(
 
     api_key = auth and auth.credentials or None
 
-    jina_api_key = get_next_token_for_polling(feishu_url=os.getenv("RERANKER_FEISHU_URL"))
+    jina_api_key = await get_next_token_for_polling(feishu_url=os.getenv("RERANKER_FEISHU_URL"))
+    logger.debug(jina_api_key)
 
     async with ppu_flow(api_key, 'ppu-01'):
         response = await rerank(request, jina_api_key)
