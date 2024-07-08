@@ -18,7 +18,8 @@ from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from openai import AsyncOpenAI
 
 from sse_starlette import EventSourceResponse
-from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks, \
+    Header
 
 router = APIRouter()
 TAGS = ["文本生成", "语音生成"]
@@ -31,7 +32,7 @@ async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         tts_model: str = Query("tts-1"),
-        html: str = Query(None)
+        is_html: bool = Query(False)
 
 ):
     api_key = auth and auth.credentials or None
@@ -46,6 +47,7 @@ async def create_chat_completions(
             _ = chunk.choices[0].delta.content or ""
             content += _
             yield _
+
         # tts
         stream = await client.audio.speech.create(input=content, model=tts_model, voice="alloy")
 
@@ -53,14 +55,14 @@ async def create_chat_completions(
         file = UploadFile(
             file=io.BytesIO(stream.content),
             filename=f"{shortuuid.random()}.mp3",
-            size=1
+            size=1,
         )
         file_object = await Minio().put_object_for_openai(file=file, bucket_name=bucket_name)
 
         url = file_object.filename
-        audio = f"[🎧音频-点击播放]({url})"
-        if html:
-            audio = f"""
+        audio = f"\n\n[🎧音频-点击播放]({url})"
+        if is_html:
+            audio = f"""\n\n
             <video src="{url}" controls="controls" muted="muted" class="d-block rounded-bottom-2 border-top" width="100%" height="50"></video>
             """
         yield audio

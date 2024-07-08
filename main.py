@@ -18,13 +18,18 @@ from free_api.routers import reranker
 
 app = App()
 
+# Chat
 app.include_router(polling_openai.router, '/polling/v1', tags=polling_openai.TAGS)
 app.include_router(chat_image.router, '/chat_image/v1', tags=chat_image.TAGS)
 app.include_router(chat_to_audio.router, '/chat_to_audio/v1', tags=chat_to_audio.TAGS)
 
 app.include_router(chat_yuanbao.router, '/yuanbao/v1', tags=['腾讯混元'])
 app.include_router(chat_suno.router, '/suno/v1', tags=['SunoAI'])
+
+# Audio
 app.include_router(audio.router, '/audio/v1', tags=audio.TAGS)
+
+# Image
 app.include_router(images.router, '/images/v1', tags=images.TAGS)  # 转发：todo 反代
 
 # 反代
