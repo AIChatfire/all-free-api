@@ -31,7 +31,7 @@ async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         tts_model: str = Query("tts-1"),
-        is_html: bool = Query(False),
+        is_html: bool = Query(True),
 
         background_tasks: BackgroundTasks = BackgroundTasks(),
 
@@ -50,21 +50,24 @@ async def create_chat_completions(
             yield _
 
         # tts
-        stream = await client.audio.speech.create(input=content, model=tts_model, voice="alloy")
         filename = f"{shortuuid.random()}.mp3"
-        file = stream.content
-        bucket_name = "files"
-        # 异步
-        background_tasks.add_task(Minio().put_object_for_openai, file=file, bucket_name=bucket_name, filename=filename)
         url = Minio().get_file_url(filename)
-        # file_object = await Minio().put_object_for_openai(file=file, bucket_name=bucket_name, filename=filename)  # todo: 异步
-        # url = file_object.filename
 
-        audio = f"\n\n[🎧音频-点击播放]({url})"
+        # 异步
+        async def to_audio():
+            stream = await client.audio.speech.create(input=content, model=tts_model, voice="alloy")
+            file = stream.content
+            bucket_name = "files"
+            await Minio().put_object_for_openai(file=file, bucket_name=bucket_name, filename=filename)
+
+        background_tasks.add_task(to_audio)
+
+        audio = f"[🎧音频-点击播放]({url})"
         if is_html:
-            audio = f"""\n\n
+            audio = f"""
             <video src="{url}" controls="controls" muted="muted" class="d-block rounded-bottom-2 border-top" width="100%" height="50"></video>
-            """
+            """.strip()
+        yield "\n\n"
         yield audio
 
     if request.stream:
