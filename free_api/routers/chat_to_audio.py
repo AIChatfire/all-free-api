@@ -60,13 +60,15 @@ async def create_chat_completions(
             bucket_name = "files"
             await Minio().put_object_for_openai(file=file, bucket_name=bucket_name, filename=filename)
 
-        background_tasks.add_task(to_audio)
-
         audio = f"[🎧音频-点击播放]({url})"
         if is_html:
             audio = f"""
             <video src="{url}" controls="controls" muted="muted" class="d-block rounded-bottom-2 border-top" width="100%" height="50"></video>
             """.strip()
+            await to_audio()
+        else:
+            background_tasks.add_task(to_audio)
+
         yield "\n\n"
         yield audio
 
