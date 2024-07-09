@@ -18,8 +18,7 @@ from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from openai import AsyncOpenAI
 
 from sse_starlette import EventSourceResponse
-from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks, \
-    Header
+from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
 TAGS = ["文本生成", "语音生成"]
@@ -33,7 +32,6 @@ async def create_chat_completions(
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         tts_model: str = Query("tts-1"),
         is_html: bool = Query(False),
-        is_async: bool = Query(False),
 
         background_tasks: BackgroundTasks = BackgroundTasks(),
 
@@ -53,19 +51,14 @@ async def create_chat_completions(
 
         # tts
         stream = await client.audio.speech.create(input=content, model=tts_model, voice="alloy")
-
+        filename = f"{shortuuid.random()}.mp3"
+        file = stream.content
         bucket_name = "files"
-        file = UploadFile(
-            file=io.BytesIO(),
-            filename=f"{shortuuid.random()}.mp3",
-            size=len(stream.content),
-        )
-        file_object = await Minio().put_object_for_openai(file=file, bucket_name=bucket_name)  # todo: 异步
-        url = file_object.filename
-
-        if is_async:
-            background_tasks.add_task(Minio().put_object_for_openai, file=file, bucket_name=bucket_name)
-            url = Minio().get_file_url(file.filename)
+        # 异步
+        background_tasks.add_task(Minio().put_object_for_openai, file=file, bucket_name=bucket_name, filename=filename)
+        url = Minio().get_file_url(filename)
+        # file_object = await Minio().put_object_for_openai(file=file, bucket_name=bucket_name, filename=filename)  # todo: 异步
+        # url = file_object.filename
 
         audio = f"\n\n[🎧音频-点击播放]({url})"
         if is_html:

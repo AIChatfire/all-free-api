@@ -39,7 +39,6 @@ async def generate(
     if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
         request.model = REDIRECT_MODEL.get(request.model, request.model)
 
-
     response = await text_to_image.create_image(request)
 
     return ImagesResponse(created=int(time.time()), data=response.get('images', []))
