@@ -6,21 +6,19 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
-
-
+# @Description  :
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ImageRequest
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
+from meutils.schemas.kuaishou_types import KlingaiImageRequest
+
 from meutils.apis.siliconflow import text_to_image
+from meutils.apis.kuaishou import klingai
 
 from openai.types import ImagesResponse
 
-from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
-
-from free_api.resources.completions.polling_openai import Completions
 
 router = APIRouter()
 TAGS = ["文生图"]
@@ -36,12 +34,27 @@ async def generate(
 ):
     logger.debug(request)
 
-    if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
-        request.model = REDIRECT_MODEL.get(request.model, request.model)
+    if request.model.startswith(("stable-diffusion-3",)):
+        if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
+            request.model = REDIRECT_MODEL.get(request.model, request.model)
 
-    response = await text_to_image.create_image(request)
+        response = await text_to_image.create_image(request)
 
-    return ImagesResponse(created=int(time.time()), data=response.get('images', []))
+        return ImagesResponse(created=int(time.time()), data=response.get('images', []))
+
+    elif request.model.startswith(("kling",)):
+
+        request = KlingaiImageRequest(
+            prompt=request.prompt,
+            imageCount=request.n,
+            # style=request.style,  # "默认"
+            aspect_ratio=request.size if request.size in {'1:1', '2:3', '3:2', '3:4', '4:3', '9:16', '16:9'} else "1:1"
+        )
+        images = await klingai.create_image(request)
+        if isinstance(images, dict):  # 异常
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
+
+        return ImagesResponse(created=int(time.time()), data=images)
 
 
 if __name__ == '__main__':

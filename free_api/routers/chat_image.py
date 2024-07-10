@@ -30,7 +30,7 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        backgroundtasks: BackgroundTasks = ...,
+        backgroundtasks: BackgroundTasks = BackgroundTasks(),
 ):
     logger.debug(request)
 
@@ -40,15 +40,15 @@ async def create_chat_completions(
         n=2,
     )
 
-    api_key = auth and auth.credentials or None
     data = to_openai_images_params(image_request)
 
+    api_key = auth and auth.credentials or None
     response = await AsyncOpenAI(api_key=api_key).images.generate(**data)
 
     if request.stream:
         async def gen():
             for image in response.data:
-                yield f"![{image.revised_prompt}]({image.url})"
+                yield f"![{image.revised_prompt}]({image.url})\n\n"
 
         chunks = create_chat_completion_chunk(gen())
         return EventSourceResponse(chunks)
