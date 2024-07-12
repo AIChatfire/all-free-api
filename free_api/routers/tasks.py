@@ -25,7 +25,6 @@ TAGS = ["异步任务"]
 
 
 @router.get("/tasks/{task_id}")
-@alru_cache(ttl=5)
 async def get_tasks(
         task_id: str,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
