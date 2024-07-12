@@ -11,10 +11,10 @@ from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ImageRequest
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
-from meutils.schemas.kuaishou_types import KlingaiImageRequest
+from meutils.schemas.kuaishou_types import KlingaiImageRequest, KolorsRequest
 
 from meutils.apis.siliconflow import text_to_image
-from meutils.apis.kuaishou import klingai
+from meutils.apis.kuaishou import klingai, kolors
 
 from openai.types import ImagesResponse
 
@@ -29,8 +29,6 @@ async def generate(
         request: ImageRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         base_url: Optional[str] = Query("https://api.siliconflow.cn/v1"),
-        feishu_url: Optional[str] = Query(None),
-        redis_key: Optional[str] = Query(None),
 ):
     logger.debug(request)
 
@@ -53,7 +51,19 @@ async def generate(
         images = await klingai.create_image(request)
         if isinstance(images, dict):  # 异常
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
+        return ImagesResponse(created=int(time.time()), data=images)
 
+    else:  # kolors
+        request = KolorsRequest(
+            prompt=request.prompt,
+            imageCount=request.n,
+            style=request.style,
+            resolution=request.size
+        )
+
+        images = await kolors.create_image(request)
+        if isinstance(images, dict):  # 异常
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
         return ImagesResponse(created=int(time.time()), data=images)
 
 
