@@ -14,7 +14,7 @@ from free_api.routers import polling_openai, chat_image, chat_to_audio
 
 from free_api.routers import files, images
 from free_api.routers import audio
-from free_api.routers import reranker
+from free_api.routers import tasks, reranker
 
 app = App()
 
@@ -35,6 +35,8 @@ app.include_router(images.router, '/images/v1', tags=images.TAGS)  # 转发：to
 # 反代
 app.include_router(files.router, '/files-extraction/v1', tags=files.TAGS)
 app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不兼容openai
+
+app.include_router(tasks.router, '/', tags=tasks.TAGS)  # 不兼容openai
 
 if __name__ == '__main__':
     app.run()
