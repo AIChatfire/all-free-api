@@ -9,15 +9,16 @@
 # @Description  :
 from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
-from meutils.apis.kuaishou import klingai_video
 from meutils.llm.openai_utils import ppu_flow
 from meutils.schemas.task_types import TaskType, Task
 from meutils.schemas.kuaishou_types import KlingaiVideoRequest, Camera
-from meutils.config_utils.lark_utils import get_next_token_for_polling
+from meutils.schemas.runwayml_types import RunwayRequest, EXAMPLES
+from meutils.apis.kuaishou import klingai_video
+from meutils.apis.runwayml import gen
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
-from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header, HTTPException, status
+from fastapi import APIRouter, Depends, BackgroundTasks, Request, Query, Body, Header, HTTPException, status
 from fastapi.responses import JSONResponse
 
 router = APIRouter()
@@ -40,15 +41,22 @@ async def get_tasks(
     if task_type is None:  # 通用业务：默认从redis获取
         data = await redis_aclient.get(task_id)
 
-    elif task_type == "kling":  # 从个业务线获取: 获取token => 在请求接口 （kling-taskid: cookie）
+    elif task_type == TaskType.kling:  # 从个业务线获取: 获取token => 在请求接口 （kling-taskid: cookie）
         async with ppu_flow(api_key, post="ppu-001"):
 
             token = await redis_aclient.get(task_id)  # bytes
             token = token and token.decode()
 
-            logger.debug(token)  # 28383134
-
             data = await klingai_video.get_task(task_id, token)
+            return data
+
+    elif task_type == TaskType.runwayml:
+        async with ppu_flow(api_key, post="ppu-001"):
+
+            token = await redis_aclient.get(task_id)  # bytes
+            token = token and token.decode()
+
+            data = await gen.get_task(task_id, token)
             return data
 
     elif task_type == "suno":
@@ -57,10 +65,10 @@ async def get_tasks(
     return JSONResponse(content=data, media_type="application/json")
 
 
-@router.post("/tasks/{task_type}")
+@router.post(f"/tasks/{TaskType.kling}")
 async def submit_tasks(
-        request: Union[KlingaiVideoRequest],
-        task_type: TaskType,
+        request: KlingaiVideoRequest,
+        # task_type: TaskType,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         upstream_base_url: Optional[str] = Header(None),
         upstream_api_key: Optional[str] = Header(None),
@@ -68,19 +76,52 @@ async def submit_tasks(
 
         background_tasks: BackgroundTasks = BackgroundTasks,
 ):
+    logger.debug(request.model_dump_json(indent=4))
+
     api_key = auth and auth.credentials or None
+    task_type = TaskType.kling
 
-    if task_type == "kling":
-        async with ppu_flow(api_key, post="kling-video"):
-            task = await klingai_video.submit_task(request)  # task_id, token
-            if task.status:
-                klingai_video.send_message(f"任务提交成功：{task.id}")
-                task.id = f"{task_type}-{task.id}"
+    async with ppu_flow(api_key, post="api-kling-video"):
+        task = await klingai_video.submit_task(request)
+        if task and task.status:
+            klingai_video.send_message(f"「{task_type}」任务提交成功：{task.id}")
+            task.id = f"{task_type}-{task.id}"
 
-                await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
-                return task.model_dump(exclude={"system_fingerprint"})
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+            return task.model_dump(exclude={"system_fingerprint"})
 
-            raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=task.data)
+        raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=task)
+
+
+@router.post(f"/tasks/{TaskType.runwayml}")
+async def submit_tasks(
+        request: RunwayRequest,
+        # task_type: TaskType,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        upstream_base_url: Optional[str] = Header(None),
+        upstream_api_key: Optional[str] = Header(None),
+        downstream_base_url: Optional[str] = Header(None),
+
+        background_tasks: BackgroundTasks = BackgroundTasks,
+):
+    logger.debug(request.model_dump_json(indent=4))
+
+    api_key = auth and auth.credentials or None
+    task_type = TaskType.runwayml
+
+    async with ppu_flow(api_key, post="api-runwayml-gen3"):
+        task = await gen.submit_task(request)
+        if task and task.status:
+            gen.send_message(f"「{task_type}」任务提交成功：{task.id}")
+
+            task.id = f"{task_type}-{task.id}"
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+            return task.model_dump(exclude={"system_fingerprint"})
+        elif task is None:
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=task)
+
+        else:
+            raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=task)
 
 
 if __name__ == '__main__':
