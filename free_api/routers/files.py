@@ -39,23 +39,23 @@ client = OpenAI(
 class Purpose(str, Enum):
     # 存储
     oss = "oss"
-    upload = "upload"
 
     # 文档智能
-    chatfire_fileparser = "textin-fileparser"
-    file_extract = "textin-fileparser"
+    file_extract = "file-extract"
     moonshot_fileparser = "moonshot-fileparser"
     textin_fileparser = "textin-fileparser"
-
-    # 语音克隆 tts  Voice clone
-    tts = "tts"
-
-    assistants = "assistants"
-    fine_tune = "fine-tune"
 
     # 图 音频 视频
     kling = "kling"
     kolors = "kolors"
+    suno = "suno"
+
+    # 语音克隆 tts  Voice clone
+    tts = "tts"
+
+    # todo
+    assistants = "assistants"
+    fine_tune = "fine-tune"
 
 
 @router.get("/files")
@@ -131,7 +131,7 @@ async def upload_files(
     )
     logger.debug(file_object)
 
-    if purpose in {purpose.oss, purpose.upload}:
+    if purpose in {purpose.oss}:
         async with ppu_flow(api_key, post="ppu-01"):
             bucket_name = "files"
             extension = Path(file.filename).suffix
@@ -147,7 +147,7 @@ async def upload_files(
 
             return file_object
 
-    elif purpose in {purpose.textin_fileparser, purpose.chatfire_fileparser, purpose.file_extract}:
+    elif purpose in {purpose.textin_fileparser, purpose.file_extract}:
         async with ppu_flow(api_key, post="ppu-01"):
 
             response_data = await textin_fileparser(file.file.read())
@@ -171,12 +171,17 @@ async def upload_files(
     elif purpose == purpose.kolors:
         async with ppu_flow(api_key, post="ppu-01"):
             url = await kolors.upload(file.file.read())
+            # todo: 内容审核
+
             file_object.url = url
             return file_object
 
     elif purpose == purpose.kling:  # 1毛
         async with ppu_flow(api_key, post="ppu-1"):
             url = await klingai.upload(file.file.read())
+            if not isinstance(url, str):
+                raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=url)
+
             file_object.url = url
             return file_object
 

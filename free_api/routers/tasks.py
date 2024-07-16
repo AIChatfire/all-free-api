@@ -70,20 +70,17 @@ async def submit_tasks(
 ):
     api_key = auth and auth.credentials or None
 
-    if task_type.kling == "kling":
-        async with ppu_flow(api_key, post="ppu-1"):
-            token = await get_next_token_for_polling(klingai_video.FEISHU_URL)
-            task_id = await klingai_video.submit_task(request, token)
+    if task_type == "kling":
+        async with ppu_flow(api_key, post="kling-video"):
+            task = await klingai_video.submit_task(request)  # task_id, token
+            if task.status:
+                klingai_video.send_message(f"任务提交成功：{task.id}")
+                task.id = f"{task_type}-{task.id}"
 
-            if not isinstance(task_id, (int, str)):  # 异常
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task_id)
+                await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+                return task.model_dump(exclude={"system_fingerprint"})
 
-            task_id = f"{task_type}-{task_id}"
-            await redis_aclient.set(task_id, token, ex=7 * 24 * 3600)
-
-            klingai_video.send_message(f"任务提交成功：{task_id}")
-
-            return Task(id=task_id)
+            raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=task.data)
 
 
 if __name__ == '__main__':

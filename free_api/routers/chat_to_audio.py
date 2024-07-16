@@ -66,6 +66,7 @@ async def create_chat_completions(
             <video src="{url}" controls="controls" muted="muted" class="d-block rounded-bottom-2 border-top" width="100%" height="50"></video>
             """.strip()
             await to_audio()
+            # "<video muted autoplay src='https://s1.xiaomiev.com/activity-outer-assets/0328/images/su7/top.mp4'> </video>"
         else:
             background_tasks.add_task(to_audio)
 
