@@ -20,10 +20,9 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, 
     Body
 from sse_starlette import EventSourceResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
-from openai import AsyncOpenAI
 
 router = APIRouter()
-TAGS = ["文本生成", "文生图"]
+TAGS = ["文本生成", "歌词生成"]
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 

@@ -19,7 +19,7 @@ from meutils.apis.jina import rerank
 from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header
 
 router = APIRouter()
-TAGS = ["reranker"]
+TAGS = ["提示词优化"]
 
 
 @router.get("/prompts")
