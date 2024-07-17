@@ -16,9 +16,10 @@ from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import appu, ppu_flow
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
-from meutils.apis.textin import textin_fileparser
 from meutils.apis import fish
+from meutils.apis.textin import textin_fileparser
 from meutils.apis.kuaishou import kolors, klingai
+from meutils.apis.sunoai import suno
 
 from enum import Enum
 from openai import OpenAI
@@ -183,6 +184,19 @@ async def upload_files(
                 raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=url)
 
             file_object.url = url
+            return file_object
+
+    elif purpose == purpose.suno:  # 1毛
+        async with ppu_flow(api_key, post="ppu-1"):
+            clip_data, token = await suno.upload(file.file.read(), title=file.filename or file.file.name)  # clip
+            if not clip_data:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=clip_data)
+
+            # 获取clip_id
+            file_object.data = clip_data
+            file_object.id, file_object.duration = jsonpath.jsonpath(clip_data, "$..[id,duration]")
+
+            await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
             return file_object
 
     elif purpose == purpose.tts:  # todo: 语音克隆

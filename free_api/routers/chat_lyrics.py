@@ -9,7 +9,8 @@
 # @Description  : 逆向工程
 
 from meutils.pipe import *
-from meutils.notice.feishu import send_message
+from meutils.apis.sunoai import suno
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ChatCompletionRequest, ImageRequest
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, chat_completion
@@ -25,37 +26,6 @@ router = APIRouter()
 TAGS = ["文本生成", "文生图"]
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
-
-#
-# @router.post("/chat/completions")
-# async def create_chat_completions(
-#         request: ChatCompletionRequest, # request: ChatCompletionRequest = Body(examples=[])
-#         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-#         backgroundtasks: BackgroundTasks = BackgroundTasks(),
-# ):
-#     logger.debug(request)
-#
-#     image_request = ImageRequest(
-#         prompt=request.last_content,
-#         model=request.model.strip('chat-'),
-#         n=2 if "dall-e-3" not in request.model else 1,  # dall-e-3 仅支持 1
-#     )
-#
-#     data = to_openai_images_params(image_request)
-#
-#     api_key = auth and auth.credentials or None
-#     response = await AsyncOpenAI(api_key=api_key).images.generate(**data)
-#
-#     if request.stream:
-#         async def gen():
-#             for image in response.data:
-#                 yield f"![{image.revised_prompt}]({image.url})\n\n"
-#
-#         chunks = create_chat_completion_chunk(gen())
-#         return EventSourceResponse(chunks)
-#     else:
-#         chat_completion.choices[0].message.content = response
-#         return create_chat_completion(chat_completion)
 
 examples = [
     {
@@ -77,35 +47,32 @@ async def create_chat_completions(
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks(),
 ):
-    logger.debug(request)
-
-    image_request = ImageRequest(
-        prompt=request.last_content,
-        model=request.model.strip('chat-'),
-        n=2 if "dall-e-3" not in request.model else 1,  # dall-e-3 仅支持 1
-    )
-
-    data = to_openai_images_params(image_request)
-
+    logger.debug(request.model_dump_json(indent=4))
     api_key = auth and auth.credentials or None
 
-    future_task = asyncio.create_task(AsyncOpenAI(api_key=api_key).images.generate(**data))  # 异步执行
+    prompt = request.last_content
+    _ = {"prompt": prompt}
+
+    future_task = asyncio.create_task(suno.generate_lyrics(prompt=prompt))  # 异步执行
     if request.stream:
         async def gen():
-            for i in f"> 🖌️正在绘画\n\n```json\n{image_request.model_dump()}\n```\n\n":
-                await asyncio.sleep(0.05)
+            for i in f"""> 正在生成\n\n```json\n{_}\n```\n\n""":
+                await asyncio.sleep(0.2)
                 yield i
 
-            response = await future_task
-            for image in response.data:
-                yield f"![{image.revised_prompt}]({image.url})\n\n"
+            data = await future_task
+            title = data.get("title")
+            text = data.get("text")
+
+            yield f"# {title}\n\n"
+            yield f"```text\n{text}\n```"
 
         chunks = create_chat_completion_chunk(gen())
         return EventSourceResponse(chunks)
     else:
-        # 跳过吧
-        # response = await future_task
-        # chat_completion.choices[0].message.content = response.model_dump_json()
+        data = await future_task
+
+        chat_completion.choices[0].message.content = data
         return create_chat_completion(chat_completion)
 
 

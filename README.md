@@ -3,7 +3,8 @@
 ```
 NAME=cr2.fit2cloud.com/chatfire/all-free-api
 docker pull $NAME && docker tag $NAME chatfire/all-free-api && docker rmi $NAME
- 
+
+docker pull cr2.fit2cloud.com/chatfire/all-free-api
 ``` 
 
 - 兼容Openai、Oneapi、Newapi等系统
