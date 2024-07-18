@@ -22,15 +22,17 @@ router = APIRouter()
 TAGS = ["提示词优化"]
 
 
-@router.get("/prompts")
+@router.get("/prompter")
 async def beautify_prompt(
         prompt: str = Query("一直带有雄鹰翅膀的老虎，飞翔在大海上方"),
 ):
     data = await klingai_video.beautify_prompt(prompt)
     data['metadata'] = "本工具赞助方 https://api.chatfire.cn/"
-    data['result'] = data['result'].replace("请进入公众号联系客服：可灵AI工具箱", "请进入公众号「火哥AI」：也可加微信313303303")
+    data['result'] = data['result'].replace("请进入公众号联系客服：可灵AI工具箱",
+                                            "请进入公众号「火哥AI」：也可加微信313303303")
 
     return data
+
 
 if __name__ == '__main__':
     from meutils.serving.fastapi import App

@@ -16,7 +16,7 @@ from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import appu, ppu_flow
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
-from meutils.apis import voice_clone
+from meutils.apis.voice_clone import fish
 from meutils.apis.textin import textin_fileparser
 from meutils.apis.kuaishou import kolors, klingai
 from meutils.apis.sunoai import suno
@@ -157,8 +157,9 @@ async def upload_files(
             return file_object
 
     elif purpose == purpose.voice_clone:
-        file_object = await voice_clone.create_file_for_openai(file)
-        return file_object
+        async with ppu_flow(api_key, post="api-voice-clone"):
+            file_object = await fish.create_file_for_openai(file)
+            return file_object
 
 
 @router.get("/files/{file_id}")
