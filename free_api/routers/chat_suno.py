@@ -25,8 +25,9 @@ TAGS = ["SunoAI"]
 @router.post('/chat/completions')
 async def generate_music_for_chat(
         request: ChatCompletionRequest,
-        backgroundtasks: BackgroundTasks,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+
+        backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
     api_key = auth and auth.credentials or None
 

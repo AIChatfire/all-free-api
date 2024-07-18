@@ -10,7 +10,11 @@
 import os
 
 from meutils.pipe import *
+from meutils.schemas.openai_types import TTSRequest
+
 from meutils.ai_audio.tts import EdgeTTS
+from meutils.apis.voice_clone import fish
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 
@@ -18,8 +22,6 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, 
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from openai import AsyncOpenAI
-
-from meutils.schemas.openai_types import TTSRequest
 
 router = APIRouter()
 TAGS = ["Audio"]
@@ -29,9 +31,9 @@ TAGS = ["Audio"]
 async def create_speech(
         request: TTSRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        voice: Optional[str] = Query(None),
+        voice: Optional[str] = Query(None),  # todo: 枚举
 ):
-    logger.debug(request)
+    logger.debug(request.model_dump_json(indent=4))
 
     # media_types = {
     #     "mp3": "audio/mpeg",
@@ -42,13 +44,15 @@ async def create_speech(
     #     "pcm": "text/event-stream",
     # }
     # media_types.get(request.response_format)
+    if len(request.model) == 32:  # "bd2680a9372746faabc4ce8ac3f12eeb" 声音克隆 可以映射一波
+        stream = await fish.create_task(request, stream=True)
+    else:
+        data = request.model_dump()
+        data["voice"] = voice or data["voice"]  # 支持很多种声音
 
-    data = request.model_dump()
-    data["voice"] = voice or data["voice"]  # 支持很多种声音
+        stream = await EdgeTTS().acreate_for_openai(**data)  # todo 优化
 
-    stream = await EdgeTTS().acreate_for_openai(**data)
-
-    return StreamingResponse(stream, media_type="text/event-stream")
+    return StreamingResponse(stream, media_type="text/event-stream", headers={"url": ""})
 
 
 @router.post("/audio/transcriptions")
@@ -77,7 +81,6 @@ async def create_transcriptions(
         temperature=temperature,
         # extra_body={"url": "https://oss.chatfire.cn/data/demo.mp3"}
     )
-
 
     return response
 

@@ -83,7 +83,8 @@ def music_info(df):
     df['🎵音乐链接'] = df['id'].map(
         lambda x: f"**请两分钟后试听**[🎧音频](https://cdn1.suno.ai/{x}.mp3)[▶️视频](https://cdn1.suno.ai/{x}.mp4)"
     )
-    df['专辑图'] = df['id'].map(lambda x: f"![🖼](https://cdn1.suno.ai/image_{x}.png)")  # _large
+    # todo: 图片链接发生变化
+    df['专辑图'] = df['id'].map(lambda x: f"![🖼](https://cdn1.suno.ai/image_{x}.jpeg)")  # _large
 
     df_ = df[["id", "created_at", "model_name", "🎵音乐链接", "专辑图"]]
 

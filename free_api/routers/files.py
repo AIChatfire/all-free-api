@@ -16,7 +16,7 @@ from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import appu, ppu_flow
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
-from meutils.apis import fish
+from meutils.apis import voice_clone
 from meutils.apis.textin import textin_fileparser
 from meutils.apis.kuaishou import kolors, klingai
 from meutils.apis.sunoai import suno
@@ -53,6 +53,7 @@ class Purpose(str, Enum):
 
     # 语音克隆 tts  Voice clone
     tts = "tts"
+    voice_clone = "voice-clone"
 
     # todo
     assistants = "assistants"
@@ -63,7 +64,6 @@ class Purpose(str, Enum):
 async def upload_files(
         file: UploadFile = File(...),
         purpose: Purpose = Form(...),
-        url: Optional[str] = Query(None),  # 转存 url文件或者file view
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
@@ -84,7 +84,6 @@ async def upload_files(
         url=None
     )
     logger.debug(file_object)
-    logger.debug(file)
     logger.debug(file.headers)
     logger.debug(file.content_type)
 
@@ -157,8 +156,9 @@ async def upload_files(
             await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
             return file_object
 
-    elif purpose == purpose.tts:  # todo: 语音克隆
-        file_object = await fish.create_file_for_openai(file)
+    elif purpose == purpose.voice_clone:
+        file_object = await voice_clone.create_file_for_openai(file)
+        return file_object
 
 
 @router.get("/files/{file_id}")
