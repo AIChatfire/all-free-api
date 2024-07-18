@@ -28,9 +28,9 @@ async def beautify_prompt(
 ):
     data = await klingai_video.beautify_prompt(prompt)
     data['metadata'] = "本工具赞助方 https://api.chatfire.cn/"
+    data['result'] = data['result'].replace("请进入公众号联系客服：可灵AI工具箱", "请进入公众号「火哥AI」：也可加微信313303303")
 
     return data
-
 
 if __name__ == '__main__':
     from meutils.serving.fastapi import App

@@ -29,7 +29,7 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, BackgroundTasks, D
 from fastapi.responses import Response, FileResponse
 
 router = APIRouter()
-TAGS = ['文档智能']
+TAGS = ['Files']
 
 client = OpenAI(
     api_key=os.getenv('MOONSHOT_API_KEY'),
@@ -57,6 +57,108 @@ class Purpose(str, Enum):
     # todo
     assistants = "assistants"
     fine_tune = "fine-tune"
+
+
+@router.post("/files")  # 核心
+async def upload_files(
+        file: UploadFile = File(...),
+        purpose: Purpose = Form(...),
+        url: Optional[str] = Query(None), # 转存 url文件或者file view
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        backgroundtasks: BackgroundTasks = BackgroundTasks,
+):
+    api_key = auth and auth.credentials or None
+
+    file_object = FileObject.construct(
+
+        filename=file.filename,
+        bytes=file.size,
+
+        id=shortuuid.random(),
+        created_at=int(time.time()),
+        object='file',
+
+        purpose=purpose,
+        status="uploaded",
+
+        url=None
+    )
+    logger.debug(file_object)
+    logger.debug(file)
+    logger.debug(file.headers)
+    logger.debug(file.content_type)
+
+    if purpose in {purpose.oss}:
+        async with ppu_flow(api_key, post="ppu-01"):
+            # if url:  # todo: 转存 url文件或者file view
+
+            bucket_name = "files"
+            extension = Path(file.filename).suffix
+            filename = f"{shortuuid.random()}{extension}"
+            backgroundtasks.add_task(
+                Minio().put_object_for_openai,
+                bucket_name=bucket_name,
+                file=file,
+                filename=filename)
+
+            file_url = Minio().get_file_url(filename)
+            file_object.url = file_url
+
+            return file_object
+
+    elif purpose in {purpose.textin_fileparser, purpose.file_extract}:
+        async with ppu_flow(api_key, post="ppu-01"):
+
+            response_data = await textin_fileparser(await file.read())
+            markdown_text = jsonpath.jsonpath(response_data, "$..markdown")  # False or []
+            markdown_text = markdown_text and markdown_text[0]
+
+            file_object.status = "processed" if markdown_text else "error"
+            file_object.status_details = response_data
+
+            if markdown_text:
+                await redis_aclient.set(file_object.id, markdown_text, ex=3600 * 24 * 7)
+            return file_object
+
+    elif purpose == purpose.moonshot_fileparser:
+        async with ppu_flow(api_key, post="ppu-01"):
+
+            file_object = client.files.create(file=(file.filename, file.file), purpose="file-extract")
+
+            return file_object
+
+    elif purpose == purpose.kolors:
+        async with ppu_flow(api_key, post="ppu-01"):
+            url = await kolors.upload(await file.read())
+            # todo: 内容审核
+
+            file_object.url = url
+            return file_object
+
+    elif purpose == purpose.kling:  # 1毛
+        async with ppu_flow(api_key, post="ppu-1"):
+            url = await klingai.upload(await file.read())
+            if not isinstance(url, str):
+                raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=url)
+
+            file_object.url = url
+            return file_object
+
+    elif purpose == purpose.suno:  # 1毛
+        async with ppu_flow(api_key, post="ppu-1"):
+            clip_data, token = await suno.upload(await file.read(), title=file.filename or file.file.name)  # clip
+            if not clip_data:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=clip_data)
+
+            # 获取clip_id
+            file_object.id, file_object.duration = jsonpath.jsonpath(clip_data, "$..[id,duration]")
+            file_object.data = clip_data
+
+            await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
+            return file_object
+
+    elif purpose == purpose.tts:  # todo: 语音克隆
+        file_object = await fish.create_file_for_openai(file)
 
 
 @router.get("/files")
@@ -104,103 +206,6 @@ async def delete_file(
     api_key = auth and auth.credentials or None
 
     return client.files.delete(file_id=file_id)
-
-
-@router.post("/files")  # 核心
-async def upload_files(
-        file: UploadFile = File(...),
-        purpose: Purpose = Form(...),
-        url: Optional[str] = Form(None),
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        backgroundtasks: BackgroundTasks = BackgroundTasks,
-):
-    api_key = auth and auth.credentials or None
-
-    file_object = FileObject.construct(
-
-        filename=file.filename,
-        bytes=file.size,
-
-        id=shortuuid.random(),
-        created_at=int(time.time()),
-        object='file',
-
-        purpose=purpose,
-        status="uploaded",
-
-        url=url
-    )
-    logger.debug(file_object)
-
-    if purpose in {purpose.oss}:
-        async with ppu_flow(api_key, post="ppu-01"):
-            bucket_name = "files"
-            extension = Path(file.filename).suffix
-            filename = f"{shortuuid.random()}{extension}"
-            backgroundtasks.add_task(
-                Minio().put_object_for_openai,
-                bucket_name=bucket_name,
-                file=file,
-                filename=filename)
-
-            file_url = Minio().get_file_url(filename)
-            file_object.url = file_url
-
-            return file_object
-
-    elif purpose in {purpose.textin_fileparser, purpose.file_extract}:
-        async with ppu_flow(api_key, post="ppu-01"):
-
-            response_data = await textin_fileparser(file.file.read())
-            markdown_text = jsonpath.jsonpath(response_data, "$..markdown")  # False or []
-            markdown_text = markdown_text and markdown_text[0]
-
-            file_object.status = "processed" if markdown_text else "error"
-            file_object.status_details = response_data
-
-            if markdown_text:
-                await redis_aclient.set(file_object.id, markdown_text, ex=3600 * 24 * 7)
-            return file_object
-
-    elif purpose == purpose.moonshot_fileparser:
-        async with ppu_flow(api_key, post="ppu-01"):
-
-            file_object = client.files.create(file=(file.filename, file.file), purpose="file-extract")
-
-            return file_object
-
-    elif purpose == purpose.kolors:
-        async with ppu_flow(api_key, post="ppu-01"):
-            url = await kolors.upload(file.file.read())
-            # todo: 内容审核
-
-            file_object.url = url
-            return file_object
-
-    elif purpose == purpose.kling:  # 1毛
-        async with ppu_flow(api_key, post="ppu-1"):
-            url = await klingai.upload(file.file.read())
-            if not isinstance(url, str):
-                raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=url)
-
-            file_object.url = url
-            return file_object
-
-    elif purpose == purpose.suno:  # 1毛
-        async with ppu_flow(api_key, post="ppu-1"):
-            clip_data, token = await suno.upload(file.file.read(), title=file.filename or file.file.name)  # clip
-            if not clip_data:
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=clip_data)
-
-            # 获取clip_id
-            file_object.data = clip_data
-            file_object.id, file_object.duration = jsonpath.jsonpath(clip_data, "$..[id,duration]")
-
-            await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
-            return file_object
-
-    elif purpose == purpose.tts:  # todo: 语音克隆
-        file_object = await fish.create_file_for_openai(file)
 
 
 if __name__ == '__main__':
