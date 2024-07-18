@@ -44,7 +44,7 @@ async def create_speech(
     #     "pcm": "text/event-stream",
     # }
     # media_types.get(request.response_format)
-    if len(request.model) == 32:  # "bd2680a9372746faabc4ce8ac3f12eeb" 声音克隆 可以映射一波
+    if len(request.voice) == 32:  # "bd2680a9372746faabc4ce8ac3f12eeb" 声音克隆 可以映射一波
         stream = await fish.create_task(request, stream=True)
     else:
         data = request.model_dump()
