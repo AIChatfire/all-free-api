@@ -63,7 +63,7 @@ class Purpose(str, Enum):
 async def upload_files(
         file: UploadFile = File(...),
         purpose: Purpose = Form(...),
-        url: Optional[str] = Query(None), # 转存 url文件或者file view
+        url: Optional[str] = Query(None),  # 转存 url文件或者file view
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
@@ -161,6 +161,14 @@ async def upload_files(
         file_object = await fish.create_file_for_openai(file)
 
 
+@router.get("/files/{file_id}")
+async def get_file(
+        file_id: str,
+        # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+):
+    return client.files.retrieve(file_id=file_id)
+
+
 @router.get("/files")
 async def get_files(
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
@@ -168,17 +176,6 @@ async def get_files(
     api_key = auth and auth.credentials or None
 
     return client.files.list()
-
-
-@router.get("/files/{file_id}")
-async def get_file(
-        file_id: str,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-
-):
-    api_key = auth and auth.credentials or None
-
-    return client.files.retrieve(file_id=file_id)
 
 
 @router.get("/files/{file_id}/content")

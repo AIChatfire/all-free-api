@@ -14,7 +14,8 @@ from free_api.routers import polling_openai, chat_image, chat_to_audio
 
 from free_api.routers import files, images
 from free_api.routers import audio
-from free_api.routers import tasks, reranker, prompter, translator
+from free_api.routers import tasks, reranker
+from free_api.routers.tools import prompter, translator
 
 app = App()
 
@@ -43,8 +44,8 @@ app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不兼容openai
 
 # 小工具
-app.include_router(prompter.router, '/v1', tags=prompter.TAGS)
-app.include_router(translator.router, '/v1', tags=translator.TAGS)
+app.include_router(prompter.router, '/tools/v1', tags=prompter.TAGS)
+app.include_router(translator.router, '/tools/v1', tags=translator.TAGS)
 
 if __name__ == '__main__':
     app.run()
