@@ -22,7 +22,7 @@ from sse_starlette import EventSourceResponse
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
 router = APIRouter()
-TAGS = ["文本生成", "歌词生成"]
+TAGS = ["SunoAI"]
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 

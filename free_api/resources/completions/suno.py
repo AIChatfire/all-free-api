@@ -14,6 +14,8 @@ import json_repair
 from meutils.pipe import *
 from meutils.schemas.openai_types import ChatCompletionRequest
 from meutils.schemas.suno_types import SunoAIRequest
+from meutils.apis.sunoai import suno
+from meutils.config_utils.lark_utils import get_next_token_for_polling
 
 template = """
 
@@ -53,40 +55,21 @@ class Completions(object):
     def __init__(self, api_key):
         self.api_key = api_key
 
-    async def acreate(self, request: ChatCompletionRequest):
+    async def create(self, request: ChatCompletionRequest):
+        token = await get_next_token_for_polling(suno.FEISHU_URL)
 
         if "chat" in request.model:
-            payload = SunoAIRequest(gpt_description_prompt=request.last_content).model_dump()
-            task_info = await generate_music(self.api_key, payload)
-            return create_chunks(task_info)
+            request = SunoAIRequest(gpt_description_prompt=request.last_content)
 
-        data = json_repair.repair_json(f"{{{request.last_content}}}", return_objects=True)
-        if isinstance(data, dict) and data:
-            payload = SunoAIRequest(**data).model_dump()
-            task_info = await generate_music(self.api_key, payload)  # 阻塞执行，奇怪？
-            return create_chunks(task_info)
+        else:
+            data = json_repair.repair_json(f"{{{request.last_content}}}", return_objects=True)
+            if isinstance(data, dict) and data:
+                request = SunoAIRequest(**data)
+            else:
+                return f"请按照规定格式提交任务（未知错误联系管理员）\n\n {template}"
 
-        return f"请按照规定格式提交任务（未知错误联系管理员）\n\n {template}"
-
-
-async def generate_music(api_key, payload):
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-    }
-    async with httpx.AsyncClient(base_url="https://api.chatfire.cn/task", headers=headers, timeout=30) as client:
-        task_info = await client.post("/suno/v1/generation", json=payload)
-        return task_info.is_success and task_info.json()
-
-
-async def get_suno_task(task_id):
-    api_key = "api_key"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-    }
-    async with httpx.AsyncClient(base_url="https://api.chatfire.cn/task", headers=headers, timeout=30) as client:
-        task_info = await client.get(f"/suno/v1/tasks/{task_id}")
-        if task_info.is_success:
-            return task_info.json()
+        task = await suno.create_task(request, token)
+        return create_chunks(task.id, token)
 
 
 def music_info(df):
@@ -118,28 +101,25 @@ def music_info(df):
     """
 
 
-async def create_chunks(task_info):
-    task_id = task_info.get('id', 'task_id')
-    music_ids = jsonpath.jsonpath(task_info, "$.clips..id") | xjoin(',')
+async def create_chunks(task_id, token):
+    clip_ids = task_id.split("suno-", 1)[-1].split(",")
 
     yield "✅开始生成音乐\n\n"
+    await asyncio.sleep(1)
 
-    await asyncio.sleep(3)
-    yield f"任务ID：\n- [{task_id}](https://api.chatfire.cn/task/suno/v1/tasks/{task_id})\n\n"
-
-    await asyncio.sleep(3)
     yield f"音乐ID：\n"
-    for music_id in music_ids.split(","):
-        yield f"- [{music_id}](https://api.chatfire.cn/task/suno/v1/music/{music_id})\n\n"
+    for clip_id in clip_ids:
+        yield f"- [{clip_id}](https://cdn1.suno.ai/{clip_id}.mp3)\n\n"
+        await asyncio.sleep(1)
 
-    await asyncio.sleep(3)
     yield f"""[🔥音乐进度]("""
+    await asyncio.sleep(1)
 
     for i in range(100):
         await asyncio.sleep(1) if i < 10 else await asyncio.sleep(3)
 
         # 监听歌曲
-        clips = (await get_suno_task(task_id)) or []
+        clips = await suno.get_task(task_id, token)
 
         STATUS = {"streaming", "complete", "error"}  # submitted queued streaming complete/error
         if all(clip.get('status') in STATUS for clip in clips):  # 可提前返回

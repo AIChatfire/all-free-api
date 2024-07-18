@@ -35,9 +35,9 @@ async def create_chat_completions(
         feishu_url: Optional[str] = Query(None),
         redis_key: Optional[str] = Query(None),
 ):
-    logger.debug(request)
-    logger.debug(base_url)
-    logger.debug(feishu_url)
+    # logger.debug(request.model_dump_json(indent=4))
+    # logger.debug(base_url)
+    # logger.debug(feishu_url)
 
     raw_model = request.model
     if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用

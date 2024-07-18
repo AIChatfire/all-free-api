@@ -145,7 +145,7 @@ async def upload_files(
             return file_object
 
     elif purpose == purpose.suno:  # 1毛
-        async with ppu_flow(api_key, post="ppu-1"):
+        async with ppu_flow(api_key, post="api-sunoai-audio"):
             clip_data, token = await suno.upload(await file.read(), title=file.filename or file.file.name)  # clip
             if not clip_data:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=clip_data)

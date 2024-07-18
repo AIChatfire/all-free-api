@@ -15,7 +15,7 @@ from meutils.schemas.kuaishou_types import KlingaiVideoRequest, Camera
 from meutils.apis.kuaishou import klingai_video
 from meutils.schemas.runwayml_types import RunwayRequest
 from meutils.apis.runwayml import gen
-from meutils.schemas.suno_types import SunoAIRequest
+from meutils.schemas.suno_types import SunoAIRequest, LyricsRequest
 from meutils.apis.sunoai import suno
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
@@ -162,7 +162,7 @@ async def create_tasks(
     token = request.continue_clip_id and await redis_aclient.get(request.continue_clip_id)  # 针对上传的音频
     token = token and token.decode()
 
-    async with ppu_flow(api_key, post="api-sunoai"):
+    async with ppu_flow(api_key, post="api-sunoai-chirp"):
         task = await suno.create_task(request, token)
         if task and task.status:
             gen.send_message(f"任务提交成功：\n\n{task.id}")
@@ -172,6 +172,27 @@ async def create_tasks(
 
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
+
+
+@router.post(f"/tasks/{TaskType.lyrics}")
+async def create_tasks(
+        request: LyricsRequest,
+        # task_type: TaskType,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        upstream_base_url: Optional[str] = Header(None),
+        upstream_api_key: Optional[str] = Header(None),
+        downstream_base_url: Optional[str] = Header(None),
+
+        background_tasks: BackgroundTasks = BackgroundTasks,
+):
+    logger.debug(request.model_dump_json(indent=4))
+
+    api_key = auth and auth.credentials or None
+    task_type = TaskType.lyrics
+
+    async with ppu_flow(api_key, post="api-sunoai-lyrics"):
+        data = await suno.generate_lyrics(prompt=request.prompt)
+        return data
 
 
 if __name__ == '__main__':

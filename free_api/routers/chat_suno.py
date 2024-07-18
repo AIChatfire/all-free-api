@@ -19,6 +19,7 @@ from sse_starlette import EventSourceResponse
 from free_api.resources.completions.suno import Completions
 
 router = APIRouter()
+TAGS = ["SunoAI"]
 
 
 @router.post('/chat/completions')
@@ -29,9 +30,7 @@ async def generate_music_for_chat(
 ):
     api_key = auth and auth.credentials or None
 
-    logger.debug(request)
-
-    chunks = await Completions(api_key=api_key).acreate(request)
+    chunks = await Completions(api_key=api_key).create(request)
 
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(chunks))

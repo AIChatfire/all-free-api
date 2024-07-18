@@ -12,9 +12,11 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from meutils.schemas.openai_types import ImageRequest
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
 from meutils.schemas.kuaishou_types import KlingaiImageRequest, KolorsRequest
+from meutils.schemas.translator_types import DeeplxRequest
 
 from meutils.apis.siliconflow import text_to_image
 from meutils.apis.kuaishou import klingai, kolors
+from meutils.apis.translator import deeplx
 
 from openai.types import ImagesResponse
 
@@ -36,9 +38,17 @@ async def generate(
         if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
             request.model = REDIRECT_MODEL.get(request.model, request.model)
 
-        response = await text_to_image.create_image(request)
+        # 异步任务
+        future_task = asyncio.create_task(text_to_image.create_image(request))
 
-        return ImagesResponse(created=int(time.time()), data=response.get('images', []))
+        # 自动翻译成英文
+        request.n = 1
+        request.prompt = await deeplx.translate(DeeplxRequest(text=request.prompt, target_lang="EN"))
+        response = await text_to_image.create_image(request)
+        data = response.get('images', [])
+        data += (await future_task).get('images', [])  # 获取异步任务
+
+        return ImagesResponse(created=int(time.time()), data=data)
 
     elif request.model.startswith(("kling",)):
 
@@ -54,17 +64,22 @@ async def generate(
         return ImagesResponse(created=int(time.time()), data=images)
 
     else:  # kolors
-        request = KolorsRequest(
+        kolors_request = KolorsRequest(
             prompt=request.prompt,
             imageCount=request.n,
             style=request.style,
             resolution=request.size
         )
+        try:
+            images = await kolors.create_image(kolors_request)
+            if isinstance(images, dict):  # 异常
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
+            return ImagesResponse(created=int(time.time()), data=images)
+        except Exception as e:
+            kolors.send_message(f"Kolors失败，sd3兜底\n\n{e}")
 
-        images = await kolors.create_image(request)
-        if isinstance(images, dict):  # 异常
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
-        return ImagesResponse(created=int(time.time()), data=images)
+            request.model = "stable-diffusion-3"
+            return await generate(request, auth, base_url)
 
 
 if __name__ == '__main__':
