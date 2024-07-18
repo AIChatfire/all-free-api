@@ -148,7 +148,7 @@ async def upload_files(
         async with ppu_flow(api_key, post="ppu-1"):
             clip_data, token = await suno.upload(await file.read(), title=file.filename or file.file.name)  # clip
             if not clip_data:
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=clip_data)
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=clip_data)
 
             # 获取clip_id
             file_object.id, file_object.duration = jsonpath.jsonpath(clip_data, "$..[id,duration]")
