@@ -7,18 +7,17 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import os
 
 from meutils.pipe import *
 from meutils.schemas.openai_types import TTSRequest
+from meutils.config_utils.lark_utils import get_next_token_for_polling
 
 from meutils.ai_audio.tts import EdgeTTS
 from meutils.apis.voice_clone import fish
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
-from meutils.config_utils.lark_utils import get_next_token_for_polling
 
-from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, status
+from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, status, Response
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from openai import AsyncOpenAI
@@ -44,15 +43,25 @@ async def create_speech(
     #     "pcm": "text/event-stream",
     # }
     # media_types.get(request.response_format)
+    media_type = "application/octet-stream"
     if len(request.voice) == 32:  # "bd2680a9372746faabc4ce8ac3f12eeb" 声音克隆 可以映射一波
-        stream = await fish.create_task(request, stream=True)
+        data = await fish.create_task(request)
+
+        logger.debug(data)
+
+        async with httpx.AsyncClient(timeout=30) as client:
+            url = data.get("url")
+            response = await client.get(url)
+            return Response(content=response.content, media_type="application/octet-stream", headers={"url": url})
+
     else:
         data = request.model_dump()
         data["voice"] = voice or data["voice"]  # 支持很多种声音
 
         stream = await EdgeTTS().acreate_for_openai(**data)  # todo 优化
 
-    return StreamingResponse(stream, media_type="text/event-stream", headers={"url": ""})
+        # text/event-stream => application/octet-stream
+        return StreamingResponse(stream, media_type=media_type)
 
 
 @router.post("/audio/transcriptions")

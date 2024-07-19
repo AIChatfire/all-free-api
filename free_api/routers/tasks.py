@@ -7,6 +7,7 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
+import jsonpath
 from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import ppu_flow
@@ -35,6 +36,11 @@ async def get_tasks(
 ):
     api_key = auth and auth.credentials or None
 
+    token = await redis_aclient.get(task_id)  # 绑定对应的 token
+    token = token and token.decode()
+    if token is None:
+        raise HTTPException(status_code=404, detail="Task ID not found")
+
     task_type = None
     if "-" in task_id:
         task_type, _ = task_id.split("-", 1)  # 区分业务
@@ -44,40 +50,20 @@ async def get_tasks(
         data = await redis_aclient.get(task_id)
 
     elif task_type == TaskType.kling:  # 从个业务线获取: 获取token => 在请求接口 （kling-taskid: cookie）
-        async with ppu_flow(api_key, post="ppu-0001"):
-
-            token = await redis_aclient.get(task_id)
-            token = token and token.decode()
-
-            data = await klingai_video.get_task(task_id, token)
-            return data
+        data = await klingai_video.get_task(task_id, token)
+        return data
 
     elif task_type == TaskType.runwayml:
-        async with ppu_flow(api_key, post="ppu-0001"):
-
-            token = await redis_aclient.get(task_id)
-            token = token and token.decode()
-
-            data = await gen.get_task(task_id, token)
-            return data
+        data = await gen.get_task(task_id, token)
+        return data
 
     elif task_type == TaskType.suno:
-        async with ppu_flow(api_key, post="ppu-0001"):
-
-            token = await redis_aclient.get(task_id)
-            token = token and token.decode()
-
-            data = await suno.get_task(task_id, token)
-            return data
+        data = await suno.get_task(task_id, token)  # todo： 获取任务 失败补偿加你分
+        return data
 
     elif task_type == TaskType.fish:  # todo: 语音克隆
-        async with ppu_flow(api_key, post="ppu-0001"):
-
-            token = await redis_aclient.get(task_id)
-            token = token and token.decode()
-
-            data = await suno.get_task(task_id, token)
-            return data
+        data = await suno.get_task(task_id, token)
+        return data
 
     return JSONResponse(content=data, media_type="application/json")
 
@@ -165,9 +151,12 @@ async def create_tasks(
     async with ppu_flow(api_key, post="api-sunoai-chirp"):
         task = await suno.create_task(request, token)
         if task and task.status:
-            gen.send_message(f"任务提交成功：\n\n{task.id}")
+            suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+            await redis_aclient.set(task.id.split(',')[0], task.system_fingerprint, ex=7 * 24 * 3600)
+            await redis_aclient.set(f"suno-{task.id.split(',')[1]}", task.system_fingerprint, ex=7 * 24 * 3600)
+
             return task.model_dump(exclude={"system_fingerprint"})
 
         else:

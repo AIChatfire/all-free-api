@@ -26,29 +26,20 @@ router = APIRouter()
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 
-@router.post("/chat/completions")
+@alru_cache(ttl=10)
+async def get_token():
+    await asyncio.sleep(3)
+    logger.debug(f"没走缓存 {time.time()}")
+
+    return time.time()
+
+
+@router.get("/chat/completions")
 async def create_chat_completions(
-        request: ChatCompletionRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        # request: ChatCompletionRequest,
+        # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 ):
-
-    raw_model = request.model
-    if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
-        request.model = REDIRECT_MODEL.get(request.model, request.model)
-
-    api_key = auth and auth.credentials or None
-
-    client = Completions(api_key=api_key, base_url=base_url, feishu_url=feishu_url, redis_key=redis_key)
-
-    response = await client.acreate(request)
-
-    if request.stream:
-        return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
-
-    if hasattr(response, "model"):
-        response.model = raw_model  # 以请求体为主
-
-    return response
+    return await get_token()
 
 
 if __name__ == '__main__':
