@@ -19,6 +19,7 @@ from free_api.routers.tools import prompter, translator
 
 app = App()
 
+
 # Chat
 app.include_router(polling_openai.router, '/polling/v1', tags=polling_openai.TAGS)
 app.include_router(chat_image.router, '/chat_image/v1', tags=chat_image.TAGS)
