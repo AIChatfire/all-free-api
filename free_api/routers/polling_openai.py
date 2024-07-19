@@ -35,7 +35,7 @@ async def create_chat_completions(
         feishu_url: Optional[str] = Query(None),
         redis_key: Optional[str] = Query(None),
 ):
-    # logger.debug(request.model_dump_json(indent=4))
+    logger.debug(request.model_dump_json(indent=4))
     # logger.debug(base_url)
     # logger.debug(feishu_url)
 
