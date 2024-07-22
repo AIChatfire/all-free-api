@@ -181,6 +181,9 @@ async def create_tasks(
 
     async with ppu_flow(api_key, post="api-sunoai-lyrics"):
         data = await suno.generate_lyrics(prompt=request.prompt)
+        if isinstance(data, str):
+            raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=data)  # 内容审核
+
         return data
 
 
