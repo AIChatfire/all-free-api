@@ -154,8 +154,8 @@ async def create_tasks(
             suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
-            await redis_aclient.set(task.id.split(',')[0], task.system_fingerprint, ex=7 * 24 * 3600)
-            await redis_aclient.set(f"suno-{task.id.split(',')[1]}", task.system_fingerprint, ex=7 * 24 * 3600)
+            for task_id in task.id.split(','):
+                await redis_aclient.set(task_id, task.system_fingerprint, ex=7 * 24 * 3600)
 
             return task.model_dump(exclude={"system_fingerprint"})
 

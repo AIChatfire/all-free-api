@@ -16,9 +16,9 @@ from free_api.routers import files, images
 from free_api.routers import audio
 from free_api.routers import tasks, reranker
 from free_api.routers.tools import prompter, translator
+from free_api.routers.goamz import suno
 
 app = App()
-
 
 # Chat
 app.include_router(polling_openai.router, '/polling/v1', tags=polling_openai.TAGS)
@@ -47,6 +47,9 @@ app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不�
 # 小工具
 app.include_router(prompter.router, '/tools/v1', tags=prompter.TAGS)
 app.include_router(translator.router, '/tools/v1', tags=translator.TAGS)
+
+# GOAMZ
+app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)
 
 if __name__ == '__main__':
     app.run()

@@ -117,6 +117,7 @@ class Completions(object):
                 total_tokens=total_tokens
             )
 
+        completion.object = "chat.completion"
         return completion
 
 

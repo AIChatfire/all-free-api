@@ -7,8 +7,7 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import httpx
-import jsonpath
+
 import json_repair
 
 from meutils.pipe import *
@@ -72,6 +71,7 @@ class Completions(object):
                 return f"请按照规定格式提交任务（未知错误联系管理员）\n\n {template}"
 
         task = await suno.create_task(request)
+        logger.debug(task.model_dump_json(indent=4))
         return create_chunks(task.id, task.system_fingerprint)
 
 
