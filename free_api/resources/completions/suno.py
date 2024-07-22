@@ -129,8 +129,6 @@ async def create_chunks(task_id, token):
 
         STATUS = {"streaming", "complete", "error"}  # submitted queued streaming complete/error
         if all(clip.get('status') in STATUS for clip in clips):  # 可提前返回
-            yield f"""{'🎵' if i % 2 else '🔥'}"""
-        else:
             yield f""") ✅\n\n"""
             df = pd.DataFrame(clips)
             df['tags'] = [clip.get('metadata').get('tags') for clip in clips]
@@ -138,6 +136,9 @@ async def create_chunks(task_id, token):
             md_string = music_info(df)
             yield md_string  # yield from
             break
+        else:
+            yield f"""{'🎵' if i % 2 else '🔥'}"""
+
 
     else:
         yield "长时间未获取或者中断，可从超链接获取音乐"
