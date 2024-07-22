@@ -44,7 +44,7 @@ examples = [
 async def create_chat_completions(
         request: ChatCompletionRequest = Body(examples=examples),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        backgroundtasks: BackgroundTasks = BackgroundTasks(),
+        backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(request.model_dump_json(indent=4))
     api_key = auth and auth.credentials or None

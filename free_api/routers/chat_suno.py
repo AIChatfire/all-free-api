@@ -44,6 +44,6 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '/suno/v1')
+    app.include_router(router, '/v1')
 
     app.run()

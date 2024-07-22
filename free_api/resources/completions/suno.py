@@ -56,7 +56,10 @@ class Completions(object):
         self.api_key = api_key
 
     async def create(self, request: ChatCompletionRequest):
-        token = await get_next_token_for_polling(suno.FEISHU_URL)
+        if request.last_content.startswith(  # 跳过nextchat
+                ("使用四到五个字直接返回这句话的简要主题",
+                 "简要总结一下对话内容，用作后续的上下文提示 prompt，控制在 200 字以内")):
+            return "请关闭nextchat上下文总结，避免不必要的浪费"
 
         if "chat" in request.model:
             request = SunoAIRequest(gpt_description_prompt=request.last_content)
@@ -68,8 +71,8 @@ class Completions(object):
             else:
                 return f"请按照规定格式提交任务（未知错误联系管理员）\n\n {template}"
 
-        task = await suno.create_task(request, token)
-        return create_chunks(task.id, token)
+        task = await suno.create_task(request)
+        return create_chunks(task.id, task.system_fingerprint)
 
 
 def music_info(df):
@@ -122,6 +125,8 @@ async def create_chunks(task_id, token):
         # 监听歌曲
         clips = await suno.get_task(task_id, token)
 
+        logger.debug(bjson(clips))
+
         STATUS = {"streaming", "complete", "error"}  # submitted queued streaming complete/error
         if all(clip.get('status') in STATUS for clip in clips):  # 可提前返回
             yield f"""{'🎵' if i % 2 else '🔥'}"""
@@ -139,4 +144,4 @@ async def create_chunks(task_id, token):
 
 
 if __name__ == '__main__':
-    print(arun(get_suno_task("4a41481e-6002-48fb-8e84-469214653bcd")))
+    pass
