@@ -12,11 +12,9 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from meutils.schemas.openai_types import ImageRequest
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
 from meutils.schemas.kuaishou_types import KlingaiImageRequest, KolorsRequest
-from meutils.schemas.translator_types import DeeplxRequest
 
-from meutils.apis.siliconflow import text_to_image
+from meutils.apis.siliconflow import api_images
 from meutils.apis.kuaishou import klingai, kolors
-from meutils.apis.translator import deeplx
 
 from openai.types import ImagesResponse
 
@@ -38,15 +36,8 @@ async def generate(
         if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
             request.model = REDIRECT_MODEL.get(request.model, request.model)
 
-        # 异步任务
-        future_task = asyncio.create_task(text_to_image.create_image(request))
-
-        # 自动翻译成英文
-        request.n = 1
-        request.prompt = await deeplx.translate(DeeplxRequest(text=request.prompt, target_lang="EN"))
-        response = await text_to_image.create_image(request)
+        response = await api_images.api_create_image(request)  # 自动翻译成英文
         data = response.get('images', [])
-        data += (await future_task).get('images', [])  # 获取异步任务
 
         return ImagesResponse(created=int(time.time()), data=data)
 
@@ -78,8 +69,7 @@ async def generate(
         except Exception as e:
             kolors.send_message(f"Kolors失败，sd3兜底\n\n{e}")
 
-            request.model = "stable-diffusion-3"
-            return await generate(request, auth, base_url)
+            return api_images.api_create_image(request)
 
 
 if __name__ == '__main__':

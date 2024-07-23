@@ -35,6 +35,7 @@ send_message = partial(
 
 TAGS = ["GOAMZ"]
 
+
 @router.post("/music")
 async def create_tasks(
         request: Request,
@@ -54,8 +55,6 @@ async def create_tasks(
             suno.send_message(f"任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
-            for task_id in task.id.split(','):
-                await redis_aclient.set(task_id, task.system_fingerprint, ex=7 * 24 * 3600)
 
             response = {
                 "code": 200,
@@ -87,7 +86,7 @@ async def get_task(
         "code": 200,
         "data": {
             "task_id": task_id,
-            "status": f"{clips[0].get('status')}",
+            "status": f"{clips[0].get('status')}d",  # completed
             "input": str(clips[0].get('metadata')),
             "clips": {clip.get("id"): clip for clip in clips},
         },
