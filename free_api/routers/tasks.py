@@ -29,12 +29,14 @@ TAGS = ["异步任务"]
 
 
 @router.get("/tasks/{task_id}")
+@alru_cache(maxsize=1024, ttl=10)  # 延迟10s
 async def get_tasks(
         task_id: str,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        backgroundtasks: BackgroundTasks = BackgroundTasks,
+        # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        # backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
-    api_key = auth and auth.credentials or None
+    # api_key = auth and auth.credentials or None
+    logger.debug("不走缓存")
 
     token = await redis_aclient.get(task_id)  # 绑定对应的 token
     token = token and token.decode()
