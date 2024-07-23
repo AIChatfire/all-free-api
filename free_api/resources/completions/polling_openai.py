@@ -21,7 +21,7 @@ from openai import OpenAI, AsyncOpenAI, APIStatusError
 send_message = partial(
     _send_message,
     url="https://open.feishu.cn/open-apis/bot/v2/hook/e0db85db-0daf-4250-9131-a98d19b909a9",
-    title="轮询api-keys"
+    title=__name__
 )
 
 redis_client.decode_responses = True

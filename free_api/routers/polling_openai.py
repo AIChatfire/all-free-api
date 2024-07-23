@@ -55,7 +55,6 @@ async def create_chat_completions(
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
 
-
     if hasattr(response, "model"):
         response.model = raw_model  # 以请求体为主
 

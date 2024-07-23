@@ -75,7 +75,7 @@ examples = [
 async def create_chat_completions(
         request: ChatCompletionRequest = Body(examples=examples),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        backgroundtasks: BackgroundTasks = BackgroundTasks(),
+        backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
     api_key = auth and auth.credentials or None
 
@@ -88,6 +88,8 @@ async def create_chat_completions(
     )
 
     data = to_openai_images_params(image_request)
+
+    logger.debug(data)
 
     future_task = asyncio.create_task(AsyncOpenAI(api_key=api_key).images.generate(**data))  # 异步执行
     if request.stream:
