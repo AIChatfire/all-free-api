@@ -35,6 +35,7 @@ async def create_chat_completions(
         feishu_url: Optional[str] = Query(None),
         redis_key: Optional[str] = Query(None),
 ):
+    api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
     # logger.debug(base_url)
     # logger.debug(feishu_url)
@@ -45,8 +46,8 @@ async def create_chat_completions(
             request.model = REDIRECT_MODEL.get("gemini-1.5")
         else:
             request.model = REDIRECT_MODEL.get(request.model, request.model)
-
-    api_key = auth and auth.credentials or None
+    if "groq" in base_url:
+        request.last_content = None
 
     client = Completions(api_key=api_key, base_url=base_url, feishu_url=feishu_url, redis_key=redis_key)
 
