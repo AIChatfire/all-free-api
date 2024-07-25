@@ -32,20 +32,25 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        vip: Optional[bool] = Query(False),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
 
-    # todo: 其他模型，目前 gen3
+    if request.last_content.startswith(  # 跳过nextchat
+            ("使用四到五个字直接返回这句话的简要主题",
+             "简要总结一下对话内容，用作后续的上下文提示 prompt，控制在 200 字以内")):
+        return
 
-    video_request = RunwayRequest(options=Options(text_prompt=request.last_content))
+        # todo: 其他模型，目前 gen3
+
+    video_request = RunwayRequest(options=Options(text_prompt=request.last_content, exploreMode=not vip))
 
     async def create_video():
-        logger.debug("提前创建任务")
         headers = {'Authorization': f'Bearer {api_key}'}
         payload = video_request.model_dump(exclude_none=True)
-        async with httpx.AsyncClient(base_url="https://api.chatfire.cn/tasks", headers=headers, timeout=60) as client:
+        async with httpx.AsyncClient(base_url="https://api.chatfire.cn/tasks", headers=headers, timeout=100) as client:
             response = await client.post("/runwayml", json=payload)
             if response.is_success:
                 return Task(**response.json())
@@ -75,7 +80,7 @@ async def create_chat_completions(
                 else:
                     yield ")\n\n"  # 隐藏进度条
                     video_url = data.get("artifacts")[0].get("url")
-                    yield f"🎉 任务完成\n![视频地址]({video_url})"
+                    yield f"🎉 任务完成\n\n![视频地址]({video_url})"
                     break
 
         chunks = create_chat_completion_chunk(gen_chunks())
