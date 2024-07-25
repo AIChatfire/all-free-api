@@ -69,9 +69,14 @@ class Completions(object):
                 if tool_outputs:
                     if tool_name == "drawing_tool":
                         for output in tool_outputs:
-                            for i in f"![]({output['image']})\n":
-                                await asyncio.sleep(0.01)
-                                yield i
+                            url = output['image']
+                            while 1:
+                                await asyncio.sleep(0.5)
+                                logger.debug("检测图片：有效性")
+                                if (await httpx.AsyncClient(timeout=10).get(url)).is_success:
+                                    logger.debug("检测图片：成功")
+                                    yield f"![]({url})\n"
+                                    break
 
                     elif tool_name == "web_browser":
                         for output in tool_outputs:
