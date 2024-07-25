@@ -32,7 +32,7 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        system_prompt: Optional[str] = Query(None)
+        system_prompt: Optional[str] = Query("你是火宝，由 Chatfire团队精心打造。请牢记，你叫火宝，一个AI全能智能助手。")
 ):
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
