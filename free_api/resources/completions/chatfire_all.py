@@ -69,7 +69,9 @@ class Completions(object):
                 if tool_outputs:
                     if tool_name == "drawing_tool":
                         for output in tool_outputs:
-                            yield f"![]({output['image']})\n"
+                            for i in f"![]({output['image']})\n":
+                                await asyncio.sleep(0.01)
+                                yield i
 
                     elif tool_name == "web_browser":
                         for output in tool_outputs:

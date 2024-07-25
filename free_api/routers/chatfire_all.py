@@ -44,6 +44,8 @@ async def create_chat_completions(
         if system_prompt:  # 定制化模型
             request.messages = [{"role": "system", "content": system_prompt}] + request.messages
 
+        logger.debug(request.model_dump_json(indent=4))
+
     client = Completions(api_key=api_key)
     if request.stream:
         response = await client.create(request)
