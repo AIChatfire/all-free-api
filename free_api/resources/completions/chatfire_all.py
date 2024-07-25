@@ -60,7 +60,7 @@ class Completions(object):
                 tool_type = tool_delta.type
                 if tool_name != tool_type:
                     tool_name = tool_type
-                    yield f"""> 🔥 「{tool_name}」\n\n"""  # 工具名
+                    yield f"""> 🔥 **{tool_name.title()}**\n\n"""  # 工具名
                     yield f"""```input\n"""  # 工具输入：开始
 
                 tool_input = tool_delta.__getattr__(tool_type).get('input')  # {'input': 'A'}
@@ -79,6 +79,7 @@ class Completions(object):
                     elif tool_name == "web_browser":
                         for output in tool_outputs:
                             yield f"[{output['title']}]({output['link']})\n"  # 太多了
+
                     elif tool_name == "code_interpreter":  #
                         yield f"```json\n{json.dumps(tool_outputs, indent=4, ensure_ascii=False)}\n```\n"
 
