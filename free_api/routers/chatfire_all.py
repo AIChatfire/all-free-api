@@ -12,17 +12,16 @@ from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
-from meutils.schemas.oneapi_types import REDIRECT_MODEL
+from meutils.schemas.openai_types import chat_completion
 
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
-from free_api.resources.completions.polling_openai import Completions
+from free_api.resources.completions.chatfire_all import Completions
 
 router = APIRouter()
-TAGS = ["文本生成", "轮询"]
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
@@ -31,35 +30,24 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        base_url: Optional[str] = Query("https://api.siliconflow.cn/v1"),
-        feishu_url: Optional[str] = Query(None),
-        redis_key: Optional[str] = Query(None),
+        system_prompt: Optional[str] = Query(None)
 ):
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
-    # logger.debug(base_url)
-    # logger.debug(feishu_url)
 
     raw_model = request.model
-    if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
-        if request.model.startswith("gemini-1.5"):
-            request.model = REDIRECT_MODEL.get("gemini-1.5")
-        else:
-            request.model = REDIRECT_MODEL.get(request.model, request.model)
-    if "groq" in base_url:
-        request.last_content = None
+    if request.model.endswith("-all"):
+        request.model = 'glm-4-alltools'
+        request.tools = TOOLS  # 开启工具：目前支持3个
+        if system_prompt:  # 定制化模型
+            request.messages = [{"role": "system", "content": system_prompt}] + request.messages
 
-    client = Completions(api_key=api_key, base_url=base_url, feishu_url=feishu_url, redis_key=redis_key)
-
-    response = await client.acreate(request)
-
+    client = Completions(api_key=api_key)
     if request.stream:
+        response = await client.create(request)
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
-
-    if hasattr(response, "model"):
-        response.model = raw_model  # 以请求体为主
-
-    return response
+    else:
+        return chat_completion
 
 
 if __name__ == '__main__':
