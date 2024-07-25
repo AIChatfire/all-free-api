@@ -21,7 +21,9 @@ class Completions(object):
     def __init__(self, api_key):
         self.api_key = api_key
         if self.api_key.startswith("sk-"):
-            self.client = AsyncOpenAI()
+            self.client = AsyncOpenAI(
+                api_key=api_key,
+            )
         else:
             logger.debug(api_key)
             self.client = AsyncOpenAI(
