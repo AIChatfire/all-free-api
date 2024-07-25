@@ -19,3 +19,5 @@ json_repair
 tabulate
 tenacity
 edge_tts
+
+gradio_client

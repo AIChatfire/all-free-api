@@ -14,7 +14,8 @@ from meutils.schemas.oneapi_types import REDIRECT_MODEL
 from meutils.schemas.kuaishou_types import KlingaiImageRequest, KolorsRequest
 
 from meutils.apis.siliconflow import api_images
-from meutils.apis.kuaishou import klingai, kolors
+from meutils.apis.kuaishou import klingai
+from meutils.apis.hf import kolors
 
 from openai.types import ImagesResponse
 
@@ -54,22 +55,14 @@ async def generate(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
         return ImagesResponse(created=int(time.time()), data=images)
 
-    else:  # kolors
-        kolors_request = KolorsRequest(
-            prompt=request.prompt,
-            imageCount=request.n,
-            style=request.style,
-            resolution=request.size
-        )
+    else:  # kolors 官网死了
         try:
-            images = await kolors.create_image(kolors_request)
-            if isinstance(images, dict):  # 异常
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
-            return ImagesResponse(created=int(time.time()), data=images)
+            image_response = await kolors.create_image(request)
+            return image_response
         except Exception as e:
-            kolors.send_message(f"Kolors失败，sd3兜底\n\n{e}")
-
-            return api_images.api_create_image(request)
+            image_response = await api_images.api_create_image(request)
+            klingai.send_message(f"SD兜底\n\n{e}\n\n{image_response}")
+            return image_response
 
 
 if __name__ == '__main__':
