@@ -7,20 +7,13 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import json
-import os
 
 from meutils.pipe import *
-from meutils.notice.feishu import send_message as _send_message
-from meutils.db.redis_db import redis_client, redis_aclient
-from meutils.config_utils.lark_utils import aget_spreadsheet_values
 
 from meutils.llm.openai_utils import to_openai_completion_params, token_encoder, token_encoder_with_cache
 from meutils.schemas.openai_types import chat_completion, chat_completion_chunk, ChatCompletionRequest, CompletionUsage
 
 from openai import OpenAI, AsyncOpenAI, APIStatusError
-
-client = AsyncOpenAI()
 
 
 class Completions(object):
@@ -28,7 +21,7 @@ class Completions(object):
     def __init__(self, api_key):
         self.api_key = api_key
         if self.api_key.startswith("sk-"):
-            self.client = client
+            self.client = AsyncOpenAI()
         else:
             logger.debug(api_key)
             self.client = AsyncOpenAI(

@@ -22,6 +22,7 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, 
 from free_api.resources.completions.chatfire_all import Completions
 
 TAGS = ["全能模型"]
+
 router = APIRouter()
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
