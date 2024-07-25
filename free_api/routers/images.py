@@ -37,23 +37,21 @@ async def generate(
         if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
             request.model = REDIRECT_MODEL.get(request.model, request.model)
 
-        response = await api_images.api_create_image(request)  # 自动翻译成英文
-        data = response.get('images', [])
+        image_response = await api_images.api_create_image(request)  # 自动翻译成英文
+        return image_response
 
-        return ImagesResponse(created=int(time.time()), data=data)
-
-    elif request.model.startswith(("kling",)):
-
-        request = KlingaiImageRequest(
-            prompt=request.prompt,
-            imageCount=request.n,
-            # style=request.style,  # "默认"
-            aspect_ratio=request.size if request.size in {'1:1', '2:3', '3:2', '3:4', '4:3', '9:16', '16:9'} else "1:1"
-        )
-        images = await klingai.create_image(request)
-        if isinstance(images, dict):  # 异常
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
-        return ImagesResponse(created=int(time.time()), data=images)
+    # elif request.model.startswith(("kling",)):
+    #
+    #     request = KlingaiImageRequest(
+    #         prompt=request.prompt,
+    #         imageCount=request.n,
+    #         # style=request.style,  # "默认"
+    #         aspect_ratio=request.size if request.size in {'1:1', '2:3', '3:2', '3:4', '4:3', '9:16', '16:9'} else "1:1"
+    #     )
+    #     images = await klingai.create_image(request)
+    #     if isinstance(images, dict):  # 异常
+    #         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
+    #     return ImagesResponse(created=int(time.time()), data=images)
 
     else:  # kolors 官网死了
         try:
