@@ -76,11 +76,12 @@ async def create_chat_completions(
                     # progressText = data.get("progressText")
                     progressRatio = float(data.get("progressRatio") or 0)
                     if progressRatio:
-                        yield f"{progressRatio:.2%} "
+                        yield f"{progressRatio:.2%}"
                 else:
-                    yield ")\n\n"  # 隐藏进度条
+                    yield ")🎉🎉🎉\n\n"  # 隐藏进度条
                     video_url = data.get("artifacts")[0].get("url")
-                    yield f"🎉 任务完成\n\n![视频地址]({video_url})"
+                    yield f"[下载地址]({video_url})\n\n"
+                    yield f"![视频地址]({video_url})\n\n"
                     break
 
         chunks = create_chat_completion_chunk(gen_chunks())
