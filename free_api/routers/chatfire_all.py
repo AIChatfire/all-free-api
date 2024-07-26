@@ -9,6 +9,8 @@
 # @Description  :
 
 from meutils.pipe import *
+from meutils.config_utils.lark_utils import get_dataframe
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
@@ -32,7 +34,8 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        system_prompt: Optional[str] = Query("你是火宝，由 Chatfire团队精心打造。请牢记，你叫火宝，一个AI全能智能助手。")
+        x: Optional[int] = Query(None),
+        y: Optional[int] = Query(None)
 ):
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
@@ -41,7 +44,8 @@ async def create_chat_completions(
     if request.model.endswith("-all"):
         request.model = 'glm-4-alltools'
         request.tools = TOOLS  # 开启工具：目前支持3个
-        if system_prompt:  # 定制化模型
+        if all(i is not None for i in (x, y)):  # 定制化模型
+            system_prompt = await get_dataframe(iloc_tuple=(x, y))
             request.messages = [{"role": "system", "content": system_prompt}] + request.messages
 
         logger.debug(request.model_dump_json(indent=4))
