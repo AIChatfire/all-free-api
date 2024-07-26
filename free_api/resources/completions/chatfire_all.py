@@ -61,8 +61,9 @@ class Completions(object):
                 tool_input = tool_delta.__getattr__(tool_type).get('input')  # {'input': 'A'}
                 if tool_input:
                     yield tool_input
-                if tool_input == '':
-                    yield "\n```\n\n"  # 工具输入：结束
+                if tool_input == '':  # 工具输入：结束
+                    tool_name = ""
+                    yield "\n```\n\n"
 
                 # 工具输出
                 tool_outputs = tool_delta.__getattr__(tool_type).get('outputs')  # {'outputs': [...]}
@@ -82,7 +83,7 @@ class Completions(object):
                         for output in tool_outputs:
                             yield f"[{output['title']}]({output['link']})\n"  # 太多了
 
-                    elif tool_name == "code_interpreter":  #
+                    elif tool_name == "code_interpreter":  # url 检测
                         yield f"```json\n{json.dumps(tool_outputs, indent=4, ensure_ascii=False)}\n```\n"
 
                     else:
