@@ -61,13 +61,13 @@ class Completions(object):
                 tool_input = tool_delta.__getattr__(tool_type).get('input')  # {'input': 'A'}
                 if tool_input:
                     yield tool_input
-                if tool_input == '':  # 工具输入：结束
-                    tool_name = ""
-                    yield "\n```\n\n"
 
                 # 工具输出
                 tool_outputs = tool_delta.__getattr__(tool_type).get('outputs')  # {'outputs': [...]}
                 if tool_outputs:
+                    if tool_input == '':  # 工具输入：结束
+                        yield "\n```\n\n"
+
                     if tool_name == "drawing_tool":
                         for output in tool_outputs:
                             url = output['image']
