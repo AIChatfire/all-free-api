@@ -84,7 +84,7 @@ async def create_chat_completions(
     image_request = ImageRequest(
         prompt=request.last_content,
         model=request.model.strip('chat-'),
-        n=2 if "dall-e-3" not in request.model else 1,  # dall-e-3 仅支持 1
+        n=1,  # dall-e-3 仅支持 1
     )
 
     data = to_openai_images_params(image_request)

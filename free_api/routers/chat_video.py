@@ -47,11 +47,12 @@ async def create_chat_completions(
 
     video_request = RunwayRequest(options=Options(text_prompt=request.last_content, exploreMode=not vip))
 
-    async def create_video():
+    async def create_video(task_type="runwayml"):
         headers = {'Authorization': f'Bearer {api_key}'}
         payload = video_request.model_dump(exclude_none=True)
+
         async with httpx.AsyncClient(base_url="https://api.chatfire.cn/tasks", headers=headers, timeout=100) as client:
-            response = await client.post("/runwayml", json=payload)
+            response = await client.post(f"/{task_type}", json=payload)
             if response.is_success:
                 return Task(**response.json())
 

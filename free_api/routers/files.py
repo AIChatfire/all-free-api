@@ -20,6 +20,7 @@ from meutils.apis.voice_clone import fish
 from meutils.apis.textin import textin_fileparser
 from meutils.apis.kuaishou import kolors, klingai
 from meutils.apis.sunoai import suno
+from meutils.apis.chatglm import glm_video
 
 from enum import Enum
 from openai import OpenAI
@@ -50,6 +51,7 @@ class Purpose(str, Enum):
     kling = "kling"
     kolors = "kolors"
     suno = "suno"
+    cogvideox = "cogvideox"
 
     # 语音克隆 tts  Voice clone
     tts = "tts"
@@ -152,6 +154,17 @@ async def upload_files(
             # 获取clip_id
             file_object.id, file_object.duration = jsonpath.jsonpath(clip_data, "$..[id,duration]")
             file_object.data = clip_data
+
+            await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
+            return file_object
+
+    elif purpose == purpose.cogvideox:
+        async with ppu_flow(api_key, post="ppu-01"):
+            data, token = await glm_video.upload(await file.read())  # clip
+
+            file_object.data = data
+            file_object.id = data['result']['source_id']
+            file_object.url = data['result']['source_url']
 
             await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
             return file_object

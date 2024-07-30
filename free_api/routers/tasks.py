@@ -19,6 +19,9 @@ from meutils.apis.runwayml import gen
 from meutils.schemas.suno_types import SunoAIRequest, LyricsRequest
 from meutils.apis.sunoai import suno
 
+from meutils.schemas.chatglm_types import VideoRequest
+from meutils.apis.chatglm import glm_video
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Request, Query, Body, Header, HTTPException, status
@@ -29,14 +32,13 @@ TAGS = ["异步任务"]
 
 
 @router.get("/tasks/{task_id}")
-@alru_cache(maxsize=1024, ttl=10)  # 延迟10s
+@alru_cache(maxsize=1024, ttl=15)  # 延迟10s
 async def get_tasks(
         task_id: str,
         # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         # backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
     # api_key = auth and auth.credentials or None
-    logger.debug("不走缓存")
 
     token = await redis_aclient.get(task_id)  # 绑定对应的 token
     token = token and token.decode()
@@ -67,6 +69,9 @@ async def get_tasks(
         data = await suno.get_task(task_id, token)
         return data
 
+    elif task_type == TaskType.cogvideox:
+        data = await glm_video.get_task(task_id, token)
+        return data
     return JSONResponse(content=data, media_type="application/json")
 
 
@@ -187,6 +192,35 @@ async def create_tasks(
             raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=data)  # 内容审核
 
         return data
+
+
+@router.post(f"/tasks/{TaskType.cogvideox}")
+async def create_tasks(
+        request: VideoRequest,
+        # task_type: TaskType,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        upstream_base_url: Optional[str] = Header(None),
+        upstream_api_key: Optional[str] = Header(None),
+        downstream_base_url: Optional[str] = Header(None),
+
+        background_tasks: BackgroundTasks = BackgroundTasks,
+):
+    logger.debug(request.model_dump_json(indent=4))
+
+    api_key = auth and auth.credentials or None
+    task_type = TaskType.cogvideox
+
+    token = request.source_list and await redis_aclient.get(request.source_list[0])  # 照片对应的token
+    token = token and token.decode()
+
+    async with ppu_flow(api_key, post="api-cogvideox"):
+        task = await glm_video.create_task(request, token)
+        if task and task.status:
+            glm_video.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
+
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+
+            return task.model_dump(exclude={"system_fingerprint"})
 
 
 if __name__ == '__main__':
