@@ -260,7 +260,7 @@ async def create_tasks(
             return task.model_dump(exclude={"system_fingerprint"})
 
 
-@router.post(f"/tasks/{TaskType.vidu}")
+@router.post(f"/tasks/{TaskType.vidu}-upscale")
 async def create_tasks(
         request: ViduUpscaleRequest,
         # task_type: TaskType,
