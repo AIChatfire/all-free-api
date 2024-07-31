@@ -7,7 +7,7 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import jsonpath
+
 from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import ppu_flow
