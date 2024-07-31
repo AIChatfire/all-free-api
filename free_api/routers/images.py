@@ -42,16 +42,22 @@ async def generate(
 
     elif request.model.startswith(("kling",)):  # 国际版
 
-        request = KlingaiImageRequest(
+        kling_request = KlingaiImageRequest(
             prompt=request.prompt,
             imageCount=request.n,
             # style=request.style,  # "默认"
             aspect_ratio=request.size if request.size in {'1:1', '2:3', '3:2', '3:4', '4:3', '9:16', '16:9'} else "1:1"
         )
-        images = await klingai.create_image(request)
+        images = await klingai.create_image(kling_request)
         if isinstance(images, dict):  # 异常
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=images)
-        return ImagesResponse(created=int(time.time()), data=images)
+
+        if images:
+            return ImagesResponse(created=int(time.time()), data=images)
+        else:
+            klingai.send_message(f"SD兜底\n\n{kling_request}")
+
+            return await api_images.api_create_image(request)
 
     else:  # kolors 官网死了
         try:

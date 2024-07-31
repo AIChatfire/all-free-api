@@ -22,6 +22,9 @@ from meutils.apis.sunoai import suno
 from meutils.schemas.chatglm_types import VideoRequest
 from meutils.apis.chatglm import glm_video
 
+from meutils.schemas.vidu_types import ViduRequest, ViduUpscaleRequest
+from meutils.apis.vidu import vidu_video
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Request, Query, Body, Header, HTTPException, status
@@ -72,6 +75,11 @@ async def get_tasks(
     elif task_type == TaskType.cogvideox:
         data = await glm_video.get_task(task_id, token)
         return data
+
+    elif task_type == TaskType.vidu:
+        data = await vidu_video.get_task(task_id, token)
+        return data
+
     return JSONResponse(content=data, media_type="application/json")
 
 
@@ -217,6 +225,64 @@ async def create_tasks(
         task = await glm_video.create_task(request, token)
         if task and task.status:
             glm_video.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
+
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+
+            return task.model_dump(exclude={"system_fingerprint"})
+
+
+@router.post(f"/tasks/{TaskType.vidu}")
+async def create_tasks(
+        request: ViduRequest,
+        # task_type: TaskType,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        upstream_base_url: Optional[str] = Header(None),
+        upstream_api_key: Optional[str] = Header(None),
+        downstream_base_url: Optional[str] = Header(None),
+
+        background_tasks: BackgroundTasks = BackgroundTasks,
+):
+    logger.debug(request.model_dump_json(indent=4))
+
+    api_key = auth and auth.credentials or None
+    task_type = TaskType.vidu
+
+    token = request.url and await redis_aclient.get(request.url)  # 照片对应的token
+    token = token and token.decode()
+
+    async with ppu_flow(api_key, post="api-vidu"):
+        task = await vidu_video.create_task(request, token)
+        if task and task.status:
+            glm_video.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
+
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+
+            return task.model_dump(exclude={"system_fingerprint"})
+
+
+@router.post(f"/tasks/{TaskType.vidu}")
+async def create_tasks(
+        request: ViduUpscaleRequest,
+        # task_type: TaskType,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        upstream_base_url: Optional[str] = Header(None),
+        upstream_api_key: Optional[str] = Header(None),
+        downstream_base_url: Optional[str] = Header(None),
+
+        background_tasks: BackgroundTasks = BackgroundTasks,
+):
+    logger.debug(request.model_dump_json(indent=4))
+
+    api_key = auth and auth.credentials or None
+    task_type = TaskType.vidu
+
+    token = await redis_aclient.get(f"vidu-{request.creation_id}")  # 任务对应的 token
+    token = token and token.decode()
+
+    async with ppu_flow(api_key, post="api-vidu-upscale"):
+        task = await vidu_video.create_task_upscale(request, token)
+        if task and task.status:
+            vidu_video.send_message(f"{task_type}-upscale 任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
 

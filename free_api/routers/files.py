@@ -21,6 +21,7 @@ from meutils.apis.textin import textin_fileparser
 from meutils.apis.kuaishou import kolors, klingai
 from meutils.apis.sunoai import suno
 from meutils.apis.chatglm import glm_video
+from meutils.apis.vidu import vidu_video
 
 from enum import Enum
 from openai import OpenAI
@@ -52,6 +53,7 @@ class Purpose(str, Enum):
     kolors = "kolors"
     suno = "suno"
     cogvideox = "cogvideox"
+    vidu = "vidu"
 
     # 语音克隆 tts  Voice clone
     tts = "tts"
@@ -160,13 +162,24 @@ async def upload_files(
 
     elif purpose == purpose.cogvideox:
         async with ppu_flow(api_key, post="ppu-01"):
-            data, token = await glm_video.upload(await file.read())  # clip
+            data, token = await glm_video.upload(await file.read())
 
             file_object.data = data
             file_object.id = data['result']['source_id']
             file_object.url = data['result']['source_url']
 
             await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
+            return file_object
+
+    elif purpose == purpose.vidu:
+        async with ppu_flow(api_key, post="ppu-01"):
+            file_task = await vidu_video.upload(await file.read())
+
+            file_object.data = file_task.data
+            file_object.id = file_task.id
+            file_object.url = file_task.url
+
+            await redis_aclient.set(file_task.url, file_task.system_fingerprint, ex=1 * 24 * 3600)
             return file_object
 
     elif purpose == purpose.voice_clone:
