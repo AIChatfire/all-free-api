@@ -58,16 +58,14 @@ class Completions(object):
             future_task = asyncio.create_task(self.create_task(task_type, video_request))  # 异步执行
 
             def func(data):
-                progress = 0
-                if data.get("state") != "success":
-                    progress += 0.05
-                    yield f"{progress:.2%}"
-                else:
+                if data.get("state") == "success":
                     yield ")🎉🎉🎉\n\n"  # 隐藏进度条
                     video_url = data.get("creations")[0].get("uri")
                     yield f"[下载地址]({video_url})\n\n"
                     yield f"![视频地址]({video_url})\n\n"
                     yield "DONE"
+                else:
+                    yield "✨"
 
         async def gen_chunks(func):
             for i in f"> ▶️ 正在制作中\n\n```json\n{video_request.model_dump_json(indent=4, exclude_none=True)}\n```\n\n":
@@ -80,14 +78,17 @@ class Completions(object):
             yield f"> 🤫 任务创建成功，[任务详情]({task_url})\n\n"
 
             yield f" 🤫 [任务进度]("
+
+            chunk = None
             for i in range(100):
                 await asyncio.sleep(3)
                 response = await httpx.AsyncClient().get(task_url)
                 data = response.json()
 
                 for chunk in func(data):
-                    if chunk == "DONE": break
                     yield chunk
+
+                if chunk == "DONE": break
 
         return gen_chunks(func)
 

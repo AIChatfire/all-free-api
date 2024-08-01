@@ -276,7 +276,8 @@ async def create_tasks(
     api_key = auth and auth.credentials or None
     task_type = TaskType.vidu
 
-    token = await redis_aclient.get(f"vidu-{request.creation_id}")  # 任务对应的 token
+    # 任务对应的 token
+    token = await redis_aclient.get(f"vidu-{request.task_id}") or await redis_aclient.get(f"{request.task_id}")
     token = token and token.decode()
 
     async with ppu_flow(api_key, post="api-vidu-upscale"):
