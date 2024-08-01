@@ -11,6 +11,7 @@ import pandas as pd
 
 from meutils.pipe import *
 
+
 d = {
     "id": "aa6f8c69-a147-44ae-90a6-e01a08e83f52",
     "createdAt": "2024-07-25T04:16:07.261Z",
