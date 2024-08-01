@@ -252,11 +252,11 @@ async def create_tasks(
 
     async with ppu_flow(api_key, post="api-vidu"):
         task = await vidu_video.create_task(request, token)
+        logger.debug(task)
         if task and task.status:
             glm_video.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
-
             return task.model_dump(exclude={"system_fingerprint"})
 
 
@@ -285,7 +285,6 @@ async def create_tasks(
             vidu_video.send_message(f"{task_type}-upscale 任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
-
             return task.model_dump(exclude={"system_fingerprint"})
 
 
