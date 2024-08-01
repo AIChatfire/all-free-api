@@ -31,7 +31,7 @@ async def beautify_prompt(
     data['result'] = data['result'].replace("请进入公众号联系客服：可灵AI工具箱",
                                             "请进入公众号「火哥AI」：也可加微信313303303")
 
-    return data
+    return {}
 
 
 if __name__ == '__main__':
