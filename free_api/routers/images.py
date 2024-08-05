@@ -25,7 +25,7 @@ router = APIRouter()
 TAGS = ["文生图"]
 
 
-@router.post("/images/generations")
+@router.post("/images/generations")  # todo: sd3 兜底
 async def generate(
         request: ImageRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
@@ -41,8 +41,14 @@ async def generate(
         return image_response
 
     elif request.model.startswith(("flux",)):
-        pass
-
+        request.model = REDIRECT_MODEL.get(request.model, request.model)
+        try:
+            image_response = await api_images.create_image(request)
+            return image_response
+        except Exception as e:
+            logger.error(e)
+            image_response = await api_images.api_create_image(request)
+            return image_response
 
     elif request.model.startswith(("kling",)):  # 国际版
 
