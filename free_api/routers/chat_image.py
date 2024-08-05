@@ -81,6 +81,7 @@ async def create_chat_completions(
 ):
     api_key = auth and auth.credentials or None
 
+
     if request.last_content.startswith(  # 跳过nextchat
             (
                     "hi"
