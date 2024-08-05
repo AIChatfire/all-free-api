@@ -5,7 +5,6 @@ git add *
 git add .dockerignore .github/workflows/docker-image.yml
 
 
-
 git commit -m "init"
 
 
