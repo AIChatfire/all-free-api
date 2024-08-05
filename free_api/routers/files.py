@@ -147,7 +147,7 @@ async def upload_files(
             file_object.url = url
             return file_object
 
-    elif purpose == purpose.suno:  # 1毛
+    elif purpose == purpose.suno:  # 1分
         async with ppu_flow(api_key, post="api-sunoai-audio"):
             clip_data, token = await suno.upload(await file.read(), title=file.filename or file.file.name)  # clip
             if not clip_data:

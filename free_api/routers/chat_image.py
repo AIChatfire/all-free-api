@@ -12,7 +12,9 @@ from meutils.pipe import *
 from meutils.notice.feishu import send_message
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ChatCompletionRequest, ImageRequest
-from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, chat_completion
+from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk
+from meutils.llm.openai_utils import chat_completion, chat_completion_chunk
+
 from meutils.llm.openai_utils import to_openai_images_params
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks, \
@@ -85,7 +87,7 @@ async def create_chat_completions(
                     "使用四到五个字直接返回这句话的简要主题",
                     "简要总结一下对话内容，用作后续的上下文提示 prompt，控制在 200 字以内"
             )):
-        return
+        return chat_completion
 
     image_request = ImageRequest(
         prompt=request.last_content,

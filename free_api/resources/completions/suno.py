@@ -56,11 +56,12 @@ class Completions(object):
 
     async def create(self, request: ChatCompletionRequest):
         if request.last_content.startswith(  # 跳过nextchat
-                ("使用四到五个字直接返回这句话的简要主题",
+                ("hi",
+                 "使用四到五个字直接返回这句话的简要主题",
                  "简要总结一下对话内容，用作后续的上下文提示 prompt，控制在 200 字以内")):
             return "请关闭nextchat上下文总结，避免不必要的浪费"
 
-        if "chat" in request.model:
+        if all(i not in request.last_content for i in {"prompt", "make_instrumental"}):  # 无字段标识，默认 gpt创作
             request = SunoAIRequest(gpt_description_prompt=request.last_content)
 
         else:

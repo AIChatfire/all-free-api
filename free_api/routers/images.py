@@ -40,6 +40,10 @@ async def generate(
         image_response = await api_images.api_create_image(request)  # 自动翻译成英文
         return image_response
 
+    elif request.model.startswith(("flux",)):
+        pass
+
+
     elif request.model.startswith(("kling",)):  # 国际版
 
         kling_request = KlingaiImageRequest(
