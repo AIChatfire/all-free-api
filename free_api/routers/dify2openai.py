@@ -29,6 +29,9 @@ def generate_id():
     return ''.join(random.choice(characters) for _ in range(29))
 
 
+
+
+
 bot_type = os.getenv("BOT_TYPE", 'Chat')
 input_variable = os.getenv("INPUT_VARIABLE", '')
 output_variable = os.getenv("OUTPUT_VARIABLE", '')
