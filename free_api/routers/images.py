@@ -13,7 +13,7 @@ from meutils.schemas.openai_types import ImageRequest
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
 from meutils.schemas.kuaishou_types import KlingaiImageRequest, KolorsRequest
 
-from meutils.apis.siliconflow import api_images
+from meutils.apis.siliconflow import api_images, flux
 from meutils.apis.kuaishou import klingai
 from meutils.apis.hf import kolors
 
@@ -41,10 +41,15 @@ async def generate(
             image_response = await api_images.api_create_image(request)
             return image_response
 
+        elif request.model.startswith(("flux-pro",)):
+            image_response = await flux.create_image(request)
+            return image_response
+
         elif request.model.startswith(("flux",)):
             request.model = REDIRECT_MODEL.get(request.model, request.model)
             image_response = await api_images.create_image(request)
             return image_response
+
 
         elif request.model.startswith(("kling",)):
             kling_request = KlingaiImageRequest(
