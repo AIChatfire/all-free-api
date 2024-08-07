@@ -16,7 +16,6 @@ EXPOSE 8000
 COPY requirements.txt .
 RUN python -m pip install --no-cache-dir --upgrade -r requirements.txt
 
-
 # 创建工作目录
 WORKDIR /app
 

@@ -22,3 +22,5 @@ edge_tts
 
 gradio_client
 python-multipart
+
+sensenova

@@ -10,7 +10,7 @@
 
 from meutils.serving.fastapi import App
 from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
-from free_api.routers import polling_openai, chat_image, chat_to_audio, chat_video, chatfire_all
+from free_api.routers import openai_adapter, polling_openai, chat_image, chat_to_audio, chat_video, chatfire_all
 
 from free_api.routers import files, images
 from free_api.routers import audio
@@ -21,6 +21,7 @@ from free_api.routers.goamz import suno
 app = App()
 
 # Chat
+app.include_router(openai_adapter.router, '/adapter/v1', tags=openai_adapter.TAGS)
 app.include_router(polling_openai.router, '/polling/v1', tags=polling_openai.TAGS)
 app.include_router(chat_image.router, '/chat_image/v1', tags=chat_image.TAGS)
 app.include_router(chat_to_audio.router, '/chat_to_audio/v1', tags=chat_to_audio.TAGS)
