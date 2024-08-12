@@ -43,8 +43,6 @@ class Completions(object):
     async def acreate(self, request: ChatCompletionRequest):
         data = to_openai_completion_params(request)
 
-        logger.debug(data)
-
         client: Optional[AsyncOpenAI] = None
         for i in range(5):  # 轮询个数
             try:
