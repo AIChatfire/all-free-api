@@ -90,7 +90,16 @@ async def create_transcriptions(
         # extra_body={"url": "https://oss.chatfire.cn/data/demo.mp3"}
     )
 
+
     return response
+
+# TODO:
+
+# curl --request POST \
+#      --url https://api.siliconflow.cn/v1/audio/transcriptions \
+#      --header 'accept: application/json' \
+#      --header 'content-type: multipart/form-data' \
+#      --form model=iic/SenseVoiceSmall
 
 
 @router.post("/audio/translations")

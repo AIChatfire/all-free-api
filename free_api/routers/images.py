@@ -43,6 +43,7 @@ async def generate(
 
         elif request.model.startswith(("flux-pro-max",)):
             request.is_nsfw = False  # 不审核
+            request.nsfw_level = "3"  # 不审核
             image_response = await flux.create_image(request)
 
         elif request.model.startswith(("flux-pro",)):

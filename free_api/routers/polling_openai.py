@@ -41,10 +41,10 @@ async def create_chat_completions(
     # logger.debug(feishu_url)
 
     raw_model = request.model
-    if any(i in base_url for i in {"xinghuo", "siliconflow", "cloudflare"}):  # 实际调用
+    if any(i in base_url for i in {"spark-api", "siliconflow", "cloudflare"}):  # 实际调用
         if request.model.startswith("gemini-1.5"):
             request.model = REDIRECT_MODEL.get("gemini-1.5")
-        else:
+        else:  # https://spark-api-open.xf-yun.com/v1
             request.model = REDIRECT_MODEL.get(request.model, request.model)
     if "groq" in base_url:
         request.last_content = None

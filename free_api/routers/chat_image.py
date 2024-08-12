@@ -83,7 +83,7 @@ async def create_chat_completions(
 
     logger.debug(request)
 
-    if request.last_content.startswith(  # 跳过nextchat
+    if isinstance(request.last_content, str) and request.last_content.startswith(  # 跳过nextchat
             (
                     "hi",
                     "使用四到五个字直接返回这句话的简要主题",
