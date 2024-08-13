@@ -39,9 +39,10 @@ async def create_chat_completions(
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
 
-    if request.last_content.startswith(  # 跳过nextchat
-            ("使用四到五个字直接返回这句话的简要主题",
-             "简要总结一下对话内容，用作后续的上下文提示 prompt，控制在 200 字以内")):
+    if isinstance(request.last_content, str) and request.last_content.startswith(  # 跳过nextchat
+            (
+                    "使用四到五个字直接返回这句话的简要主题",
+                    "简要总结一下对话内容，用作后续的上下文提示 prompt，控制在 200 字以内")):
         return
 
     if request.stream:
