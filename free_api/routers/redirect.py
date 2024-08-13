@@ -45,7 +45,7 @@ async def create_chat_completions(
     # api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
 
-    raw_model = request.model
+    raw_model   = request.model
 
     client = Completions(
         model,

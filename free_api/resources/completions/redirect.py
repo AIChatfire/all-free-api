@@ -59,6 +59,8 @@ class Completions(object):
         try:
             request.model = self.model
             data = to_openai_completion_params(request)
+            logger.debug(data)
+
             return await self.client.chat.completions.create(**data)
         except APIStatusError as e:
             logger.error(e)

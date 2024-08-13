@@ -16,8 +16,11 @@ from meutils.schemas.kuaishou_types import KlingaiVideoRequest, Camera
 from meutils.apis.kuaishou import klingai_video
 from meutils.schemas.runwayml_types import RunwayRequest
 from meutils.apis.runwayml import gen
+
 from meutils.schemas.suno_types import SunoAIRequest, LyricsRequest
-from meutils.apis.sunoai import suno
+from meutils.apis.sunoai import suno, haimian
+
+from meutils.schemas.haimian_types import HaimianRequest
 
 from meutils.schemas.chatglm_types import VideoRequest
 from meutils.apis.chatglm import glm_video
@@ -66,6 +69,10 @@ async def get_tasks(
 
     elif task_type == TaskType.suno:
         data = await suno.get_task(task_id, token)  # todo： 获取任务 失败补偿加你分
+        return data
+
+    elif task_type == TaskType.haimian:
+        data = await haimian.get_task(task_id, token)
         return data
 
     elif task_type == TaskType.fish:  # todo: 语音克隆
@@ -178,24 +185,44 @@ async def create_tasks(
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
 
 
+@router.post(f"/tasks/{TaskType.haimian}")
+async def create_tasks(
+        request: HaimianRequest,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+):
+    logger.debug(request.model_dump_json(indent=4))
+
+    api_key = auth and auth.credentials or None
+    task_type = TaskType.haimian
+
+    async with ppu_flow(api_key, post="api-haimian"):
+        task = await haimian.create_task(request)
+        if task and task.status:
+            haimian.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
+
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+            return task.model_dump(exclude={"system_fingerprint"})
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
+
+
 @router.post(f"/tasks/{TaskType.lyrics}")
 async def create_tasks(
         request: LyricsRequest,
         # task_type: TaskType,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        upstream_base_url: Optional[str] = Header(None),
-        upstream_api_key: Optional[str] = Header(None),
-        downstream_base_url: Optional[str] = Header(None),
-
-        background_tasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(request.model_dump_json(indent=4))
+
 
     api_key = auth and auth.credentials or None
     task_type = TaskType.lyrics
 
     async with ppu_flow(api_key, post="api-sunoai-lyrics"):
-        data = await suno.generate_lyrics(prompt=request.prompt)
+        if request.model == "haimian":
+            data = haimian.generate_lyrics(prompt=request.prompt)
+        else:
+            data = await suno.generate_lyrics(prompt=request.prompt)
         if isinstance(data, str):
             raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=data)  # 内容审核
 

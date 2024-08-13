@@ -18,6 +18,7 @@ from free_api.routers import audio
 from free_api.routers import tasks, reranker
 from free_api.routers.tools import prompter, translator
 from free_api.routers.goamz import suno
+from free_api.routers.hooks import wechat
 
 app = App()
 
@@ -58,6 +59,9 @@ app.include_router(translator.router, '/tools/v1', tags=translator.TAGS)
 
 # GOAMZ
 app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)
+
+# Hook
+app.include_router(wechat.router, '/hooks/v1', tags=wechat.TAGS)
 
 if __name__ == '__main__':
     app.run()
