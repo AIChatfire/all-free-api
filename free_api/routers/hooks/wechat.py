@@ -27,7 +27,7 @@ async def create_reply(
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    response = []
+    responses = []
     flag = request.Content.split(maxsplit=1)[-1]
     if flag.startswith(('/v', '/video')):
         prompt = flag.strip('/video').split('/v')[-1]
@@ -38,14 +38,15 @@ async def create_reply(
             await asyncio.sleep(5)
             try:
                 data = await vidu_video.get_task(task.id, task.system_fingerprint)
+                responses += [HookResponse(content=f"任务已完成🎉🎉🎉\nTaskId: {task.id}")]
                 if data.get("state") == "success":
                     video_url = data.get("creations")[0].get("uri")
-                    response = [HookResponse(type='video', content=video_url)]
+                    responses += [HookResponse(type='video', content=video_url)]
                     break
             except Exception as e:
                 logger.debug(e)
 
-    return response
+    return responses
 
 
 if __name__ == '__main__':
