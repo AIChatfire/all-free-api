@@ -28,6 +28,9 @@ from meutils.apis.chatglm import glm_video
 from meutils.schemas.vidu_types import ViduRequest, ViduUpscaleRequest
 from meutils.apis.vidu import vidu_video
 
+from meutils.schemas.prodia_types import FaceswapRequest
+from meutils.apis.prodia import faceswap
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Request, Query, Body, Header, HTTPException, status
@@ -214,7 +217,6 @@ async def create_tasks(
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-
     api_key = auth and auth.credentials or None
     task_type = TaskType.lyrics
 
@@ -311,6 +313,35 @@ async def create_tasks(
         task = await vidu_video.create_task_upscale(request, token)
         if task and task.status:
             vidu_video.send_message(f"{task_type}-upscale 任务提交成功：\n\n{task.id}")
+
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+            return task.model_dump(exclude={"system_fingerprint"})
+
+
+@router.post(f"/tasks/{TaskType.faceswap}")
+async def create_tasks(
+        request: FaceswapRequest,
+        # task_type: TaskType,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        upstream_base_url: Optional[str] = Header(None),
+        upstream_api_key: Optional[str] = Header(None),
+        downstream_base_url: Optional[str] = Header(None),
+
+        background_tasks: BackgroundTasks = BackgroundTasks,
+):
+    logger.debug(request.model_dump_json(indent=4))
+
+    api_key = auth and auth.credentials or None
+    task_type = TaskType.faceswap
+
+    # 任务对应的 token
+    token = await redis_aclient.get(f"vidu-{request.task_id}") or await redis_aclient.get(f"{request.task_id}")
+    token = token and token.decode()
+
+    async with ppu_flow(api_key, post=f"api-{task_type}"):
+        task = await faceswap.create_task(request, token)
+        if task and task.status:
+            faceswap.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
             return task.model_dump(exclude={"system_fingerprint"})
