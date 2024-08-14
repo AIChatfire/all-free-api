@@ -38,9 +38,9 @@ async def create_reply(
             await asyncio.sleep(5)
             try:
                 data = await vidu_video.get_task(task.id, task.system_fingerprint)
-                responses += [HookResponse(content=f"任务已完成🎉🎉🎉\nTaskId: {task.id}")]
                 if data.get("state") == "success":
                     video_url = data.get("creations")[0].get("uri")
+                    responses += [HookResponse(content=f"任务已完成🎉🎉🎉\nTaskId: {task.id}")]
                     responses += [HookResponse(type='video', content=video_url)]
                     break
             except Exception as e:
