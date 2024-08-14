@@ -90,6 +90,10 @@ async def get_tasks(
         data = await vidu_video.get_task(task_id, token)
         return data
 
+    elif task_type == TaskType.faceswap:
+        data = await faceswap.get_task(task_id, token)
+        return data
+
     return JSONResponse(content=data, media_type="application/json")
 
 
@@ -321,11 +325,7 @@ async def create_tasks(
 @router.post(f"/tasks/{TaskType.faceswap}")
 async def create_tasks(
         request: FaceswapRequest,
-        # task_type: TaskType,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        upstream_base_url: Optional[str] = Header(None),
-        upstream_api_key: Optional[str] = Header(None),
-        downstream_base_url: Optional[str] = Header(None),
 
         background_tasks: BackgroundTasks = BackgroundTasks,
 ):
@@ -333,10 +333,7 @@ async def create_tasks(
 
     api_key = auth and auth.credentials or None
     task_type = TaskType.faceswap
-
-    # 任务对应的 token
-    token = await redis_aclient.get(f"vidu-{request.task_id}") or await redis_aclient.get(f"{request.task_id}")
-    token = token and token.decode()
+    token = None  ###
 
     async with ppu_flow(api_key, post=f"api-{task_type}"):
         task = await faceswap.create_task(request, token)
