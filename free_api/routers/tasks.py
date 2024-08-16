@@ -269,6 +269,8 @@ async def create_tasks(
         request: ViduRequest,
         # task_type: TaskType,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        vip: Optional[bool] = Query(False),
+
         upstream_base_url: Optional[str] = Header(None),
         upstream_api_key: Optional[str] = Header(None),
         downstream_base_url: Optional[str] = Header(None),
@@ -283,8 +285,8 @@ async def create_tasks(
     token = request.url and await redis_aclient.get(request.url)  # 照片对应的token
     token = token and token.decode()
 
-    async with ppu_flow(api_key, post="api-vidu"):
-        task = await vidu_video.create_task(request, token)
+    async with ppu_flow(api_key, post="api-vidu" if not vip else "api-vidu-vip"):
+        task = await vidu_video.create_task(request, token, vip)
         logger.debug(task)
         if task and task.status:
             vidu_video.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
@@ -298,6 +300,7 @@ async def create_tasks(
         request: ViduUpscaleRequest,
         # task_type: TaskType,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+
         upstream_base_url: Optional[str] = Header(None),
         upstream_api_key: Optional[str] = Header(None),
         downstream_base_url: Optional[str] = Header(None),

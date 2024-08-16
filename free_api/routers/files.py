@@ -23,6 +23,8 @@ from meutils.apis.sunoai import suno
 from meutils.apis.chatglm import glm_video
 from meutils.apis.vidu import vidu_video
 
+from meutils.schemas.task_types import Purpose
+
 from enum import Enum
 from openai import OpenAI
 from openai._types import FileTypes
@@ -37,31 +39,6 @@ client = OpenAI(
     api_key=os.getenv('MOONSHOT_API_KEY'),
     base_url=os.getenv('MOONSHOT_BASE_URL'),
 )
-
-
-class Purpose(str, Enum):
-    # 存储
-    oss = "oss"
-
-    # 文档智能
-    file_extract = "file-extract"
-    moonshot_fileparser = "moonshot-fileparser"
-    textin_fileparser = "textin-fileparser"
-
-    # 图 音频 视频
-    kling = "kling"
-    kolors = "kolors"
-    suno = "suno"
-    cogvideox = "cogvideox"
-    vidu = "vidu"
-
-    # 语音克隆 tts  Voice clone
-    tts = "tts"
-    voice_clone = "voice-clone"
-
-    # todo
-    assistants = "assistants"
-    fine_tune = "fine-tune"
 
 
 @router.post("/files")  # 核心
@@ -130,16 +107,8 @@ async def upload_files(
 
             return file_object
 
-    elif purpose == purpose.kolors:
-        async with ppu_flow(api_key, post="ppu-01"):
-            url = await kolors.upload(await file.read())
-            # todo: 内容审核
-
-            file_object.url = url
-            return file_object
-
-    elif purpose == purpose.kling:  # 1毛
-        async with ppu_flow(api_key, post="ppu-1"):
+    elif purpose == purpose.kling:
+        async with ppu_flow(api_key, post=f"api-{purpose.value}"):
             url = await klingai.upload(await file.read())
             if not isinstance(url, str):
                 raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=url)
@@ -171,9 +140,9 @@ async def upload_files(
             await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
             return file_object
 
-    elif purpose == purpose.vidu:
+    elif purpose.startswith('vidu'):
         async with ppu_flow(api_key, post="ppu-01"):
-            file_task = await vidu_video.upload(await file.read())
+            file_task = await vidu_video.upload(await file.read(), vip='vip' in purpose)
 
             file_object.data = file_task.data
             file_object.id = file_task.id
