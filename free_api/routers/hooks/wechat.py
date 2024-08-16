@@ -50,7 +50,7 @@ async def create_reply(
                 logger.debug(e)
                 responses = [HookResponse(content=str(e))]
 
-    elif content.startswith(('/flux-pro')):
+    elif content.startswith('/flux-pro'):
         prompts = content.replace('/flux-pro', '').strip().split(maxsplit=1)
         if len(prompts) > 1:
             aspect_ratio, prompt = prompts
