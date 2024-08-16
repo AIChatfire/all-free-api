@@ -27,7 +27,10 @@ TAGS = ["HOOK"]
 @router.post("/wechat")  # todo: sd3 兜底，增加 key
 async def create_reply(
         request: Message,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 ):
+    api_key = auth and auth.credentials or None
+
     logger.debug(request.model_dump_json(indent=4))
 
     responses = []
@@ -46,6 +49,7 @@ async def create_reply(
                     video_url = data.get("creations")[0].get("uri")
                     responses += [HookResponse(content=f"任务已完成🎉🎉🎉\nTaskId: {task.id}")]
                     responses += [HookResponse(type='video', content=video_url)]
+                    logger.debug(responses)
                     break
             except Exception as e:
                 logger.debug(e)
@@ -60,7 +64,8 @@ async def create_reply(
             prompt = prompts[0]
 
         image_reponse = await create_image(ImageRequest(prompt=prompt, size=aspect_ratio))
-        responses = [HookResponse(type='image', content=img.url) for img in image_reponse.data]
+        responses += [HookResponse(content=f"任务已完成🎉🎉🎉")]
+        responses += [HookResponse(type='image', content=img.url) for img in image_reponse.data]
         logger.debug(responses)
 
     return responses
