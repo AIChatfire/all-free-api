@@ -116,7 +116,7 @@ async def create_tasks(
     api_key = auth and auth.credentials or None
     task_type = TaskType.kling
 
-    async with ppu_flow(api_key, post="api-kling-video"):
+    async with ppu_flow(api_key, post="api-kling"):
         task = await klingai_video.create_task(request, feishu_url=feishu_url)
         if task and task.status:
             klingai_video.send_message(f"任务提交成功：\n\n{task_type}-{task.id}")

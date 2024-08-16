@@ -12,8 +12,11 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 
 from meutils.schemas.wechat_types import Message, HookResponse
 
-from meutils.schemas.vidu_types import ViduRequest
 from meutils.apis.vidu import vidu_video
+from meutils.schemas.vidu_types import ViduRequest
+
+from meutils.apis.siliconflow.flux import create_image
+from meutils.schemas.openai_types import ImageRequest
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
@@ -21,16 +24,16 @@ router = APIRouter()
 TAGS = ["HOOK"]
 
 
-@router.post("/wechat")  # todo: sd3 兜底
+@router.post("/wechat")  # todo: sd3 兜底，增加 key
 async def create_reply(
         request: Message,
 ):
     logger.debug(request.model_dump_json(indent=4))
 
     responses = []
-    flag = request.Content.split(maxsplit=1)[-1]
-    if flag.startswith(('/v', '/video')):
-        prompt = flag.strip('/video').split('/v')[-1]
+    content = request.Content.split(maxsplit=1)[-1]
+    if content.startswith(('/v', '/video')):
+        prompt = content.strip('/video').split('/v')[-1]
         video_request = ViduRequest(prompt=prompt)
         task = await vidu_video.create_task(video_request)
 
@@ -45,6 +48,17 @@ async def create_reply(
                     break
             except Exception as e:
                 logger.debug(e)
+                responses = [HookResponse(content=str(e))]
+
+    elif content.startswith(('/flux-pro')):
+        prompts = content.replace('/flux-pro', '').strip().split(maxsplit=1)
+        if len(prompts) > 1:
+            aspect_ratio, prompt = prompts
+        else:
+            prompt = prompts[0]
+
+        image_reponse = await create_image(ImageRequest(prompt=prompt))
+        responses = [HookResponse(type='image', content=img.url) for img in image_reponse.data]
 
     return responses
 
