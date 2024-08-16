@@ -31,9 +31,10 @@ async def create_reply(
     logger.debug(request.model_dump_json(indent=4))
 
     responses = []
-    content = request.Content.split(maxsplit=1)[-1]
+    content = request.Content.split(maxsplit=1)[-1]  # request.Content = "@firebot /flux-pro 一条狗"
     if content.startswith(('/v', '/video')):
         prompt = content.strip('/video').split('/v')[-1]
+
         video_request = ViduRequest(prompt=prompt)
         task = await vidu_video.create_task(video_request)
 
@@ -55,10 +56,12 @@ async def create_reply(
         if len(prompts) > 1:
             aspect_ratio, prompt = prompts
         else:
+            aspect_ratio = '1:1'
             prompt = prompts[0]
 
-        image_reponse = await create_image(ImageRequest(prompt=prompt))
+        image_reponse = await create_image(ImageRequest(prompt=prompt, size=aspect_ratio))
         responses = [HookResponse(type='image', content=img.url) for img in image_reponse.data]
+        logger.debug(responses)
 
     return responses
 
