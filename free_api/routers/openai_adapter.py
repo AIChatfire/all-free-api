@@ -20,7 +20,7 @@ from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
-from free_api.resources.completions import sensechat
+from free_api.resources.completions import sensechat, chat_qianfan
 
 router = APIRouter()
 TAGS = ["文本生成"]
@@ -33,6 +33,8 @@ async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
+        threshold: Optional[int] = Query(None),
+
 ):
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
@@ -40,8 +42,12 @@ async def create_chat_completions(
     raw_model = request.model
 
     response = None
-    if request.model.startswith(("SenseChat", "sensechat")):
-        client = sensechat.Completions()
+    if request.model.lower().startswith(("sensechat",)):
+        client = sensechat.Completions(threshold=threshold)
+        response = await client.create(request)
+
+    elif request.model.lower().startswith(("ernie",)):
+        client = chat_qianfan.Completions(threshold=threshold)
         response = await client.create(request)
 
     if request.stream:

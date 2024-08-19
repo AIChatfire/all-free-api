@@ -24,3 +24,4 @@ gradio_client
 python-multipart
 
 sensenova
+qianfan

@@ -1,22 +1,21 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Project      : AI.  @by PyCharm
-# @File         : sensechat
-# @Time         : 2024/8/7 10:37
+# @File         : chat_qianfan
+# @Time         : 2024/8/19 13:49
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-
 from meutils.pipe import *
 from meutils.schemas.openai_types import ChatCompletionRequest, ChatCompletion, chat_completion
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 from meutils.llm.openai_utils import to_openai_completion_params
 from meutils.notice.feishu import send_message
 
-FEISHU_URL = "https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=LCOPGF"
+FEISHU_URL = "https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=Wb5BPv"
 
-import sensenova
+import qianfan
 from openai import AsyncOpenAI
 
 
@@ -30,25 +29,23 @@ class Completions(object):
         try:
             if self.threshold and len(str(request.messages)) > self.threshold:
                 raise Exception("走重定向")
-            api_key = self.api_key or await get_next_token_for_polling(FEISHU_URL)
-            # api_key="06B21A0AE0C94980868BD457DD5AB7FA:AEB14BD3D772499897E8306B08D1D258"
-            access_key_id, secret_access_key = api_key.strip().split(':')
 
-            resp = await sensenova.ChatCompletion.acreate(
+            api_key = self.api_key or await get_next_token_for_polling(FEISHU_URL)
+            os.environ["QIANFAN_AK"], os.environ["QIANFAN_SK"] = api_key.split('|')
+
+            resp = await qianfan.ChatCompletion().ado(
                 **request.model_dump(exclude_none=True),
-                access_key_id=access_key_id,
-                secret_access_key=secret_access_key
             )
             if request.stream:
                 async def gen():
                     async for i in resp:
-                        yield i.data.choices[0].delta
+                        yield i.body['result']
 
                 return gen()
 
             else:
-                chat_completion.choices[0].message.content = resp.data.choices[0].message
-                chat_completion.usage = dict(resp.data.usage)
+                chat_completion.choices[0].message.content = resp["body"]['result']
+                chat_completion.usage = resp["body"]['usage']
 
                 return chat_completion
         except Exception as e:
@@ -61,12 +58,4 @@ class Completions(object):
 
 
 if __name__ == '__main__':
-    request = ChatCompletionRequest(model='SenseChat', stream=False, messages=[{'role': 'user', 'content': '你是谁'}])
-
-
-    async def main():
-        for i in await Completions().create(request):
-            print(i)
-
-
-    arun(main())
+    arun(Completions().create(ChatCompletionRequest(model="ERNIE-4.0-8K")))

@@ -36,7 +36,7 @@ async def create_chat_completions(
         api_key: Optional[str] = Query(None),
 
         redirect_model: Optional[str] = Query('deepseek-chat'),
-        redirect_base_url: Optional[str] = Query('https://api.deepseek.com/v1'),
+        redirect_base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),
         redirect_api_key: Optional[str] = Query(None),
 
         threshold: Optional[int] = Query(32000),
