@@ -12,21 +12,17 @@ from meutils.pipe import *
 
 import os
 import qianfan
-from qianfan import  QfResponse
+from qianfan import QfResponse
 
-#【推荐】使用安全认证AK/SK鉴权，通过环境变量初始化认证信息
+# 【推荐】使用安全认证AK/SK鉴权，通过环境变量初始化认证信息
 # 替换下列示例中参数，安全认证Access Key替换your_iam_ak，Secret Key替换your_iam_sk
-os.environ["QIANFAN_AK"] = "BDFfKLrzBxDjqPwDUPQYz3gp"
-os.environ["QIANFAN_SK"] = "ER3XaVE73TV3rg0GpJoCeJac2vEz33Fo"
-
+os.environ["QIANFAN_AK"] = "BDFfKLrzBxDjqPwDUPQYz3gpp"
+os.environ["QIANFAN_SK"] = "ER3XaVE73TV3rg0GpJoCeJac2vEz33Foo"
 
 chat_comp = qianfan.ChatCompletion()
 
-
-
-
 # 指定特定模型
-resp = chat_comp.do(stream=True, model="ERNIE-4.0-8K", messages=[{
+resp = chat_comp.do(stream=True, model="ERNIE-", messages=[{
     "role": "user",
     "content": "1+1"
 }])
