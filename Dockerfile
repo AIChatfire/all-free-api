@@ -8,6 +8,15 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
 
+# 环境变量
+ENV HF_ENDPOINT=https://hf.chatfire.cc
+ENV HF_TOKEN=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
+ENV FEISHU_APP_ID=cli_a45451400dfd900b
+ENV MINIO_ACCESS_KEY=chatfire
+
+ENV OPENAI_BASE_URL=https://api.chatfire.cn/v1
+ENV MOONSHOT_BASE_URL=https://api.moonshot.cn/v1
+
 # 暴露端口
 EXPOSE 8000
 
