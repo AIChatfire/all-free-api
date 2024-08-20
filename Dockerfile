@@ -41,8 +41,6 @@ RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /
 USER appuser
 
 
-docker run --name polling-openai-dev -d --restart=always -p 40001:8000 -e WORKERS=1 -e FEISHU_APP_SECRET=I3HZbrWTUvXJEBBc6ggMOekABUviRoo3 -e MINIO_SECRET_KEY=miniominio -e REDIS_URL="redis://default:chatfirechatfire@111.173.117.175:6379" -e MOONSHOT_API_KEY=sk-1TF6tcATkYxgb1V2PUXPZVob411yHseqPCyxPhnnPdt22uPp -e OPENAI_API_KEY=sk-Dugv36ayd4L4VgIqDa649aA60b124234B33bB4C244D87737 cr2.fit2cloud.com/chatfire/all-free-api
-
 
 # 容器启动时运行命令
 # 设置容器启动后默认执行的命令及其参数。不过，CMD 指定的命令可以通过 docker run 命令行参数来覆盖。它主要用于为容器设定默认启动行为。如果 Dockerfile 中有多个 CMD 指令，只有最后一个生效。
