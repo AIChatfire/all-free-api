@@ -28,13 +28,18 @@ class Completions(object):
     async def create(self, request: ChatCompletionRequest):
         try:
             if self.threshold and len(str(request.messages)) > self.threshold:
-                raise Exception("走重定向")
+                raise Exception("pass")
 
             api_key = self.api_key or await get_next_token_for_polling(FEISHU_URL)
             os.environ["QIANFAN_AK"], os.environ["QIANFAN_SK"] = api_key.split('|')
 
+            kwargs = request.model_dump(exclude_none=True)
+            if request.messages[0]['role'] == 'system':
+                kwargs['system'] = request.messages[0]['content']
+                kwargs['messages'] = request.messages[1:]
+
             resp = await qianfan.ChatCompletion().ado(
-                **request.model_dump(exclude_none=True),
+                **kwargs
             )
             if request.stream:
                 async def gen():
@@ -58,4 +63,6 @@ class Completions(object):
 
 
 if __name__ == '__main__':
-    arun(Completions().create(ChatCompletionRequest(model="ERNIE-4.0-8K")))
+    messages = [{'role': 'system', 'content': '你是数学家'}, {'role': 'user', 'content': '你能干嘛'}]
+
+    arun(Completions().create(ChatCompletionRequest(model="ERNIE-4.0-8K", messages=messages)))

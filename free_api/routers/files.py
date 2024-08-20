@@ -50,6 +50,8 @@ async def upload_files(
 ):
     api_key = auth and auth.credentials or None
 
+    vip = 'vip' in purpose
+
     file_object = FileObject.construct(
 
         filename=file.filename,
@@ -107,13 +109,24 @@ async def upload_files(
 
             return file_object
 
-    elif purpose == purpose.kling:
-        async with ppu_flow(api_key, post=f"api-{purpose.value}"):
-            url = await klingai.upload(await file.read())
+    elif purpose.startswith(purpose.kling):
+        async with ppu_flow(api_key, post="ppu-01"):
+            url = await klingai.upload(await file.read(), vip=vip)
             if not isinstance(url, str):
                 raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=url)
 
             file_object.url = url
+            return file_object
+
+    elif purpose.startswith(purpose.vidu):
+        async with ppu_flow(api_key, post="ppu-01"):
+            file_task = await vidu_video.upload(await file.read(), vip=vip)
+
+            file_object.data = file_task.data
+            file_object.id = file_task.id
+            file_object.url = file_task.url
+
+            await redis_aclient.set(file_task.url, file_task.system_fingerprint, ex=1 * 24 * 3600)
             return file_object
 
     elif purpose == purpose.suno:  # 1分
@@ -138,17 +151,6 @@ async def upload_files(
             file_object.url = data['result']['source_url']
 
             await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
-            return file_object
-
-    elif purpose.startswith('vidu'):
-        async with ppu_flow(api_key, post="ppu-01"):
-            file_task = await vidu_video.upload(await file.read(), vip='vip' in purpose)
-
-            file_object.data = file_task.data
-            file_object.id = file_task.id
-            file_object.url = file_task.url
-
-            await redis_aclient.set(file_task.url, file_task.system_fingerprint, ex=1 * 24 * 3600)
             return file_object
 
     elif purpose == purpose.voice_clone:

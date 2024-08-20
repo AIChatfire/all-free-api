@@ -42,7 +42,6 @@ async def generate(
             image_response = await api_images.api_create_image(request)
 
         elif request.model.startswith(("flux-pro-max",)):
-            request.is_nsfw = False  # 不审核
             request.nsfw_level = "3"  # 不审核
             image_response = await flux.create_image(request)
 
@@ -61,6 +60,9 @@ async def generate(
                 prompt=request.prompt,
                 imageCount=request.n,
                 # style=request.style,  # "默认"
+
+                url=request.url,  # 垫图
+
                 aspect_ratio=request.size if request.size in {'1:1', '2:3', '3:2', '3:4', '4:3', '9:16',
                                                               '16:9'} else "1:1"
             )

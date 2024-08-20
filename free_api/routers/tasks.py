@@ -62,8 +62,12 @@ async def get_tasks(
     if task_type is None:  # 通用业务：默认从redis获取
         data = await redis_aclient.get(task_id)
 
-    elif task_type == TaskType.kling:  # 从个业务线获取: 获取token => 在请求接口 （kling-taskid: cookie）
+    elif task_type.startswith(TaskType.kling):  # 从个业务线获取: 获取token => 在请求接口 （kling-taskid: cookie）
         data = await klingai_video.get_task(task_id, token)
+        return data
+
+    elif task_type.startswith(TaskType.vidu):
+        data = await vidu_video.get_task(task_id, token)
         return data
 
     elif task_type == TaskType.runwayml:
@@ -86,9 +90,6 @@ async def get_tasks(
         data = await glm_video.get_task(task_id, token)
         return data
 
-    elif task_type == TaskType.vidu:
-        data = await vidu_video.get_task(task_id, token)
-        return data
 
     elif task_type == TaskType.faceswap:
         data = await faceswap.get_task(task_id, token)
@@ -102,25 +103,20 @@ async def create_tasks(
         request: KlingaiVideoRequest,
         # task_type: TaskType,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        upstream_base_url: Optional[str] = Header(None),
-        upstream_api_key: Optional[str] = Header(None),
-        downstream_base_url: Optional[str] = Header(None),
-
-        feishu_url: Optional[str] = Header(None),  # 指定某个token
+        vip: Optional[bool] = Query(False),
 
         background_tasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(request.model_dump_json(indent=4))
-    logger.debug(feishu_url)
 
     api_key = auth and auth.credentials or None
-    task_type = TaskType.kling
+    task_type = TaskType.kling_vip if vip else TaskType.kling
 
-    async with ppu_flow(api_key, post="api-kling"):
-        task = await klingai_video.create_task(request, feishu_url=feishu_url)
+    n = int(np.ceil(request.duration / 5))
+    async with ppu_flow(api_key, post="api-kling-vip" if vip else "api-kling", n=n):
+        task = await klingai_video.create_task(request, vip=vip)
         if task and task.status:
             klingai_video.send_message(f"任务提交成功：\n\n{task_type}-{task.id}")
-            task.id = f"{task_type}-{task.id}"
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
             return task.model_dump(exclude={"system_fingerprint"})
@@ -280,12 +276,12 @@ async def create_tasks(
     logger.debug(request.model_dump_json(indent=4))
 
     api_key = auth and auth.credentials or None
-    task_type = TaskType.vidu
+    task_type = TaskType.vidu_vip if vip else TaskType.vidu
 
     token = request.url and await redis_aclient.get(request.url)  # 照片对应的token
     token = token and token.decode()
 
-    async with ppu_flow(api_key, post="api-vidu" if not vip else "api-vidu-vip"):
+    async with ppu_flow(api_key, post="api-vidu-vip" if vip else "api-vidu", n=int(np.ceil(request.duration / 4))):
         task = await vidu_video.create_task(request, token, vip)
         logger.debug(task)
         if task and task.status:
@@ -311,12 +307,13 @@ async def create_tasks(
 
     api_key = auth and auth.credentials or None
     task_type = TaskType.vidu
+    vip = 'vip' in request.task_id
 
     # 任务对应的 token
-    token = await redis_aclient.get(f"vidu-{request.task_id}") or await redis_aclient.get(f"{request.task_id}")
+    token = await redis_aclient.get(request.task_id)
     token = token and token.decode()
 
-    async with ppu_flow(api_key, post="api-vidu-upscale"):
+    async with ppu_flow(api_key, post="api-vidu-vip" if vip else "api-vidu"):
         task = await vidu_video.create_task_upscale(request, token)
         if task and task.status:
             vidu_video.send_message(f"{task_type}-upscale 任务提交成功：\n\n{task.id}")

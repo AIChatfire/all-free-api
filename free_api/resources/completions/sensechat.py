@@ -29,7 +29,8 @@ class Completions(object):
     async def create(self, request: ChatCompletionRequest):
         try:
             if self.threshold and len(str(request.messages)) > self.threshold:
-                raise Exception("走重定向")
+                raise Exception("pass")
+
             api_key = self.api_key or await get_next_token_for_polling(FEISHU_URL)
             # api_key="06B21A0AE0C94980868BD457DD5AB7FA:AEB14BD3D772499897E8306B08D1D258"
             access_key_id, secret_access_key = api_key.strip().split(':')
