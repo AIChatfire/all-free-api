@@ -81,7 +81,8 @@ async def upload_files(
                 Minio().put_object_for_openai,
                 bucket_name=bucket_name,
                 file=file,
-                filename=filename)
+                filename=filename
+            )
 
             file_url = Minio().get_file_url(filename)
             file_object.url = file_url
