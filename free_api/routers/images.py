@@ -13,9 +13,10 @@ from meutils.schemas.openai_types import ImageRequest
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
 from meutils.schemas.kuaishou_types import KlingaiImageRequest, KolorsRequest
 
-from meutils.apis.siliconflow import api_images, flux
 from meutils.apis.kuaishou import klingai
 from meutils.apis.hf import kolors
+from meutils.apis.siliconflow import api_images, flux
+from meutils.apis.flux import mystic
 
 from meutils.notice.feishu import send_message
 
@@ -46,7 +47,8 @@ async def generate(
             image_response = await flux.create_image(request)
 
         elif request.model.startswith(("flux-pro",)):
-            image_response = await flux.create_image(request)
+            # image_response = await flux.create_image(request)
+            image_response = await mystic.create_image(request)
 
         elif request.model.startswith(("flux-dev",)):  # 逆向
             request.model = "black-forest-labs/FLUX.1-schnell"
