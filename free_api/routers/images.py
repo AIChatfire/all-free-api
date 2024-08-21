@@ -43,8 +43,8 @@ async def generate(
             image_response = await api_images.api_create_image(request)
 
         elif request.model.startswith(("flux-pro-max",)):
-            request.nsfw_level = "3"  # 不审核
-            image_response = await flux.create_image(request)
+            request.nsfw_level = "6"  # 不审核
+            image_response = await mystic.create_image(request)
 
         elif request.model.startswith(("flux-pro",)):
             # image_response = await flux.create_image(request)
