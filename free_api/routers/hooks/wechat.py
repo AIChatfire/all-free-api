@@ -15,7 +15,7 @@ from meutils.schemas.wechat_types import Message, HookResponse
 from meutils.apis.vidu import vidu_video
 from meutils.schemas.vidu_types import ViduRequest
 
-from meutils.apis.siliconflow.flux import create_image
+from meutils.apis.siliconflow.api_images import create_image
 from meutils.schemas.openai_types import ImageRequest
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
