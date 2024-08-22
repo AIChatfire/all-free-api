@@ -49,10 +49,16 @@ async def generate(
         #     # image_response = await flux.create_image(request)
         #     image_response = await mystic.create_image(request)
 
-        elif request.model.startswith(("flux-pro", "flux-dev")):
+        elif request.model.startswith(("flux-pro",)):
             request.model = "black-forest-labs/FLUX.1-dev"
+            request.size = '1366x1366'
+
             image_response = await api_images.create_image(request)
 
+        elif request.model.startswith(("flux-dev",)):
+            request.model = "black-forest-labs/FLUX.1-dev"
+
+            image_response = await api_images.create_image(request)
 
         elif request.model.startswith(("kolors",)):
             image_response = await kolors.create_image(request)

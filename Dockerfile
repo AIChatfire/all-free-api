@@ -12,15 +12,15 @@ ENV PYTHONUNBUFFERED=1
 ENV HF_ENDPOINT=https://hf.chatfire.cc
 ENV HF_TOKEN=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
 
-ENV FEISHU_APP_ID=cli_a45451400dfd900b
 # FEISHU_APP_SECRET
-
-ENV MINIO_ENDPOINT=oss.ffire.cc
-ENV MINIO_ACCESS_KEY=chatfire
 # MINIO_ACCESS_KEY
 
 ENV OPENAI_BASE_URL=https://api.chatfire.cn/v1
+ENV SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
 ENV MOONSHOT_BASE_URL=https://api.moonshot.cn/v1
+ENV DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+ENV ZHIPUAI_BASE_URL=https://open.bigmodel.cn/api/paas/v4
+ENV GROQ_BASE_URL=https://api.groq.com/openai/v1
 
 # 暴露端口
 EXPOSE 8000
