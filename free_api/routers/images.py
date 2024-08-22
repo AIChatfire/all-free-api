@@ -15,8 +15,7 @@ from meutils.schemas.kuaishou_types import KlingaiImageRequest, KolorsRequest
 
 from meutils.apis.kuaishou import klingai
 from meutils.apis.hf import kolors
-from meutils.apis.siliconflow import api_images, flux
-from meutils.apis.flux import mystic
+from meutils.apis.siliconflow import api_images
 
 from meutils.notice.feishu import send_message
 
@@ -42,17 +41,18 @@ async def generate(
             request.model = REDIRECT_MODEL.get(request.model, request.model)
             image_response = await api_images.api_create_image(request)
 
-        elif request.model.startswith(("flux-pro-max",)):
-            request.nsfw_level = "6"  # 不审核
-            image_response = await mystic.create_image(request)
+        # elif request.model.startswith(("flux-pro-max",)):
+        #     request.nsfw_level = "6"  # 不审核
+        #     image_response = await mystic.create_image(request)
+        #
+        # elif request.model.startswith(("flux-pro",)):
+        #     # image_response = await flux.create_image(request)
+        #     image_response = await mystic.create_image(request)
 
-        elif request.model.startswith(("flux-pro",)):
-            # image_response = await flux.create_image(request)
-            image_response = await mystic.create_image(request)
-
-        elif request.model.startswith(("flux-dev",)):  # 逆向
-            request.model = "black-forest-labs/FLUX.1-schnell"
+        elif request.model.startswith(("flux-pro", "flux-dev")):
+            request.model = "black-forest-labs/FLUX.1-dev"
             image_response = await api_images.create_image(request)
+
 
         elif request.model.startswith(("kolors",)):
             image_response = await kolors.create_image(request)
