@@ -116,7 +116,7 @@ async def create_tasks(
     async with ppu_flow(api_key, post="api-kling-vip" if vip else "api-kling", n=n):
         task = await klingai_video.create_task(request, vip=vip)
         if task and task.status:
-            klingai_video.send_message(f"任务提交成功：\n\n{task_type}-{task.id}")
+            klingai_video.send_message(f"任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
             return task.model_dump(exclude={"system_fingerprint"})
