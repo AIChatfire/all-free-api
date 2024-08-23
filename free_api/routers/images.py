@@ -38,7 +38,7 @@ async def generate(
 
     image_response = None
     try:
-        if request.model.startswith(("stable-diffusion-3",)):
+        if request.model.startswith(("stable-diffusion", "dreamshaper")):
             request.model = REDIRECT_MODEL.get(request.model, request.model)
             image_response = await api_images.api_create_image(request)
 
