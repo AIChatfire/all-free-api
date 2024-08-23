@@ -38,7 +38,7 @@ async def generate(
 
     image_response = None
     try:
-        if request.model.startswith(("stable-diffusion", "dreamshaper")):
+        if request.model.startswith(("stable-diffusion", "dreamshaper")) and not request.url:
             request.model = REDIRECT_MODEL.get(request.model, request.model)
             image_response = await api_images.api_create_image(request)
 
@@ -54,18 +54,17 @@ async def generate(
             request.model = "black-forest-labs/FLUX.1-dev"
             if request.size in {'1024x1024', '1:1'}:
                 request.size = "1366x1366"
-
             image_response = await api_images.create_image(request)
 
         elif request.model.startswith(("flux-dev",)):
             request.model = "black-forest-labs/FLUX.1-dev"
-
             image_response = await api_images.create_image(request)
 
         elif request.model.startswith(("kolors",)):
             image_response = await kolors.create_image(request)
 
         elif request.model.startswith(("ideogram",)):
+            request.model = "V_1_5" if 'pro' in request.model else "V_0_3"
             image_response = await ideogram_images.create(request)
 
         elif request.model.startswith(("kling",)):  # 支持图生图
