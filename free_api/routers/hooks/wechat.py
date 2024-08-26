@@ -15,7 +15,7 @@ from meutils.schemas.wechat_types import Message, HookResponse
 from meutils.apis.vidu import vidu_video
 from meutils.schemas.vidu_types import ViduRequest
 
-from meutils.apis.siliconflow.api_images import create_image
+from meutils.apis.siliconflow.text_to_image import create
 from meutils.schemas.openai_types import ImageRequest
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
@@ -63,7 +63,7 @@ async def create_reply(
             aspect_ratio = '1:1'
             prompt = prompts[0]
 
-        image_reponse = await create_image(ImageRequest(prompt=prompt, size=aspect_ratio))
+        image_reponse = await create(ImageRequest(prompt=prompt, size=aspect_ratio))
         responses += [HookResponse(content=f"任务已完成🎉🎉🎉")]
         responses += [HookResponse(type='image', content=img.url) for img in image_reponse.data]
         logger.debug(responses)
