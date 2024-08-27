@@ -53,7 +53,7 @@ async def create_reply(
                     break
             except Exception as e:
                 logger.debug(e)
-                responses = [HookResponse(content=str(e))]
+                continue
 
     elif content.startswith('/flux-pro'):
         prompts = content.replace('/flux-pro', '').strip().split(maxsplit=1)
