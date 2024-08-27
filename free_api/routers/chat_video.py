@@ -33,10 +33,10 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 async def create_chat_completions(
         request: ChatCompletionRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        vip: Optional[bool] = Query(False),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
     api_key = auth and auth.credentials or None
+
     logger.debug(request.model_dump_json(indent=4))
 
     if isinstance(request.last_content, str) and request.last_content.startswith(  # 跳过nextchat

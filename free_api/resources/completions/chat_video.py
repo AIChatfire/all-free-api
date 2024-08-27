@@ -24,6 +24,8 @@ class Completions(object):
 
     async def create(self, request: ChatCompletionRequest):
 
+        vip = "vip" in request.model  # todo: 增强
+
         task_type = "vidu"
         if request.model.__contains__('gen'):
             task_type = "runwayml"
