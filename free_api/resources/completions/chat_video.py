@@ -52,19 +52,19 @@ class Completions(object):
                     yield ")🎉🎉🎉\n\n"  # 隐藏进度条
                     video_url = data.get("artifacts")[0].get("url")
                     yield f"[下载地址]({video_url})\n\n"
-                    yield f"![视频地址]({video_url})\n\n"
+                    # yield f"![视频地址]({video_url})\n\n"
                     yield "DONE"
 
         elif task_type == "vidu":
             video_request = ViduRequest(prompt=request.last_content)
-            future_task = asyncio.create_task(self.create_task(task_type, video_request))  # 异步执行
+            future_task = asyncio.create_task(self.create_task(task_type, video_request, vip))  # 异步执行
 
             def func(data):
                 if data.get("state") == "success":
                     yield ")🎉🎉🎉\n\n"  # 隐藏进度条
                     video_url = data.get("creations")[0].get("uri")
                     yield f"[下载地址]({video_url})\n\n"
-                    yield f"![视频地址]({video_url})\n\n"
+                    # yield f"![视频地址]({video_url})\n\n"
                     yield "DONE"
                 else:
                     yield "✨"
@@ -84,8 +84,12 @@ class Completions(object):
             chunk = None
             for i in range(100):
                 await asyncio.sleep(3)
-                response = await httpx.AsyncClient().get(task_url)
-                data = response.json()
+                try:
+                    response = await httpx.AsyncClient(timeout=30).get(task_url)
+                    data = response.json()
+                except Exception as e:
+                    logger.error(e)
+                    continue
 
                 for chunk in func(data):
                     yield chunk
@@ -94,11 +98,12 @@ class Completions(object):
 
         return gen_chunks(func)
 
-    async def create_task(self, task_type, video_request):
+    async def create_task(self, task_type, video_request, vip: bool = False):
         headers = {'Authorization': f'Bearer {self.api_key}'}
         payload = video_request.model_dump(exclude_none=True)
+        params = {"vip": vip}
 
         async with httpx.AsyncClient(base_url="https://api.chatfire.cn/tasks", headers=headers, timeout=100) as client:
-            response = await client.post(f"/{task_type}", json=payload)
+            response = await client.post(f"/{task_type}", json=payload, params=params)
             if response.is_success:
                 return Task(**response.json())
