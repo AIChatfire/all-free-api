@@ -18,8 +18,6 @@ from meutils.apis.hf import kolors
 from meutils.apis.ideogram import ideogram_images
 from meutils.apis.siliconflow import text_to_image, image_to_image
 
-from meutils.notice.feishu import send_message
-
 from openai.types import ImagesResponse
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
@@ -35,68 +33,69 @@ async def generate(
         base_url: Optional[str] = Query("https://api.siliconflow.cn/v1"),
 ):
     logger.debug(request.model_dump_json(indent=4))
+    # return await text_to_image.create(request)
 
-    try:
-        if request.model.startswith(("stable-diffusion", "dreamshaper")) and not request.url:
-            request.model = REDIRECT_MODEL.get(request.model, request.model)
-            image_response = await text_to_image.create(request)
-            return image_response
+    if request.model.startswith(("stable-diffusion", "dreamshaper")) and not request.url:
+        request.model = REDIRECT_MODEL.get(request.model, request.model)
+        image_response = await text_to_image.create(request)
+        return image_response
 
-        elif request.model.startswith(("flux-pro",)):
-            request.model = "black-forest-labs/FLUX.1-dev"
-            if request.size in {'1024x1024', '1:1'}:
-                request.size = "1366x1366"
-            image_response = await text_to_image.create(request)
-            return image_response
+    elif request.model.startswith(("flux-pro",)):
+        request.model = "black-forest-labs/FLUX.1-dev"
+        if request.size in {'1024x1024', '1:1'}:
+            request.size = "1366x1366"
+        image_response = await text_to_image.create(request)
+        return image_response
 
-        elif request.model.startswith(("flux-dev",)):
-            request.model = "black-forest-labs/FLUX.1-dev"
-            image_response = await text_to_image.create(request)
-            return image_response
+    elif request.model.startswith(("flux-dev",)):
+        request.model = "black-forest-labs/FLUX.1-dev"
+        image_response = await text_to_image.create(request)
+        return image_response
 
-        elif request.model.startswith(("kolors",)):
-            image_response = await kolors.create_image(request)
-            return image_response
+    elif request.model.startswith(("kolors",)):
+        image_response = await kolors.create_image(request)
+        return image_response
 
-        elif request.model.startswith(("ideogram",)):
-            request.model = "V_1_5" if 'pro' in request.model else "V_0_3"
-            image_response = await ideogram_images.create(request)
-            return image_response
+    elif request.model.startswith(("ideogram",)):
+        request.model = "V_1_5" if 'pro' in request.model else "V_0_3"
+        image_response = await ideogram_images.create(request)
+        return image_response
 
-        elif request.model.startswith(("kling",)):  # 支持图生图
-            kling_request = KlingaiImageRequest(
-                prompt=request.prompt,
-                imageCount=request.n,
-                # style=request.style,  # "默认"
+    elif request.model.startswith(("kling",)):  # 支持图生图
+        kling_request = KlingaiImageRequest(
+            prompt=request.prompt,
+            imageCount=request.n,
+            # style=request.style,  # "默认"
 
-                url=request.url,  # 垫图
+            url=request.url,  # 垫图
 
-                aspect_ratio=request.size if request.size in {'1:1', '2:3', '3:2', '3:4', '4:3', '9:16',
-                                                              '16:9'} else "1:1"
-            )
-            images = await klingai.create_image(kling_request)
-            image_response = ImagesResponse(created=int(time.time()), data=images)
-            return image_response
-
-        elif request.url:  # 支持图生图
-            return await image_to_image.create(request)
-
-        else:
-            return await text_to_image.create(request)
-
-
-    except Exception as e:
-        send_message(f"images error：\n {e}", title=__name__)
-        if isinstance(e, httpx.HTTPStatusError):
-            return HTTPException(
-                status_code=e.response.status_code,
-                detail=e.response.text
-            )
-
-        return HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="未知错误，请联系管理员"
+            aspect_ratio=request.size if request.size in {'1:1', '2:3', '3:2', '3:4', '4:3', '9:16',
+                                                          '16:9'} else "1:1"
         )
+        images = await klingai.create_image(kling_request)
+        image_response = ImagesResponse(created=int(time.time()), data=images)
+        return image_response
+
+    elif request.url:  # 支持图生图
+        return await image_to_image.create(request)
+
+    else:
+        return await text_to_image.create(request)
+
+    # except Exception as e:
+    # from meutils.notice.feishu import send_message
+
+    #     send_message(f"images error：\n {e}", title=__name__)
+    #     if isinstance(e, httpx.HTTPStatusError):
+    #         return HTTPException(
+    #             status_code=e.response.status_code,
+    #             detail=e.response.text
+    #         )
+    #
+    #     return HTTPException(
+    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         detail="未知错误，请联系管理员"
+    #     )
 
 
 if __name__ == '__main__':

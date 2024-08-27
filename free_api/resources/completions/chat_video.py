@@ -83,7 +83,7 @@ class Completions(object):
 
             chunk = None
             for i in range(100):
-                await asyncio.sleep(3)
+                await asyncio.sleep(2)
                 try:
                     response = await httpx.AsyncClient(timeout=30).get(task_url)
                     data = response.json()
@@ -105,5 +105,19 @@ class Completions(object):
 
         async with httpx.AsyncClient(base_url="https://api.chatfire.cn/tasks", headers=headers, timeout=100) as client:
             response = await client.post(f"/{task_type}", json=payload, params=params)
+            if response.is_success:
+                return Task(**response.json())
+
+    async def create_task_upscale(self, task_id, creation_id):
+        task_type = "vidu-upscale"
+
+        headers = {'Authorization': f'Bearer {self.api_key}'}
+        payload = {
+            "task_id": task_id,
+            "creation_id": creation_id
+        }
+
+        async with httpx.AsyncClient(base_url="https://api.chatfire.cn/tasks", headers=headers, timeout=100) as client:
+            response = await client.post(f"/{task_type}", json=payload)
             if response.is_success:
                 return Task(**response.json())
