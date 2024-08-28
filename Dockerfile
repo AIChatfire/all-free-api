@@ -11,7 +11,7 @@ ENV PYTHONUNBUFFERED=1
 # 环境变量
 ENV HF_ENDPOINT=https://hf.chatfire.cc
 ENV HF_TOKEN=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
-
+# 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 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
 # FEISHU_APP_SECRET
 # MINIO_ACCESS_KEY
 
