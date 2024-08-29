@@ -47,6 +47,7 @@ TAGS = ["异步任务"]
 @alru_cache(maxsize=1024, ttl=15)  # 延迟10s
 async def get_tasks(
         task_id: str,
+        response_format: Optional[str] = Query(None),
         # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         # backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
@@ -99,7 +100,7 @@ async def get_tasks(
         return data
 
     elif task_type == TaskType.pcedit:
-        data = await bdaitpzs.get_task(task_id, token)
+        data = await bdaitpzs.get_task(task_id, token, response_format=response_format)
         return data
 
     return JSONResponse(content=data, media_type="application/json")
