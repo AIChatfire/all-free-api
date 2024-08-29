@@ -53,7 +53,11 @@ async def generate(
         return image_response
 
     elif request.model.startswith(("kolors",)):
-        image_response = await kolors.create_image(request)
+        try:
+            image_response = await kolors.create_image(request)
+        except Exception as e:
+            logger.error(e)
+            image_response = await text_to_image.create(request)
         return image_response
 
     elif request.model.startswith(("ideogram",)):
@@ -77,25 +81,11 @@ async def generate(
         return image_response
 
     elif request.url:  # 支持图生图
+        request.model = REDIRECT_MODEL.get(request.model, request.model)
         return await image_to_image.create(request)
 
     else:
         return await text_to_image.create(request)
-
-    # except Exception as e:
-    # from meutils.notice.feishu import send_message
-
-    #     send_message(f"images error：\n {e}", title=__name__)
-    #     if isinstance(e, httpx.HTTPStatusError):
-    #         return HTTPException(
-    #             status_code=e.response.status_code,
-    #             detail=e.response.text
-    #         )
-    #
-    #     return HTTPException(
-    #         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         detail="未知错误，请联系管理员"
-    #     )
 
 
 if __name__ == '__main__':

@@ -31,6 +31,9 @@ from meutils.apis.vidu import vidu_video
 from meutils.schemas.prodia_types import FaceswapRequest
 from meutils.apis.prodia import faceswap
 
+from meutils.schemas.baidu_types import BDAITPZSRequest
+from meutils.apis.baidu import bdaitpzs
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Request, Query, Body, Header, HTTPException, status
@@ -93,6 +96,10 @@ async def get_tasks(
 
     elif task_type == TaskType.faceswap:
         data = await faceswap.get_task(task_id, token)
+        return data
+
+    elif task_type == TaskType.pcedit:
+        data = await bdaitpzs.get_task(task_id, token)
         return data
 
     return JSONResponse(content=data, media_type="application/json")
@@ -341,6 +348,28 @@ async def create_tasks(
         task = await faceswap.create_task(request, token)
         if task and task.status:
             faceswap.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
+
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+            return task.model_dump(exclude={"system_fingerprint"})
+
+
+@router.post(f"/tasks/{TaskType.pcedit}")
+async def create_tasks(
+        request: BDAITPZSRequest,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+
+        background_tasks: BackgroundTasks = BackgroundTasks,
+):
+    logger.debug(request.model_dump_json(indent=4))
+
+    api_key = auth and auth.credentials or None
+    task_type = TaskType.pcedit
+    token = None
+
+    async with ppu_flow(api_key, post=f"api-{task_type}"):
+        task = await bdaitpzs.create_task(request, token)
+        if task and task.status:
+            bdaitpzs.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
             return task.model_dump(exclude={"system_fingerprint"})

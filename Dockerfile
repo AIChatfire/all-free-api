@@ -16,11 +16,14 @@ ENV HF_TOKEN=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
 # MINIO_ACCESS_KEY
 
 ENV OPENAI_BASE_URL=https://api.chatfire.cn/v1
+ENV DIFY_BASE_URL=http://flow.chatfire.cn/v1
+
 ENV SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
 ENV MOONSHOT_BASE_URL=https://api.moonshot.cn/v1
 ENV DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
 ENV ZHIPUAI_BASE_URL=https://open.bigmodel.cn/api/paas/v4
 ENV GROQ_BASE_URL=https://api.groq.com/openai/v1
+
 
 # 暴露端口
 EXPOSE 8000
