@@ -10,13 +10,13 @@
 
 from meutils.serving.fastapi import App
 from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
-from free_api.routers import openai_adapter, polling_openai, redirect, chatfire_all, vision_llm
+from free_api.routers import openai_adapter, polling_openai, redirect, chatfire_all, vision_llm, openai_provider
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
 from free_api.routers import files, images
 from free_api.routers import audio
 from free_api.routers import tasks, reranker
-from free_api.routers.tools import prompter, translator
+from free_api.routers.tools import prompter, translator, imager
 from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
 
@@ -27,6 +27,7 @@ app.include_router(openai_adapter.router, '/adapter/v1', tags=openai_adapter.TAG
 app.include_router(polling_openai.router, '/polling/v1', tags=polling_openai.TAGS)
 app.include_router(vision_llm.router, '/vision/v1', tags=vision_llm.TAGS)
 
+app.include_router(openai_provider.router, '/to', tags=openai_provider.TAGS)
 app.include_router(redirect.router, '/redirect/v1', tags=redirect.TAGS)
 
 app.include_router(chat_image.router, '/chat_image/v1', tags=chat_image.TAGS)
@@ -58,6 +59,7 @@ app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不�
 # 小工具
 app.include_router(prompter.router, '/tools/v1', tags=prompter.TAGS)
 app.include_router(translator.router, '/tools/v1', tags=translator.TAGS)
+app.include_router(imager.router, '/tools/v1', tags=imager.TAGS)
 
 # GOAMZ
 app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)

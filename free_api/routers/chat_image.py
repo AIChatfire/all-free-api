@@ -12,7 +12,7 @@ from meutils.pipe import *
 from meutils.notice.feishu import send_message
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ChatCompletionRequest, ImageRequest
-from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk
+from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, ppu_flow
 from meutils.llm.openai_utils import chat_completion, chat_completion_chunk
 
 from meutils.llm.openai_utils import to_openai_images_params
@@ -105,7 +105,7 @@ async def create_chat_completions(
     future_task = asyncio.create_task(AsyncOpenAI(api_key=api_key).images.generate(**data))  # 异步执行
     if request.stream:
         async def gen():
-            for i in f"> 🖌️正在绘画\n\n```json\n{image_request.model_dump_json(indent=4)}\n```\n\n":
+            for i in f"> 🖌️正在绘画\n\n```json\n{image_request.model_dump_json(indent=4, exclude_none=True)}\n```\n\n":
                 await asyncio.sleep(0.05)
                 yield i
 

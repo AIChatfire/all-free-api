@@ -70,17 +70,23 @@ async def upload_files(
     logger.debug(file.headers)
     logger.debug(file.content_type)
 
-    if purpose in {purpose.oss}:
+    if purpose in {purpose.oss} or purpose not in Purpose.__members__:
         async with ppu_flow(api_key, post="ppu-01"):
             # if url:  # todo: 转存 url文件或者file view
 
             bucket_name = "files"
             extension = Path(file.filename).suffix
             filename = f"{shortuuid.random()}{extension}"
-            backgroundtasks.add_task(
-                Minio().put_object_for_openai,
+            # backgroundtasks.add_task(
+            #     Minio().put_object_for_openai,
+            #     bucket_name=bucket_name,
+            #     file=file,  # 异步错误 ValueError: I/O operation on closed file.
+            #     filename=filename
+            # )
+
+            file_object = await Minio().put_object_for_openai(
                 bucket_name=bucket_name,
-                file=file,
+                file=file,  # 异步错误 ValueError: I/O operation on closed file.
                 filename=filename
             )
 
@@ -112,20 +118,22 @@ async def upload_files(
 
     elif purpose.startswith(purpose.kling):
         async with ppu_flow(api_key, post="ppu-01"):
-            url = await klingai.upload(await file.read(), vip=vip)
-            if not isinstance(url, str):
-                raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=url)
+            file_task = await klingai.upload(await file.read(), vip=vip)
 
-            file_object.url = url
+            file_object.id = file_task.id
+            file_object.url = file_task.url
+            file_object.data = file_task.data
+            file_object.status = "uploaded" if file_task.url else "error"
+
             return file_object
 
-    elif purpose.startswith(purpose.vidu):
+    elif purpose.startswith(purpose.vidu):  # 绑定token
         async with ppu_flow(api_key, post="ppu-01"):
             file_task = await vidu_video.upload(await file.read(), vip=vip)
 
-            file_object.data = file_task.data
             file_object.id = file_task.id
             file_object.url = file_task.url
+            file_object.data = file_task.data
 
             await redis_aclient.set(file_task.url, file_task.system_fingerprint, ex=1 * 24 * 3600)
             return file_object

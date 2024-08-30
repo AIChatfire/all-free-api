@@ -57,7 +57,7 @@ class Completions(object):
             logger.error(e)
             send_message(e, title=__name__)
 
-            request.model = "glm-4"
+            request.model = "glm-4"  # BACKUP_MODEL
             data = to_openai_completion_params(request)
             return await AsyncOpenAI().chat.completions.create(**data)
 
