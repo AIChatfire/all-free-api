@@ -81,7 +81,7 @@ async def generate(
         return image_response
 
     elif request.url:  # 支持图生图：只支持几个
-        request.model = REDIRECT_MODEL.get(request.model, request.model) # todo 完善
+        request.model = REDIRECT_MODEL.get(request.model, request.model)  # todo 完善
         request.model = "TencentARC/PhotoMaker"
         return await image_to_image.create(request)
 

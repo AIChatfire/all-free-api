@@ -369,8 +369,8 @@ async def create_tasks(
 
     async with ppu_flow(api_key, post=f"api-{task_type}"):
         task = await bdaitpzs.create_task(request, token)
-        if task and task.status:
-            bdaitpzs.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")
+        if task:
+            bdaitpzs.send_message(f"{task_type} {request.type} 任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
             return task.model_dump(exclude={"system_fingerprint"})
