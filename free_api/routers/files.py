@@ -47,10 +47,13 @@ async def upload_files(
         purpose: Purpose = Form(...),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
+
+        vip: Optional[bool] = Query(False),
+
 ):
     api_key = auth and auth.credentials or None
 
-    vip = 'vip' in purpose
+    vip = 'vip' in purpose or vip
 
     file_object = FileObject.construct(
 
