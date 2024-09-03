@@ -322,6 +322,8 @@ async def create_tasks(
     # 任务对应的 token
     token = await redis_aclient.get(request.task_id)
     token = token and token.decode()
+    if token is None:
+        raise HTTPException(status_code=404, detail="Task ID not found")
 
     async with ppu_flow(api_key, post="api-vidu-vip" if vip else "api-vidu"):
         task = await vidu_video.create_task_upscale(request, token)
