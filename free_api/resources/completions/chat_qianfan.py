@@ -7,8 +7,10 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
+import os
+
 from meutils.pipe import *
-from meutils.schemas.openai_types import ChatCompletionRequest, ChatCompletion, chat_completion
+from meutils.schemas.openai_types import BACKUP_MODEL, ChatCompletionRequest, ChatCompletion, chat_completion
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 from meutils.llm.openai_utils import to_openai_completion_params
 from meutils.notice.feishu import send_message
@@ -57,7 +59,7 @@ class Completions(object):
             logger.error(e)
             send_message(e, title=__name__)
 
-            request.model = "glm-4"  # BACKUP_MODEL
+            request.model = BACKUP_MODEL
             data = to_openai_completion_params(request)
             return await AsyncOpenAI().chat.completions.create(**data)
 
