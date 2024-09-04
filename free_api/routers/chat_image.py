@@ -109,7 +109,12 @@ async def create_chat_completions(
                 await asyncio.sleep(0.05)
                 yield i
 
-            response = await future_task
+            try:
+                response = await future_task
+            except Exception as e:
+                data['model'] = "flux-schnell"
+                response = await AsyncOpenAI(api_key=api_key).images.generate(**data)
+
             for image in response.data:
                 yield f"![{image.revised_prompt}]({image.url})\n\n"
 

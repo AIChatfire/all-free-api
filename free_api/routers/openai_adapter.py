@@ -14,7 +14,7 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
-from meutils.llm.completions import dify
+from meutils.llm.completions import dify, tryblend
 
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
@@ -54,6 +54,10 @@ async def create_chat_completions(
     elif api_key.startswith(("app-",)):  # 适配dify
         client = dify.Completions(api_key=api_key)
         response = client.create(request)  # List[str]
+
+    elif api_key.startswith(("tryblend",)):
+        client = tryblend.Completions()
+        response = client.create(request)
 
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
