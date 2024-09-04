@@ -175,7 +175,7 @@ async def upload_files(
 
     # textin
     elif purpose == Purpose.watermark_remove:
-        async with ppu_flow(api_key, post=f"api-{purpose.watermark_remove}"):
+        async with ppu_flow(api_key, post=f"api-{purpose.watermark_remove.value}"):
             response_data = await textin_fileparser(await file.read(), service=purpose.watermark_remove)
             file_object.data = response_data['data']['result']['image']  # todo: 转存 url文件或者file view
             return file_object
