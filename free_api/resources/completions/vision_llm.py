@@ -19,7 +19,10 @@ class Completions(object):
 
     async def create(self, request: ChatCompletionRequest):
 
-        urls = jsonpath.jsonpath(request.last_content, expr='$..url')
+        urls = (
+                jsonpath.jsonpath(request.last_content, expr='$..url') or
+                jsonpath.jsonpath(request.last_content, expr='$..image_url')
+        )
         prompts = jsonpath.jsonpath(request.last_content, expr='$..text') or "一步一步思考，解释图片"
 
         logger.debug(urls)
@@ -48,8 +51,20 @@ if __name__ == '__main__':
                         "url": "https://dss2.bdstatic.com/5bVYsj_p_tVS5dKfpU_Y_D3/res/r/image/2021-3-4/hao123%20logo.png"
                     }
                 }
+
             ]
         }
     ]
+
+    # messages[0]['content'] = [
+    #     {
+    #         "type": "text",
+    #         "text": "解释下"
+    #     },
+    #     {
+    #         "type": "image_url",
+    #         "image_url": "http://ai.chatfire.cn/files/images/image-1725418399272-d7b71012f.png"
+    #     }
+    # ]
 
     arun(Completions().create(ChatCompletionRequest(messages=messages)))
