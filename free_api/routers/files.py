@@ -170,6 +170,13 @@ async def upload_files(
             file_object = await fish.create_file_for_openai(file)
             return file_object
 
+    # textin
+    elif purpose == purpose.watermark_remove:
+        async with ppu_flow(api_key, post=f"api-{purpose.watermark_remove}"):
+            response_data = await textin_fileparser(await file.read(), service=purpose.watermark_remove)
+            file_object.data = response_data['data']['result']['image']  # todo: 转存 url文件或者file view
+            return file_object
+
 
 @router.get("/files/{file_id}")
 async def get_file(
