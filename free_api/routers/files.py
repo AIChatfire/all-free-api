@@ -72,8 +72,11 @@ async def upload_files(
     logger.debug(file_object)
     logger.debug(file.headers)
     logger.debug(file.content_type)
+    logger.debug(purpose)
+    logger.debug(purpose.value)
 
-    if purpose in {purpose.oss} or purpose not in Purpose.__members__:
+    if purpose in {purpose.oss}:  # or purpose not in Purpose.__members__
+
         async with ppu_flow(api_key, post="ppu-01"):
             # if url:  # todo: 转存 url文件或者file view
 
@@ -171,7 +174,7 @@ async def upload_files(
             return file_object
 
     # textin
-    elif purpose == purpose.watermark_remove:
+    elif purpose == Purpose.watermark_remove:
         async with ppu_flow(api_key, post=f"api-{purpose.watermark_remove}"):
             response_data = await textin_fileparser(await file.read(), service=purpose.watermark_remove)
             file_object.data = response_data['data']['result']['image']  # todo: 转存 url文件或者file view
