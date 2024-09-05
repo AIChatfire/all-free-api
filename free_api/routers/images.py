@@ -19,7 +19,7 @@ from meutils.apis.ideogram import ideogram_images
 from meutils.apis.siliconflow import text_to_image, image_to_image
 
 from openai.types import ImagesResponse
-
+from openai import AsyncClient
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
@@ -88,6 +88,17 @@ async def generate(
         request.model = REDIRECT_MODEL.get(request.model, request.model)  # todo 完善
         request.model = "TencentARC/PhotoMaker"
         return await image_to_image.create(request)
+
+    elif request.model.startswith(('cogview',)):  # 去水印
+        from meutils.io.image import image2nowatermark_image
+
+        response = await AsyncClient().images.generate(
+            model='cogview-3',
+            prompt=request.prompt,
+        )
+
+        response.data[0].url = image2nowatermark_image(response.data[0].url)
+        return response
 
     else:
         request.model = "black-forest-labs/FLUX.1-schnell"

@@ -17,6 +17,8 @@ from meutils.schemas.vidu_types import ViduRequest
 
 from meutils.apis.siliconflow.text_to_image import create
 from meutils.schemas.openai_types import ImageRequest
+from meutils.io.image import image2nowatermark_image
+from meutils.str_utils.regular_expression import parse_url
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
@@ -66,6 +68,14 @@ async def create_reply(
         image_reponse = await create(ImageRequest(prompt=prompt, size=aspect_ratio))
         responses += [HookResponse(content=f"任务已完成🎉🎉🎉")]
         responses += [HookResponse(type='image', content=img.url) for img in image_reponse.data]
+        logger.debug(responses)
+
+    elif content.startswith('/去水印'):
+        urls = parse_url(content, for_image=True)
+        for url in urls:
+            url = await image2nowatermark_image(url)
+            responses += [HookResponse(content=url)]
+
         logger.debug(responses)
 
     return responses
