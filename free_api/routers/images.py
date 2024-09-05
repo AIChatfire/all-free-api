@@ -61,6 +61,7 @@ async def generate(
             image_response = await kolors.create_image(request)
         except Exception as e:
             logger.error(e)
+            request.model = "black-forest-labs/FLUX.1-schnell"
             image_response = await text_to_image.create(request)
         return image_response
 
