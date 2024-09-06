@@ -81,8 +81,14 @@ async def generate(
             aspect_ratio=request.size if request.size in {'1:1', '2:3', '3:2', '3:4', '4:3', '9:16',
                                                           '16:9'} else "1:1"
         )
-        images = await klingai.create_image(kling_request)
-        image_response = ImagesResponse(created=int(time.time()), data=images)
+        try:
+            images = await klingai.create_image(kling_request)
+            image_response = ImagesResponse(created=int(time.time()), data=images)
+        except Exception as e:
+            logger.error(e)
+            request.model = "black-forest-labs/FLUX.1-schnell"
+            image_response = await text_to_image.create(request)
+
         return image_response
 
     elif request.url:  # 支持图生图：只支持几个

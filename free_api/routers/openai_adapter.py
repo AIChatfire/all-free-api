@@ -55,9 +55,9 @@ async def create_chat_completions(
         client = dify.Completions(api_key=api_key)
         response = client.create(request)  # List[str]
 
-    elif request.stream and api_key.startswith(("tryblend",)):  # 目前仅适配流式
+    elif api_key.startswith(("tryblend",)):  # 目前仅适配流式
         client = tryblend.Completions()
-        response = client.create(request)
+        response = await client.create(request)
 
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))

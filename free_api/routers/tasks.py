@@ -325,7 +325,7 @@ async def create_tasks(
     if token is None:
         raise HTTPException(status_code=404, detail="Task ID not found")
 
-    async with ppu_flow(api_key, post="api-vidu-vip" if vip else "api-vidu"):
+    async with ppu_flow(api_key, post="api-vidu-vip" if vip else "api-vidu", n=2):
         task = await vidu_video.create_task_upscale(request, token)
         if task and task.status:
             vidu_video.send_message(f"{task_type}-upscale 任务提交成功：\n\n{task.id}")
@@ -372,7 +372,7 @@ async def create_tasks(
     async with ppu_flow(api_key, post=f"api-{task_type}"):
         task = await bdaitpzs.create_task(request, token)
         if task:
-            bdaitpzs.send_message(f"{task_type} {request.type} 任务提交成功：\n\n{task.id}")
+            # bdaitpzs.send_message(f"{task_type} {request.type} 任务提交成功：\n\n{task.id}")
 
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
             return task.model_dump(exclude={"system_fingerprint"})
