@@ -35,6 +35,7 @@ async def create_chat_completions(
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
         threshold: Optional[int] = Query(None),
+        vip: Optional[bool] = Query(False),
 
 ):
     api_key = auth and auth.credentials or None
@@ -56,7 +57,7 @@ async def create_chat_completions(
         response = client.create(request)  # List[str]
 
     elif api_key.startswith(("tryblend",)):  # 目前仅适配流式
-        client = tryblend.Completions()
+        client = tryblend.Completions(vip=vip)
         response = await client.create(request)
 
     if request.stream:

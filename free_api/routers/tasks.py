@@ -325,7 +325,7 @@ async def create_tasks(
     if token is None:
         raise HTTPException(status_code=404, detail="Task ID not found")
 
-    async with ppu_flow(api_key, post="api-vidu-vip" if vip else "api-vidu", n=2):
+    async with ppu_flow(api_key, post="api-vidu-vip" if vip else "api-vidu"):
         task = await vidu_video.create_task_upscale(request, token)
         if task and task.status:
             vidu_video.send_message(f"{task_type}-upscale 任务提交成功：\n\n{task.id}")
