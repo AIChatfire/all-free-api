@@ -94,7 +94,6 @@ async def get_tasks(
         data = await glm_video.get_task(task_id, token)
         return data
 
-
     elif task_type == TaskType.faceswap:
         data = await faceswap.get_task(task_id, token)
         return data

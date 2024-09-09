@@ -8,6 +8,10 @@
 # @Software     : PyCharm
 # @Description  :
 from meutils.pipe import *
+from meutils.config_utils.lark_utils import get_next_token_for_polling
+from meutils.llm.openai_utils import to_openai_images_params
+from meutils.io.image import base64_to_url, image2nowatermark_image
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ImageRequest
 from meutils.schemas.oneapi_types import REDIRECT_MODEL
@@ -91,14 +95,27 @@ async def generate(
 
         return image_response
 
+    elif request.model.startswith(('step',)):  # 转存： todo check api-key
+
+        FEISHU_URL = "https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=KVClcs"
+        request.response_format = 'b64_json'
+
+        api_key = await get_next_token_for_polling(FEISHU_URL)
+        response = await AsyncClient(
+            api_key=api_key,
+            base_url='https://api.stepfun.com/v1',
+        ).images.generate(**to_openai_images_params(request))
+        # 正方形：256x256, 512x512, 768x768, 1024x1024；长方形（16:9）：1280x800, 800x1280。
+
+        response.data = [{"url": await base64_to_url(image.b64_json)} for image in response.data]
+        return response
+
     elif request.url:  # 支持图生图：只支持几个
         request.model = REDIRECT_MODEL.get(request.model, request.model)  # todo 完善
         request.model = "TencentARC/PhotoMaker"
         return await image_to_image.create(request)
 
     elif request.model.startswith(('cogview',)):  # 去水印
-        from meutils.io.image import image2nowatermark_image
-
         response = await AsyncClient().images.generate(
             model='cogview-3',
             prompt=request.prompt,
