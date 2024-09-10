@@ -44,7 +44,7 @@ TAGS = ["异步任务"]
 
 
 @router.get("/tasks/{task_id}")
-@alru_cache(maxsize=1024, ttl=15)  # 延迟10s
+@alru_cache(maxsize=2048, ttl=15)  # 延迟10s
 async def get_tasks(
         task_id: str,
         response_format: Optional[str] = Query(None),

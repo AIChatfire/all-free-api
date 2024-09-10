@@ -16,7 +16,7 @@ from free_api.routers import chat_image, chat_to_audio, chat_video
 from free_api.routers import files, images
 from free_api.routers import audio
 from free_api.routers import tasks, reranker
-from free_api.routers.tools import prompter, translator, imager
+from free_api.routers.tools import prompter, translator, imager, news
 from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
 
@@ -60,6 +60,7 @@ app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # ‰∏çÂÖ
 app.include_router(prompter.router, '/tools/v1', tags=prompter.TAGS)
 app.include_router(translator.router, '/tools/v1', tags=translator.TAGS)
 app.include_router(imager.router, '/tools/v1', tags=imager.TAGS)
+app.include_router(news.router, '/tools/v1', tags=news.TAGS)
 
 # GOAMZ
 app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)
