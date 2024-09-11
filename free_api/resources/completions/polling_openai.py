@@ -52,7 +52,6 @@ class Completions(object):
                     base_url=self.base_url,
                 )
                 completion = await client.chat.completions.create(**data)
-
                 if completion:
                     return self.calculate_tokens(request, completion)
                 else:
@@ -65,7 +64,7 @@ class Completions(object):
                 if e.status_code == 400:  # todo: 细分错误
                     send_message(f"{e.response}\n\n{e}\n\n{request.model_dump()}", title=self.base_url)
                     if any(i in str(e) for i in {"The parameter is invalid", }):
-                        request.messages = [{'role': 'user', 'content': str(request.messages)}]  # 重构 messages
+                        data['messages'] = [{'role': 'user', 'content': str(request.messages)}]  # 重构 messages
                         continue
 
                     else:
