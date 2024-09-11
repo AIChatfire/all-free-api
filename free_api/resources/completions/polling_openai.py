@@ -60,14 +60,18 @@ class Completions(object):
 
             except APIStatusError as e:  # {'detail': 'Insufficient Balance'}
                 logger.error(e)
+                # e.code=='1210' # {'error': {'code': '1210', 'message': 'API 调用参数有误，请检查文档。'}}
 
                 if e.status_code == 400:  # todo: 细分错误
                     send_message(f"{e.response}\n\n{e}\n\n{request.model_dump()}", title=self.base_url)
+                    if any(i in str(e) for i in {"The parameter is invalid", }):
+                        request.messages = [{'role': 'user', 'content': str(request.messages)}]  # 重构 messages
+                        continue
 
-                    chat_completion.choices[0].message.content = chat_completion_chunk.choices[0].delta.content = str(e)
-                    return [chat_completion_chunk] if request.stream else chat_completion
-
-                    # e.code=='1210' # {'error': {'code': '1210', 'message': 'API 调用参数有误，请检查文档。'}}
+                    else:
+                        chat_completion.choices[0].message.content = chat_completion_chunk.choices[
+                            0].delta.content = str(e)
+                        return [chat_completion_chunk] if request.stream else chat_completion
 
                 if i > 3:  # 兜底策略
                     send_message(f"{client and client.api_key}\n\n轮询{i}次\n\n{e}\n\n{self.feishu_url}",
@@ -98,7 +102,7 @@ class Completions(object):
         return api_key
 
     @staticmethod
-    def calculate_tokens(request: ChatCompletionRequest, completion, alfa: float = 1.1):
+    def calculate_tokens(request: ChatCompletionRequest, completion, alfa: float = 1.02):
 
         if request.stream or isinstance(completion, str): return completion
 

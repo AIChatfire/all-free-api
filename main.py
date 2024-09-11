@@ -10,7 +10,7 @@
 
 from meutils.serving.fastapi import App
 from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
-from free_api.routers import openai_adapter, polling_openai, redirect, chatfire_all, vision_llm, openai_provider
+from free_api.routers import openai_adapter, openai_polling, redirect, chatfire_all, vision_llm, openai_provider
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
 from free_api.routers import files, images
@@ -24,7 +24,7 @@ app = App()
 
 # Chat
 app.include_router(openai_adapter.router, '/adapter/v1', tags=openai_adapter.TAGS)
-app.include_router(polling_openai.router, '/polling/v1', tags=polling_openai.TAGS)
+app.include_router(openai_polling.router, '/polling/v1', tags=openai_polling.TAGS)
 app.include_router(vision_llm.router, '/vision/v1', tags=vision_llm.TAGS)
 
 app.include_router(openai_provider.router, '/to', tags=openai_provider.TAGS)
