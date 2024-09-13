@@ -23,7 +23,7 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
-TAGS = ["文生图"]
+TAGS = ["视频生成"]
 
 
 @router.post("/async-result/{task_id}")  # todo: sd3 兜底

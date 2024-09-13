@@ -13,7 +13,7 @@ from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
 from free_api.routers import openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
-from free_api.routers import files, images
+from free_api.routers import files, images, videos
 from free_api.routers import audio
 from free_api.routers import tasks, reranker
 from free_api.routers.tools import prompter, translator, imager, news
@@ -48,6 +48,9 @@ app.include_router(images.router, '/images/v1', tags=images.TAGS)
 
 # files
 app.include_router(files.router, '/files/v1', tags=files.TAGS)
+
+# videos
+app.include_router(videos.router, '/videos/v1', tags=videos.TAGS)
 
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
