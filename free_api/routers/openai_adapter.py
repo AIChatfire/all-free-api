@@ -35,6 +35,8 @@ async def create_chat_completions(
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
         threshold: Optional[int] = Query(None),
+        max_turns: Optional[int] = None,
+
         vip: Optional[bool] = Query(False),
 
 ):
@@ -43,8 +45,13 @@ async def create_chat_completions(
 
     raw_model = request.model
 
+    if max_turns:  # 限制对话轮次
+        request.messages = request.messages[-(2 * max_turns - 1):]
+
     response = None
     if request.model.lower().startswith(("o1",)):
+        if "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content): return
+
         data = to_openai_completion_params(request)
         data['stream'] = False
         data.pop('max_tokens', None)

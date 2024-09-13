@@ -41,7 +41,6 @@ async def create_chat_completions(
 
         threshold: Optional[int] = None,
         max_turns: Optional[int] = None,
-
 ):
     logger.debug(request.model_dump_json(indent=4))
 
@@ -53,7 +52,10 @@ async def create_chat_completions(
         request.messages = request.messages[-(2 * max_turns - 1):]
 
     request.model = model
-    if threshold is None or len(str(request.messages)) > threshold:  # 动态切模型: 默认切换模型，可设置大于1000才切换
+    if (threshold is None
+            or len(str(request.messages)) > threshold  # 动态切模型: 默认切换模型，可设置大于1000才切换
+            or "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content)
+    ):
         request.model = redirect_model
         openai = AsyncClient(api_key=api_key, base_url=redirect_base_url)
     else:
