@@ -11,11 +11,11 @@
 
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
-from meutils.llm.openai_utils import create_chat_completion_chunk
+from meutils.llm.openai_utils import create_chat_completion_chunk, to_openai_completion_params
 from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
-from meutils.schemas.oneapi_types import REDIRECT_MODEL
 from meutils.llm.completions import dify, tryblend
 
+from openai import AsyncClient
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
 from sse_starlette import EventSourceResponse
@@ -44,7 +44,14 @@ async def create_chat_completions(
     raw_model = request.model
 
     response = None
-    if request.model.lower().startswith(("sensechat",)):
+    if request.model.lower().startswith(("o1",)):
+        data = to_openai_completion_params(request)
+        data['stream'] = False
+        response = await AsyncClient(api_key=f"{api_key}-296").chat.completions.create(**data)  # 定向渠道
+        if request.stream:
+            response = response.choices[0].message.content
+
+    elif request.model.lower().startswith(("sensechat",)):
         client = sensechat.Completions(threshold=threshold)
         response = await client.create(request)
 
