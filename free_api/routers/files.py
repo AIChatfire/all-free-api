@@ -67,7 +67,8 @@ async def upload_files(
         purpose=purpose,
         status="uploaded",
 
-        url=None
+        data=None,
+        url=None,
     )
     logger.debug(file_object)
     logger.debug(file.headers)
@@ -109,16 +110,22 @@ async def upload_files(
             markdown_text = markdown_text and markdown_text[0]
 
             file_object.status = "processed" if markdown_text else "error"
-            file_object.status_details = response_data
+            file_object.data = response_data
 
             if markdown_text:
-                await redis_aclient.set(file_object.id, markdown_text, ex=3600 * 24 * 7)
+                await redis_aclient.set(file_object.id, markdown_text, ex=1 * 3600 * 24)
             return file_object
 
     elif purpose == purpose.moonshot_fileparser:
         async with ppu_flow(api_key, post="ppu-01"):
 
             file_object = client.files.create(file=(file.filename, file.file), purpose="file-extract")
+
+            file_content = client.files.content(file_id=file_object.id).text
+            file_object.data = file_content
+
+            # await redis_aclient.set(file_object.id, file_object.data, ex=1 * 3600 * 24)
+            # 定期清理
 
             return file_object
 

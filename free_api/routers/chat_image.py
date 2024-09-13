@@ -118,7 +118,7 @@ async def create_chat_completions(
             for image in response.data:
                 yield f"![{image.revised_prompt}]({image.url})\n\n"
 
-        chunks = create_chat_completion_chunk(gen())
+        chunks = create_chat_completion_chunk(gen(), redirect_model=request.model)
         return EventSourceResponse(chunks)
     else:
         # 跳过吧

@@ -10,6 +10,7 @@ tiktoken
 langchain
 websocket
 
+
 minio
 redis
 
@@ -25,3 +26,4 @@ python-multipart
 
 sensenova
 qianfan
+zhipuai

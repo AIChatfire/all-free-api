@@ -63,7 +63,7 @@ class Completions(object):
 
                 if e.status_code == 400:  # todo: 细分错误
                     send_message(f"{e.response}\n\n{e}\n\n{request.model_dump()}", title=self.base_url)
-                    if any(i in str(e) for i in {"The parameter is invalid", }):
+                    if any(i in str(e) for i in {"The parameter is invalid", "'role' has invalid value"}):
                         data['messages'] = [{'role': 'user', 'content': str(request.messages)}]  # 重构 messages
                         continue
 
