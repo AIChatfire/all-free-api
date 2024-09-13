@@ -48,7 +48,7 @@ async def create_chat_completions(
         data = to_openai_completion_params(request)
         data['stream'] = False
         data.pop('max_tokens', None)
-        response = await AsyncClient(api_key=api_key).chat.completions.create(**data)  # 定向渠道
+        response = await AsyncClient(api_key=api_key, timeout=100).chat.completions.create(**data)  # 定向渠道
         if request.stream:
             response = response.choices[0].message.content
 
