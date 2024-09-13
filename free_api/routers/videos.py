@@ -26,7 +26,7 @@ router = APIRouter()
 TAGS = ["视频生成"]
 
 
-@router.post("/async-result/{task_id}")  # todo: sd3 兜底
+@router.get("/async-result/{task_id}")  # todo: sd3 兜底
 async def generate(
         task_id: str,
         response_format: Optional[str] = Query(None),
