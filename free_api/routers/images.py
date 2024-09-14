@@ -121,7 +121,7 @@ async def generate(
             prompt=request.prompt,
         )
 
-        response.data[0].url = image2nowatermark_image(response.data[0].url)
+        response.data[0].url = await image2nowatermark_image(response.data[0].url)
         return response
 
     else:

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥火宝新语 - 996</title>
+    <link href="https://fonts.lug.ustc.edu.cn/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 深邃宝石系：使用低饱和度和深色调 */
+            --primary-color: #4C2B4B; /* 紫色，用于主要文字 */
+            --secondary-color: #847B8B; /* 深灰褐色，用于标题背景 */
+            --accent-color: #C5A59B; /* 粉棕色，用于强调元素 */
+            --background-color: #E7DFE3; /* 浅米色，用于页面背景 */
+            --text-color: #3D2626; /* 深棕色，用于主要文字 */
+            --light-text-color: #6B4B4B; /* 浅灰色，用于次要文字 */
+            --divider-color: #D1C5C5; /* 浅灰色，用于分隔线 */
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--background-color); /* 使用浅米色作为页面背景 */
+            font-family: 'Noto Sans SC', sans-serif;
+            color: var(--text-color); /* 使用深棕色作为主要文字颜色 */
+        }
+        .card {
+            width: 300px;
+            height: auto;
+            background-color: #F2E0D5; /* 浅米色，用于卡片背景 */
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: var(--secondary-color); /* 使用深灰褐色作为标题背景 */
+            color: #F2E0D5; /* 浅色文字与深色背景形成对比 */
+            padding: 20px;
+            text-align: left;
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 20px;
+            margin: 0;
+            font-weight: 700;
+        }
+        .content {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .word {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .word-main {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 36px;
+            color: var(--text-color); /* 使用深棕色作为主要词汇颜色 */
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .word-main::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 50px;
+            height: 3px;
+            background-color: var(--accent-color); /* 使用粉棕色作为下划线 */
+        }
+        .word-sub {
+            font-size: 14px;
+            color: var(--light-text-color); /* 使用浅灰色作为次要文字颜色 */
+            margin: 5px 0;
+        }
+        .divider {
+            width: 100%;
+            height: 1px;
+            background-color: var(--divider-color); /* 使用浅灰色作为分隔线 */
+            margin: 20px 0;
+        }
+        .explanation {
+            font-size: 18px;
+            line-height: 1.6;
+            text-align: left;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .quote {
+            position: relative;
+            padding-left: 20px;
+            border-left: 3px solid var(--accent-color); /* 使用粉棕色作为引用边框 */
+        }
+        .background-text {
+            position: absolute;
+            font-size: 150px;
+            color: rgba(76, 43, 75, 0.15); /* 深紫色的透明版本作为背景文字 */
+            z-index: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h1>🔥火宝新语</h1>
+        </div>
+        <div class="content">
+            <div class="word">
+                <div class="word-main">996</div>
+                <div class="word-sub">Jiǔ Jiǔ Liù</div>
+                <div class="word-sub">996 Work Schedule</div>
+                <div class="word-sub">horaires de travail 996</div>
+                <div class="word-sub">график 996</div>
+                <div class="word-sub">996 근무제</div>
+                <div class="word-sub">⏰😩💼</div>
+            </div>
+            <div class="divider"></div>
+            <div class="explanation">
+                <div class="quote">
+                    <p>
+                        早九晚六，<br>
+                        不如从早到晚，<br>
+                        以梦换梦，<br>
+                        桌上工具，梦中伴我。
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="background-text">996</div>
+    </div>
+</body>
+</html>
