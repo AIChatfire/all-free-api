@@ -46,7 +46,6 @@ async def generate(
 
     elif request.model.startswith(("flux-pro",)):
         request.model = "black-forest-labs/FLUX.1-dev"
-        request.model = "black-forest-labs/FLUX.1-schnell"
 
         if request.size in {'1024x1024', '1:1'}:
             request.size = "1366x1366"
@@ -55,7 +54,6 @@ async def generate(
 
     elif request.model.startswith(("flux-dev",)):
         request.model = "black-forest-labs/FLUX.1-dev"
-        request.model = "black-forest-labs/FLUX.1-schnell"
 
         image_response = await text_to_image.create(request)
         return image_response
