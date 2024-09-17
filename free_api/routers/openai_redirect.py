@@ -36,8 +36,9 @@ async def create_chat_completions(
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
         model: str = 'gpt-3.5-turbo',
-        redirect_model: str = "deepseek-chat",  # 默认
-        redirect_base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),
+        base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),
+
+        redirect_model: str = "deepseek-chat",  # 默认走 chatfire
 
         threshold: Optional[int] = None,
         max_turns: Optional[int] = None,
@@ -57,9 +58,9 @@ async def create_chat_completions(
             or "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content)
     ):
         request.model = redirect_model
-        openai = AsyncClient(api_key=api_key[:51], base_url=redirect_base_url)  # 避免指定渠道
+        openai = AsyncClient()  # 兜底渠道
     else:
-        openai = AsyncClient(api_key=api_key)
+        openai = AsyncClient(api_key=api_key, base_url=base_url)
 
     data = to_openai_completion_params(request)
     response = await openai.chat.completions.create(**data)
