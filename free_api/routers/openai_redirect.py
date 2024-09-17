@@ -57,7 +57,7 @@ async def create_chat_completions(
             or "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content)
     ):
         request.model = redirect_model
-        openai = AsyncClient(api_key=api_key, base_url=redirect_base_url)
+        openai = AsyncClient(api_key=api_key[:51], base_url=redirect_base_url)  # 避免指定渠道
     else:
         openai = AsyncClient(api_key=api_key)
 

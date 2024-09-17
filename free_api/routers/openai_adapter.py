@@ -6,8 +6,8 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
-
+# @Description  :
+import os
 
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
@@ -52,6 +52,10 @@ async def create_chat_completions(
     if request.model.lower().startswith(("o1",)):
         if "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content): return
 
+        request.model = request.model.strip('-all')
+        if request.messages[0]['role'] == 'system':
+            request.messages.pop(0)
+
         data = to_openai_completion_params(request)
         data['stream'] = False
         data.pop('max_tokens', None)
@@ -92,3 +96,5 @@ if __name__ == '__main__':
     app.include_router(router, '/v1')
 
     app.run()
+
+    os.getenv("OPENAI_API_KEY_OPENAI")
