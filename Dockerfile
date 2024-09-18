@@ -35,9 +35,7 @@ RUN python -m pip install --no-cache-dir -U -r requirements.txt
 
 RUN python -m pip install --no-cache-dir -U --no-deps zhipuai
 
-RUN python -m playwright install-deps
-RUN python -m pip install --no-cache-dir playwright && python -m playwright install chromium
-
+RUN python -m pip install --no-cache-dir playwright && python -m playwright install-deps && python -m playwright install chromium
 
 
 # 创建工作目录
