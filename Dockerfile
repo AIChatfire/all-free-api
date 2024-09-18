@@ -35,7 +35,7 @@ RUN python -m pip install --no-cache-dir -U -r requirements.txt
 
 RUN python -m pip install --no-cache-dir -U --no-deps zhipuai
 
-RUN python -m pip install --no-cache-dir playwright && python -m playwright install-deps && python -m playwright install
+#RUN python -m pip install --no-cache-dir playwright && python -m playwright install-deps && python -m playwright install
 
 
 # 创建工作目录
