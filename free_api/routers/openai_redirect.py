@@ -38,7 +38,9 @@ async def create_chat_completions(
         model: str = 'gpt-3.5-turbo',
         base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),
 
+        # redirect_api_key: Optional[str] = Query(None),
         redirect_model: str = "deepseek-chat",  # 默认走 chatfire
+        # redirect_base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),
 
         threshold: Optional[int] = None,
         max_turns: Optional[int] = None,

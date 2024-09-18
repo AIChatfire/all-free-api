@@ -31,9 +31,11 @@ EXPOSE 8000
 
 # Install pip requirements
 COPY requirements.txt .
-RUN python -m pip install --no-cache-dir -U -r requirements.txt
+RUN python -m pip install --no-cache-dir -U -r requirements.txt && python -m playwright install chromium
 
 RUN python -m pip install --no-cache-dir -U --no-deps zhipuai
+
+
 
 # 创建工作目录
 WORKDIR /app

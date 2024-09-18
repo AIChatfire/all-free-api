@@ -16,9 +16,11 @@ from free_api.routers import chat_image, chat_to_audio, chat_video
 from free_api.routers import files, images, videos
 from free_api.routers import audio
 from free_api.routers import tasks, reranker
-from free_api.routers.tools import prompter, translator, imager, news
+
+from free_api.routers.tools import prompter, translator, imager, news, textcard, processor
 from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
+from free_api.routers.oneapi import extra_api
 
 app = App()
 
@@ -58,16 +60,22 @@ app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不兼容openai
 
 # 小工具
+
 app.include_router(prompter.router, '/tools/v1', tags=prompter.TAGS)
 app.include_router(translator.router, '/tools/v1', tags=translator.TAGS)
 app.include_router(imager.router, '/tools/v1', tags=imager.TAGS)
 app.include_router(news.router, '/tools/v1', tags=news.TAGS)
+app.include_router(processor.router, '/tools/processor/v1', tags=processor.TAGS)
+app.include_router(textcard.router, '/tools/textcard/v1', tags=textcard.TAGS)
 
 # GOAMZ
 app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)
 
 # Hook
 app.include_router(wechat.router, '/hooks/v1', tags=wechat.TAGS)
+
+# ONEAPI: extra-api
+app.include_router(extra_api.router, tags=extra_api.TAGS)
 
 if __name__ == '__main__':
     app.run()

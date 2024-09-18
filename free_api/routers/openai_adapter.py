@@ -53,8 +53,7 @@ async def create_chat_completions(
         if "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content): return
 
         request.model = request.model.strip('-all')
-        if request.messages[0]['role'] == 'system':
-            request.messages.pop(0)
+        request.messages = [message for message in request.messages if message['role'] != 'system']
 
         data = to_openai_completion_params(request)
         data['stream'] = False
