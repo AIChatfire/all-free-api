@@ -31,7 +31,9 @@ async def get_user_info(
 
     data = await get_api_key_log(api_key)
     if data and (user_id := data[0]['user_id']):
-        return await get_user_with_cache(user_id)
+        if data:= await get_user_with_cache(user_id):
+            data['data']['access_token'] = '🔥chatfire'
+            return data
 
 
 if __name__ == '__main__':

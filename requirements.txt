@@ -27,5 +27,3 @@ python-multipart
 sensenova
 qianfan
 zhipuai
-
-playwright
