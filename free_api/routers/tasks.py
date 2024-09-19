@@ -297,7 +297,7 @@ async def create_tasks(
             await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
             return task.model_dump(exclude={"system_fingerprint"})
         else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task.data)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task and task.data)
 
 
 @router.post(f"/tasks/{TaskType.vidu}-upscale")

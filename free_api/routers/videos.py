@@ -62,7 +62,7 @@ async def generate(
     logger.debug(request.model_dump_json(indent=4))
 
     if request.model.startswith("cogvideox"):
-        async with ppu_flow(api_key, post="api-cogvideox-vip"):
+        async with ppu_flow(api_key, post="api-cogvideox-official"):
             task_type = TaskType.cogvideox_vip
 
             task = await glm_video_api.create_task(request)

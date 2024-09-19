@@ -78,7 +78,7 @@ async def upload_files(
 
     if purpose in {purpose.oss}:  # or purpose not in Purpose.__members__
 
-        async with ppu_flow(api_key, post="ppu-01"):
+        async with ppu_flow(api_key, post="api-oss"):
             # if url:  # todo: 转存 url文件或者file view
 
             bucket_name = "files"
@@ -103,7 +103,7 @@ async def upload_files(
             return file_object
 
     elif purpose in {purpose.textin_fileparser, purpose.file_extract}:
-        async with ppu_flow(api_key, post="ppu-01"):
+        async with ppu_flow(api_key, post="api-pdf-to-markdown"):
 
             response_data = await textin_fileparser(await file.read())
             markdown_text = jsonpath.jsonpath(response_data, "$..markdown")  # False or []
@@ -117,7 +117,7 @@ async def upload_files(
             return file_object
 
     elif purpose == purpose.moonshot_fileparser:
-        async with ppu_flow(api_key, post="ppu-01"):
+        async with ppu_flow(api_key, post="api-file-to-text"):
 
             file_object = client.files.create(file=(file.filename, file.file), purpose="file-extract")
 

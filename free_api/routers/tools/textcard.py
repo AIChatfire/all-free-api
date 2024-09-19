@@ -8,15 +8,17 @@
 # @Software     : PyCharm
 # @Description  : 
 
+from aiostream import stream
+
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
-from meutils.llm.openai_utils import create_chat_completion_chunk, appu
+from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, appu
+from meutils.llm.openai_utils import to_openai_completion_params, token_encoder, token_encoder_with_cache
 from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 
 from openai import AsyncClient
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
-from meutils.llm.openai_utils import to_openai_completion_params, token_encoder, token_encoder_with_cache
 
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks, \
@@ -48,7 +50,9 @@ async def create_chat_completions(
 
     if hasattr(response, "model"):
         response.model = model  # 以请求体为主
-    return response
+
+    response = await stream.list(response)
+    return create_chat_completion(response)
 
 
 # @router.get("/") # html
