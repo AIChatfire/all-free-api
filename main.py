@@ -17,7 +17,7 @@ from free_api.routers import files, images, videos
 from free_api.routers import audio
 from free_api.routers import tasks, reranker
 
-from free_api.routers.tools import prompter, translator, imager, news, textcard#, processor
+from free_api.routers.tools import prompter, translator, imager, news, textcard  # , processor
 from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
 from free_api.routers.oneapi import extra_api
