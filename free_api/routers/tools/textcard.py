@@ -35,18 +35,20 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/chat/completions")
 async def create_chat_completions(
         request: ChatCompletionRequest,
+        model: str = Query("Pro/THUDM/glm-4-9b-chat"),
+        title: str = Query("🔥汉语新解"),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 ):
     logger.debug(request.model_dump_json(indent=4))
 
     api_key = auth and auth.credentials or None
 
-    model = "汉语新解"
-    await appu(model, api_key)
+    if '/' in request.model:  # 替换内置模型
+        model = request.model
 
-    response = hanyuxinjie.create(request.last_content, request.model)
+    response = hanyuxinjie.create(request.last_content, model, title)
     if request.stream:
-        return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=model))
+        return EventSourceResponse(create_chat_completion_chunk(response))
 
     if hasattr(response, "model"):
         response.model = model  # 以请求体为主
