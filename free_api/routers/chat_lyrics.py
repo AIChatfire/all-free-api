@@ -72,7 +72,7 @@ async def create_chat_completions(
         data = await future_task
 
         chat_completion.choices[0].message.content = data
-        return create_chat_completion(chat_completion)
+        return chat_completion
 
 
 if __name__ == '__main__':

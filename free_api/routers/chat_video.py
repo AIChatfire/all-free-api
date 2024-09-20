@@ -53,7 +53,7 @@ async def create_chat_completions(
 
         return EventSourceResponse(chunks)
     else:
-        return create_chat_completion(chat_completion)
+        return chat_completion
 
 
 if __name__ == '__main__':

@@ -218,7 +218,6 @@ async def get_file_content(
     else:
         file_content = client.files.content(file_id=file_id).text
 
-    await appu("ppu-1", api_key)  # 计费
     return Response(content=file_content, media_type="application/octet-stream")
 
 

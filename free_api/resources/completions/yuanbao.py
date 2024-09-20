@@ -108,7 +108,7 @@ class Completions(object):
 
         async with self.httpx_aclient.stream(method="POST", url=f"{API_CHAT}/{chatid}", json=payload) as response:
             async for chunk in response.aiter_lines():
-                content = SSEData(chunk=chunk, crop_image=True).content
+                content = SSEData(chunk=chunk, crop_image=False).content
                 # print(content)
                 yield content
 
@@ -143,6 +143,7 @@ class Completions(object):
 
 
 if __name__ == '__main__':
+
     api_key = "bUZenNkB3YaXTbw9|lTb5OHLVMWugG/U9/hzmYbzP09T1d3VcrQ5wqtYIDQObyUVrVFBOTayWg9uNWtFS|%7B%22distinct_id%22%3A%22100000458739%22%2C%22first_id%22%3A%2218b12e46a2cc31-0422341cefa2bb-18525634-2073600-18b12e46a2d16e0%22%2C%22props%22%3A%7B%22%24latest_traffic_source_type%22%3A%22%E8%87%AA%E7%84%B6%E6%90%9C%E7%B4%A2%E6%B5%81%E9%87%8F%22%2C%22%24latest_utm_medium%22%3A%22cpc%22%2C%22%24search_keyword_id%22%3A%22dfc6144d0063998d000000026667e3ec%22%2C%22%24search_keyword_id_type%22%3A%22baidu_seo_keyword_id%22%2C%22%24search_keyword_id_hash%22%3A5499731361824189%7D%2C%22identities%22%3A%22eyIkaWRlbnRpdHlfY29va2llX2lkIjoiMThiMTJlNDZhMmNjMzEtMDQyMjM0MWNlZmEyYmItMTg1MjU2MzQtMjA3MzYwMC0xOGIxMmU0NmEyZDE2ZTAiLCIkaWRlbnRpdHlfbG9naW5faWQiOiIxMDAwMDA0NTg3MzkifQ%3D%3D%22%2C%22history_login_id%22%3A%7B%22name%22%3A%22%24identity_login_id%22%2C%22value%22%3A%22100000458739%22%7D%2C%22%24device_id%22%3A%2218b12e46a2cc31-0422341cefa2bb-18525634-2073600-18b12e46a2d16e0%22%7D"
     # chatid = generate_id()
     # print(chatid)
@@ -162,4 +163,7 @@ if __name__ == '__main__':
     # }
     # chat(payload)
 
-    async2sync_generator(Completions(api_key).achat('画条狗')) | xprint
+    # async2sync_generator(Completions(api_key).achat('画条狗')) | xprint
+
+    arun(Completions(api_key).achat('你是谁'))
+

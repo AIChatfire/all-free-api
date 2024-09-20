@@ -7,13 +7,15 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import os
+
+from aiostream import stream
 
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
-from meutils.llm.openai_utils import create_chat_completion_chunk, to_openai_completion_params
+from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_completion_params
 from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
-from meutils.llm.completions import dify, tryblend
+from meutils.llm.completions import dify, tryblend, tune, delilegal
+from meutils.config_utils.lark_utils import get_next_token_for_polling
 
 from openai import AsyncClient
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
@@ -21,7 +23,7 @@ from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
-from free_api.resources.completions import sensechat, chat_qianfan
+from free_api.resources.completions import sensechat, chat_qianfan, yuanbao  # todo
 
 router = APIRouter()
 TAGS = ["文本生成"]
@@ -49,8 +51,13 @@ async def create_chat_completions(
         request.messages = request.messages[-(2 * max_turns - 1):]
 
     response = None
-    if request.model.lower().startswith(("o1",)):
+    if request.model.lower().startswith(("o1", "openai/o1")):  # 适配o1
         if "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content): return
+
+        base_url = None
+        if api_key.startswith('sk-tune'):  # https://studio.tune.app/playground
+            request.model = f"openai/{request.model}"
+            base_url = 'https://any2chat.chatfire.cn/tune/v1'
 
         request.model = request.model.strip('-all')
         request.messages = [message for message in request.messages if message['role'] != 'system']
@@ -58,7 +65,7 @@ async def create_chat_completions(
         data = to_openai_completion_params(request)
         data['stream'] = False
         data.pop('max_tokens', None)
-        response = await AsyncClient(api_key=api_key, timeout=100).chat.completions.create(**data)  # 定向渠道
+        response = await AsyncClient(api_key=api_key, base_url=base_url, timeout=100).chat.completions.create(**data)
         if request.stream:
             response = response.choices[0].message.content
 
@@ -74,17 +81,36 @@ async def create_chat_completions(
         client = dify.Completions(api_key=api_key)
         response = client.create(request)  # List[str]
 
-    elif api_key.startswith(("tryblend",)):  # 目前仅适配流式
+    elif api_key.startswith(("tryblend",)):
         client = tryblend.Completions(vip=vip)
         response = await client.create(request)
+
+    elif api_key.startswith(("deli",)):  # 逆向
+        response = delilegal.create(request)
+
+    elif api_key.startswith(("tune",)):  # 逆向
+        response = tune.create(request, vip=vip)
+
+    elif api_key.startswith(("sk-tune",)):
+        if request.model.startswith("claude-3-5-sonnet"):
+            request.model = "anthropic/claude-3.5-sonnet"
+            request.max_tokens = request.max_tokens or 8192  # c35必须有max_tokens 8192
+
+        data = to_openai_completion_params(request)
+        base_url = 'https://any2chat.chatfire.cn/tune/v1'
+        api_key = await get_next_token_for_polling(tune.FEISHU_URL_API)
+        response = await AsyncClient(api_key=api_key, base_url=base_url, timeout=100).chat.completions.create(**data)
 
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
 
+    if inspect.isasyncgen(response):
+        response = await stream.list(response)
+        response = create_chat_completion(response)
+
     if hasattr(response, "model"):
         response.model = raw_model  # 以请求体为主
-
-    return response
+    return response  # chat_completion
 
 
 if __name__ == '__main__':
