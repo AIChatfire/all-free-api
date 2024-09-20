@@ -51,7 +51,7 @@ async def create_chat_completions(
         request.messages = request.messages[-(2 * max_turns - 1):]
 
     response = None
-    if request.model.lower().startswith(("o1", "openai/o1")):  # 适配o1
+    if request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
         if "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content): return
 
         base_url = None
