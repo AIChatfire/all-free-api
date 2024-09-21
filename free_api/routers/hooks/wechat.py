@@ -7,6 +7,8 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
+from aiostream import stream
+
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
@@ -19,6 +21,8 @@ from meutils.apis.siliconflow.text_to_image import create
 from meutils.schemas.openai_types import ImageRequest
 from meutils.io.image import image2nowatermark_image
 from meutils.str_utils.regular_expression import parse_url
+
+from meutils.apis.textcard import hanyuxinjie
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
@@ -77,6 +81,19 @@ async def create_reply(
             responses += [HookResponse(content=url)]
 
         logger.debug(responses)
+
+    elif content.startswith('/汉语新解'):
+        prompt = content.split(maxsplit=1)[-1]
+        chunks = await stream.list(hanyuxinjie.create(prompt))
+        html_content = "".join(chunks)
+        htmls = hanyuxinjie.HTML_PARSER.findall(html_content)
+        html_content = htmls and htmls[-1] or html_content
+        with tempfile.NamedTemporaryFile(mode='w+', suffix='.html', delete=False) as file:
+            # logger.debug(file.name)
+            file.write(html_content)
+            file.seek(0)
+            url = f"https://api.chatfire.cn/render/{file.name}"
+            responses += [HookResponse(content=url)]
 
     return responses
 

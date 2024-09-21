@@ -58,6 +58,7 @@ async def create_chat_completions(
         if api_key.startswith('sk-tune'):  # https://studio.tune.app/playground
             request.model = f"openai/{request.model}"
             base_url = 'https://any2chat.chatfire.cn/tune/v1'
+            api_key = await get_next_token_for_polling(tune.FEISHU_URL_API)
 
         request.model = request.model.strip('-all')
         request.messages = [message for message in request.messages if message['role'] != 'system']
@@ -105,8 +106,10 @@ async def create_chat_completions(
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
 
     if inspect.isasyncgen(response):
-        response = await stream.list(response)
-        response = create_chat_completion(response)
+        chunks = await stream.list(response)
+        response = create_chat_completion(chunks)
+        response.usage.prompt_tokens = len(str(request.messages)) // 1.25
+        response.usage.completion_tokens = len(chunks)
 
     if hasattr(response, "model"):
         response.model = raw_model  # 以请求体为主

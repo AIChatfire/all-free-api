@@ -31,7 +31,7 @@ class Completions(object):
         if urls:
             content = await luca.create_chat(prompt=prompts[0], image_data=urls[0])
         else:
-            content = "请输入图片"
+            content = "请输入正确的图片格式：base64/url"
 
         return content
 
