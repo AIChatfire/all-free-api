@@ -108,7 +108,7 @@ async def create_chat_completions(
     if inspect.isasyncgen(response):
         chunks = await stream.list(response)
         response = create_chat_completion(chunks)
-        response.usage.prompt_tokens = len(str(request.messages)) // 1.25
+        response.usage.prompt_tokens = int(len(str(request.messages)) // 1.25)
         response.usage.completion_tokens = len(chunks)
 
     if hasattr(response, "model"):
