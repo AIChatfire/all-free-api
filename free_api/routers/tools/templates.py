@@ -20,6 +20,7 @@ TAGS = ["HTML"]
 
 
 @router.get("/render/{file:path}")
+@alru_cache()
 async def render(
         file: str,
 ):
