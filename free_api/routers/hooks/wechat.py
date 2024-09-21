@@ -88,6 +88,7 @@ async def create_reply(
         html_content = "".join(chunks)
         htmls = hanyuxinjie.HTML_PARSER.findall(html_content)
         html_content = htmls and htmls[-1] or html_content
+        html_content = html_content.replace("```", "")
         with tempfile.NamedTemporaryFile(mode='w+', suffix='.html', delete=False) as file:
             # logger.debug(file.name)
             file.write(html_content)
