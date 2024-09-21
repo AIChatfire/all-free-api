@@ -24,8 +24,9 @@ TAGS = ["HTML"]
 async def render(
         file: str,
 ):
-    html_content = Path(file).read_text()
-    return HTMLResponse(content=html_content, status_code=200)
+    if Path(file).is_file():
+        html_content = Path(file).read_text()
+        return HTMLResponse(content=html_content)
 
 
 if __name__ == '__main__':
