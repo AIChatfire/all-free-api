@@ -257,7 +257,7 @@ async def create_tasks(
     token = request.source_list and await redis_aclient.get(request.source_list[0])  # 照片对应的token
     token = token and token.decode()
 
-    async with ppu_flow(api_key, post="api-cogvideox"):
+    async with ppu_flow(api_key, post="official-api-cogvideox"):
         task = await glm_video.create_task(request, token)
         if task and task.status:
             glm_video.send_message(f"{task_type} 任务提交成功：\n\n{task.id}")

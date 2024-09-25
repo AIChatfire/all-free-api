@@ -21,6 +21,7 @@ from free_api.routers.tools import prompter, translator, imager, news, textcard,
 from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
 from free_api.routers.oneapi import extra_api
+from free_api.routers.async_tasks import kling, glm
 
 app = App()
 
@@ -51,8 +52,10 @@ app.include_router(images.router, '/images/v1', tags=images.TAGS)
 # files
 app.include_router(files.router, '/files/v1', tags=files.TAGS)
 
-# videos
-app.include_router(videos.router, '/videos/v1', tags=videos.TAGS)
+# 异步任务 async_tasks
+# app.include_router(videos.router, '/videos/v1', tags=videos.TAGS)
+app.include_router(glm.router, '/glm/v1', tags=glm.TAGS)
+app.include_router(kling.router, '/kling/v1', tags=videos.TAGS)
 
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai

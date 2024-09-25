@@ -13,7 +13,7 @@
 from meutils.pipe import *
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 router = APIRouter()
 TAGS = ["HTML"]
@@ -27,6 +27,15 @@ async def render(
     if Path(file).is_file():
         html_content = Path(file).read_text()
         return HTMLResponse(content=html_content)
+
+
+@router.get("/redirect/{url:path}")
+@alru_cache()
+async def render(
+        url: str,
+):
+    return RedirectResponse(url=url)
+
 
 
 if __name__ == '__main__':
