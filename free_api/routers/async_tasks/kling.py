@@ -57,7 +57,7 @@ async def create_task(
         request: ImageRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
-        vip: Optional[bool] = Query(False)
+        vip: Optional[bool] = Query(True)
 ):
     api_key = auth and auth.credentials or None
 
@@ -79,7 +79,7 @@ async def create_task(
         request: VideoRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
-        vip: Optional[bool] = Query(False)
+        vip: Optional[bool] = Query(True)
 ):
     api_key = auth and auth.credentials or None
 
