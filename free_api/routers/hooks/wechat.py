@@ -66,7 +66,7 @@ async def create_reply(
     elif content.startswith('/flux-pro'):
         prompt = content.split(maxsplit=1)[-1]
 
-        image_reponse = await create(ImageRequest(prompt=prompt))
+        image_reponse = await create(ImageRequest(prompt=prompt, model="black-forest-labs/FLUX.1-dev"))
         responses += [HookResponse(type='image', content=img.url) for img in image_reponse.data]
         logger.debug(responses)
 
@@ -83,10 +83,12 @@ async def create_reply(
         task = await kling_image.create_task(request)
 
         for i in range(1, 16):
-            await asyncio.sleep(5 / i)
+            await asyncio.sleep(10 / i)
             try:
                 data = await kling_image.get_task(task.data.task_id, task.system_fingerprint)
                 if data.code == 0:
+                    logger.debug(data)
+
                     for image in data.data.task_result.get('images', []):
                         url = image.get("url")
                         responses += [HookResponse(type='image', content=url)]
