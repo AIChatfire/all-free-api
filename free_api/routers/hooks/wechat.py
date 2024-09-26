@@ -89,8 +89,8 @@ async def create_reply(
                 logger.debug(data)
 
                 for image in data.data.task_result.get('images', []):
-                    url = image.get("url")
-                    responses += [HookResponse(type='image', content=url)]
+                    if url := image.get("url"):
+                        responses += [HookResponse(type='image', content=url)]
                 logger.debug(responses)
                 break
             except Exception as e:
