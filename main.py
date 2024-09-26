@@ -13,7 +13,7 @@ from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
 from free_api.routers import openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
-from free_api.routers import files, images, videos
+from free_api.routers import files, images
 from free_api.routers import audio
 from free_api.routers import tasks, reranker
 
@@ -53,9 +53,8 @@ app.include_router(images.router, '/images/v1', tags=images.TAGS)
 app.include_router(files.router, '/files/v1', tags=files.TAGS)
 
 # 异步任务 async_tasks
-# app.include_router(videos.router, '/videos/v1', tags=videos.TAGS)
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
-app.include_router(kling.router, '/kling/v1', tags=videos.TAGS)
+app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
 
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
