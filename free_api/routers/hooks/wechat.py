@@ -14,6 +14,8 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 
 from meutils.schemas.wechat_types import Message, HookResponse
 
+from meutils.apis.kling import images as kling_image
+
 from meutils.apis.vidu import vidu_video
 from meutils.schemas.vidu_types import ViduRequest
 
@@ -62,17 +64,37 @@ async def create_reply(
                 continue
 
     elif content.startswith('/flux-pro'):
-        prompts = content.replace('/flux-pro', '').strip().split(maxsplit=1)
-        if len(prompts) > 1:
-            aspect_ratio, prompt = prompts
-        else:
-            aspect_ratio = '1:1'
-            prompt = prompts[0]
+        prompt = content.split(maxsplit=1)[-1]
 
-        image_reponse = await create(ImageRequest(prompt=prompt, size=aspect_ratio))
-        responses += [HookResponse(content=f"任务已完成🎉🎉🎉")]
+        image_reponse = await create(ImageRequest(prompt=prompt))
         responses += [HookResponse(type='image', content=img.url) for img in image_reponse.data]
         logger.debug(responses)
+
+    elif content.startswith('/kling'):
+        prompt = content.split(maxsplit=1)[-1]
+        # 图生图
+        urls = parse_url(prompt, for_image=True)
+        url = None
+        if urls:
+            url = urls[0]
+            prompt = prompt.replace(url, '')
+
+        request = kling_image.ImageRequest(prompt=prompt, image=url, n=2)
+        task = await kling_image.create_task(request)
+
+        for i in range(1, 16):
+            await asyncio.sleep(5 / i)
+            try:
+                data = await kling_image.get_task(task.data.task_id, task.system_fingerprint)
+                if data.code == 0:
+                    for image in data.data.task_result.get('images', []):
+                        url = image.get("url")
+                        responses += [HookResponse(type='image', content=url)]
+                    logger.debug(responses)
+                    break
+            except Exception as e:
+                logger.debug(e)
+                continue
 
     elif content.startswith('/去水印'):
         urls = parse_url(content, for_image=True)
