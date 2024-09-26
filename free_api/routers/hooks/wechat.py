@@ -49,8 +49,8 @@ async def create_reply(
         video_request = ViduRequest(prompt=prompt)
         task = await vidu_video.create_task(video_request)
 
-        for i in range(16):
-            await asyncio.sleep(5)
+        for i in range(1, 16):
+            await asyncio.sleep(10 / i)
             try:
                 data = await vidu_video.get_task(task.id, task.system_fingerprint)
                 if data.get("state") == "success":
@@ -80,20 +80,19 @@ async def create_reply(
             prompt = prompt.replace(url, '')
 
         request = kling_image.ImageRequest(prompt=prompt, image=url, n=2)
-        task = await kling_image.create_task(request)
+        task = await kling_image.create_task(request, vip=True)
 
         for i in range(1, 16):
-            await asyncio.sleep(10 / i)
+            await asyncio.sleep(15 / i)
             try:
-                data = await kling_image.get_task(task.data.task_id, task.system_fingerprint)
-                if data.code == 0:
-                    logger.debug(data)
+                data = await kling_image.get_task(task.data.task_id, task.system_fingerprint, oss="glm")
+                logger.debug(data)
 
-                    for image in data.data.task_result.get('images', []):
-                        url = image.get("url")
-                        responses += [HookResponse(type='image', content=url)]
-                    logger.debug(responses)
-                    break
+                for image in data.data.task_result.get('images', []):
+                    url = image.get("url")
+                    responses += [HookResponse(type='image', content=url)]
+                logger.debug(responses)
+                break
             except Exception as e:
                 logger.debug(e)
                 continue
@@ -124,10 +123,36 @@ async def create_reply(
 
 
 if __name__ == '__main__':
-    from meutils.serving.fastapi import App
+    # from meutils.serving.fastapi import App
+    #
+    # app = App()
+    #
+    # app.include_router(router, '/v1')
+    #
+    # app.run()
 
-    app = App()
+    async def main():
 
-    app.include_router(router, '/v1')
+        prompt = "画条狗"
 
-    app.run()
+        request = kling_image.ImageRequest(prompt=prompt, n=2)
+        task = await kling_image.create_task(request, vip=True)
+
+        responses = []
+        with timer():
+            for i in range(1, 16):
+                await asyncio.sleep(15 / i)
+                try:
+                    data = await kling_image.get_task(task.data.task_id, task.system_fingerprint, oss='glm')
+                    logger.debug(data)
+
+                    for image in data.data.task_result.get('images', []):
+                        url = image.get("url")
+                        responses += [HookResponse(type='image', content=url)]
+                    logger.debug(responses)
+                    break
+                except Exception as e:
+                    logger.debug(e)
+
+
+    arun(main())
