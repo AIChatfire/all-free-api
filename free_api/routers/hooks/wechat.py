@@ -24,6 +24,9 @@ from meutils.schemas.openai_types import ImageRequest
 from meutils.io.image import image2nowatermark_image
 from meutils.str_utils.regular_expression import parse_url
 
+from meutils.apis.hf import got_ocr
+from meutils.schemas.ocr_types import OCRRequest
+
 from meutils.apis.textcard import hanyuxinjie
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
@@ -97,11 +100,36 @@ async def create_reply(
                 logger.debug(e)
                 continue
 
+    elif content.startswith('/ocr'):
+        prompt = content.split(maxsplit=1)[-1]
+        urls = parse_url(prompt, for_image=True)
+        url = None
+        if urls:
+            url = urls[0]
+            prompt = prompt.replace(url, '').strip().replace('ocr', "OCR")
+
+        modes = {
+            'plain texts OCR', 'plain multi-crop OCR', 'plain fine-grained OCR',
+            'format texts OCR', 'format multi-crop OCR', 'format fine-grained OCR'
+        }
+
+        mode = prompt if prompt in modes else "plain texts OCR"
+
+        request = OCRRequest(
+            image=urls[0],
+            mode=mode,
+        )
+
+        ocr_text, rendered_html = await got_ocr.create(request)
+        responses += [HookResponse(content=ocr_text)]
+
+        logger.debug(responses)
+
     elif content.startswith('/去水印'):
         urls = parse_url(content, for_image=True)
         for url in urls:
             url = await image2nowatermark_image(url)
-            responses += [HookResponse(content=url)]
+            responses += [HookResponse(type="image", content=url)]
 
         logger.debug(responses)
 

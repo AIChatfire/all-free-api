@@ -12,8 +12,11 @@ from meutils.pipe import *
 from meutils.apis.hf import got_ocr
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
-from meutils.schemas.ocr_types import OCRRequest
 from meutils.llm.openai_utils import ppu_flow
+
+
+from meutils.apis.hf import got_ocr
+from meutils.schemas.ocr_types import OCRRequest
 
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
