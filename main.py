@@ -54,7 +54,7 @@ app.include_router(images.router, '/images/v1', tags=images.TAGS)
 app.include_router(files.router, '/files/v1', tags=files.TAGS)
 
 # CV
-app.include_router(ocr.router, '/cv/v1', tags=ocr.TAGS)
+app.include_router(ocr.router, '/ocr/v1', tags=ocr.TAGS)
 
 # 异步任务 async_tasks
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
