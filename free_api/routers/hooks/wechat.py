@@ -119,11 +119,14 @@ async def create_reply(
             image=urls[0],
             mode=mode,
         )
+        try:
 
-        ocr_text, rendered_html = await got_ocr.create(request)
-        responses += [HookResponse(content=ocr_text)]
+            ocr_text, rendered_html = await got_ocr.create(request)
+            responses += [HookResponse(content=ocr_text)]
 
-        logger.debug(responses)
+            logger.debug(responses)
+        except Exception as e:
+            pass
 
     elif content.startswith('/去水印'):
         urls = parse_url(content, for_image=True)

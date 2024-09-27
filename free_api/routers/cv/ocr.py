@@ -29,7 +29,7 @@ TAGS = ["VISION"]
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 
-@router.post("/cv/ocr")
+@router.post("/ocr")
 async def create_ocr(
         request: OCRRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
