@@ -49,7 +49,7 @@ async def get_task(
         return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
     elif task_type.startswith(TaskType.kling_video):
-        data = await videos.get_task(task_id, token, oss=oss, whether_to_transfer=whether_to_transfer)
+        data = await videos.get_task(task_id, token, oss=oss)
         return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
 

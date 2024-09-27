@@ -21,6 +21,7 @@ from free_api.routers.tools import prompter, translator, imager, news, textcard,
 from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
 from free_api.routers.oneapi import extra_api
+from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import kling, cogvideox
 
 app = App()
@@ -51,6 +52,9 @@ app.include_router(images.router, '/images/v1', tags=images.TAGS)
 
 # files
 app.include_router(files.router, '/files/v1', tags=files.TAGS)
+
+# CV
+app.include_router(ocr.router, '/cv/v1', tags=ocr.TAGS)
 
 # 异步任务 async_tasks
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)

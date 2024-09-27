@@ -72,7 +72,7 @@ async def generate(
         image_response = await ideogram_images.create(request)
         return image_response
 
-    elif request.model.startswith(("kling",)):  # 支持图生图
+    elif request.model.startswith(("kling", "kolors")):  # 支持图生图
         kling_request = KlingaiImageRequest(
             prompt=request.prompt,
             imageCount=request.n,
