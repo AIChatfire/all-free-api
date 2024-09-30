@@ -33,7 +33,7 @@ router = APIRouter()
 TAGS = ["图片编辑"]
 
 
-@router.get("/watermark/remove/{url:path}")  # addition
+@router.get("/watermark/remove")  # addition
 async def remove_watermark(
         url: str,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
