@@ -55,10 +55,6 @@ async def create_chat_completions(
         if "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content): return
 
         base_url = None
-        if api_key.startswith('sk-tune'):  # https://studio.tune.app/playground
-            request.model = f"openai/{request.model}"
-            base_url = 'https://any2chat.chatfire.cn/tune/v1'
-            api_key = await get_next_token_for_polling(tune.FEISHU_URL_API)
 
         request.model = request.model.strip('-all')
         request.messages = [message for message in request.messages if message['role'] != 'system']
@@ -91,16 +87,6 @@ async def create_chat_completions(
 
     elif api_key.startswith(("tune",)):  # 逆向
         response = tune.create(request, vip=vip)
-
-    elif api_key.startswith(("sk-tune",)):
-        if request.model.startswith("claude-3-5-sonnet"):
-            request.model = "anthropic/claude-3.5-sonnet"
-            request.max_tokens = request.max_tokens or 8192  # c35必须有max_tokens 8192
-
-        data = to_openai_completion_params(request)
-        base_url = 'https://any2chat.chatfire.cn/tune/v1'
-        api_key = await get_next_token_for_polling(tune.FEISHU_URL_API)
-        response = await AsyncClient(api_key=api_key, base_url=base_url, timeout=100).chat.completions.create(**data)
 
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))

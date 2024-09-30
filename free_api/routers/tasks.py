@@ -13,7 +13,7 @@ from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import ppu_flow
 from meutils.schemas.task_types import TaskType, Task
 from meutils.schemas.kuaishou_types import KlingaiVideoRequest, Camera
-from meutils.apis.kuaishou import klingai_video
+from meutils.apis.kuaishou import klingai_video, klingai
 from meutils.schemas.runwayml_types import RunwayRequest
 from meutils.apis.runwayml import gen
 
@@ -67,7 +67,10 @@ async def get_tasks(
         data = await redis_aclient.get(task_id)
 
     elif task_type.startswith(TaskType.kling):  # 从个业务线获取: 获取token => 在请求接口 （kling-taskid: cookie）
-        data = await klingai_video.get_task(task_id, token)
+
+        mode = "mini" if "vip" not in task_id else ""
+        task_id = f"{mode}-image-{task_id}"
+        data = await klingai.get_task_plus(task_id, token)
         return data
 
     elif task_type.startswith(TaskType.vidu):

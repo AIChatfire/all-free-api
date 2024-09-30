@@ -6,7 +6,7 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
+# @Description  : Image edit
 # :str（默认）：匹配任何字符串，不包括斜杠
 # :int：匹配整数
 # :float：匹配浮点数
@@ -20,9 +20,9 @@ from urllib.parse import unquote
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.llm.openai_utils import ppu_flow
-from meutils.apis.kuaishou import klingai_video
+from meutils.apis import textin
+from meutils.io.files_utils import to_bytes, to_url
 from meutils.config_utils.lark_utils import get_next_token_for_polling
-from meutils.apis.jina import rerank
 from meutils.apis.baidu import bdaitpzs
 from meutils.io.image import base64_to_bytes
 
@@ -33,24 +33,25 @@ router = APIRouter()
 TAGS = ["图片编辑"]
 
 
-@router.get("/no_watermark/{url:path}")
-async def remove_watermark(url: str):
+@router.get("/watermark/remove/{url:path}")  # addition
+async def remove_watermark(
+        url: str,
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+):
+    api_key = auth and auth.credentials or None
+
     # 解码 URL
-    url = unquote(url)
+    # url = unquote(url)
 
-    request = bdaitpzs.BDAITPZSRequest(original_url=url, thumb_url=url)
-    data = await bdaitpzs.create_task(request, is_async=False)
+    file = await to_bytes(url)
 
-    base64_image_string = data['picArr'][0]['src']
+    async with ppu_flow(api_key, post="api-watermark-remove"):
+        data = await textin.textin_fileparser(file, service="watermark-remove")
 
-    # content_type, _ = base64_image_string.split(";base64,", 1)
-    # logger.debug(content_type)
+        base64_data = data['data']['result']['image']
 
-    image_stream = base64_to_bytes(base64_image_string)
-
-    return StreamingResponse(io.BytesIO(image_stream))
-
-
+        data['data']['result']['image'] = await to_url(base64_data)
+        return data
 
 
 if __name__ == '__main__':
