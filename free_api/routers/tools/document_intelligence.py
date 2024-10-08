@@ -14,45 +14,34 @@
 
 
 from meutils.pipe import *
-from fastapi import FastAPI, HTTPException
-
-from urllib.parse import unquote
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.llm.openai_utils import ppu_flow
 from meutils.apis import textin
-from meutils.io.files_utils import to_bytes, to_url
-from meutils.config_utils.lark_utils import get_next_token_for_polling
-from meutils.apis.baidu import bdaitpzs
-from meutils.io.image import base64_to_bytes
+from meutils.io.files_utils import to_bytes
 
-from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header, Body
 
 router = APIRouter()
-TAGS = ["图片编辑"]
+TAGS = ["文档智能"]
 
 
-@router.get("/watermark/remove")  # addition
-async def remove_watermark(
-        url: str,
+@router.post("/{service}")  # addition
+async def document_process(
+        service: str,
+        kwargs: dict = Body(),
+        response_format: str = Query("url"),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 ):
     api_key = auth and auth.credentials or None
 
-    # 解码 URL
-    # url = unquote(url)
+    logger.debug(kwargs)
 
-    file = await to_bytes(url)
+    file = await to_bytes(kwargs.pop('file', None) or kwargs.pop('image'))
 
-    async with ppu_flow(api_key, post="api-watermark-remove"):
-        data = await textin.document_process(file, service="watermark-remove")
-
-        base64_data = data['data']['result']['image']
-
-        data['data']['result']['image'] = await to_url(base64_data)
+    async with ppu_flow(api_key, post=f"api-{service}".replace('_', '-')):
+        data = await textin.document_process(file, service=service, response_format=response_format, **kwargs)
         return data
-
 
 
 if __name__ == '__main__':

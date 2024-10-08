@@ -23,7 +23,8 @@ from free_api.routers.oneapi import extra_api
 from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import kling, cogvideox
 
-from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark  # , processor
+from free_api.routers.tools import document_intelligence
+from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
 
 app = App()
 
@@ -67,6 +68,8 @@ app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不兼容openai
 
 # 小工具
+app.include_router(document_intelligence.router, '/document-intelligence/v1', tags=document_intelligence.TAGS)  # 文档智能
+
 app.include_router(templates.router, tags=templates.TAGS)
 app.include_router(prompter.router, '/tools/v1', tags=prompter.TAGS)
 app.include_router(translator.router, '/tools/v1', tags=translator.TAGS)

@@ -19,7 +19,7 @@ from meutils.llm.openai_utils import appu, ppu_flow
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
 from meutils.apis.voice_clone import fish
-from meutils.apis.textin import textin_fileparser
+from meutils.apis.textin import document_process as textin_fileparser
 from meutils.apis.kuaishou import kolors, klingai
 from meutils.apis.sunoai import suno
 from meutils.apis.chatglm import glm_video
@@ -184,16 +184,7 @@ async def upload_files(
             file_object = await fish.create_file_for_openai(file)
             return file_object
 
-    # textin
-    elif purpose == Purpose.watermark_remove:
-        async with ppu_flow(api_key, post=f"api-{purpose.watermark_remove.value}"):
-            response_data = await textin_fileparser(await file.read(), service=purpose.watermark_remove)
-            image = response_data['data']['result']['image']
-            if response_format == "url":
-                file_object.url = await to_url(image)
-            else:
-                file_object.data = image
-            return file_object
+
 
 
 @router.get("/files/{file_id}")
