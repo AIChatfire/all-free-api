@@ -40,7 +40,10 @@ async def document_process(
     file = await to_bytes(kwargs.pop('file', None) or kwargs.pop('image'))
 
     async with ppu_flow(api_key, post=f"api-{service}".replace('_', '-')):
-        data = await textin.document_process(file, service=service, response_format=response_format, **kwargs)
+        if service == 'audio-to-text':
+            pass
+        else:
+            data = await textin.document_process(file, service=service, response_format=response_format, **kwargs)
         return data
 
 

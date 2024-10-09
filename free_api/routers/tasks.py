@@ -198,6 +198,51 @@ async def create_tasks(
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
 
 
+@router.post(f"/tasks/suno-cover")
+async def create_tasks(
+        request: dict = Body(),  # audio lyrics
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+):
+    logger.debug(request)
+
+    api_key = auth and auth.credentials or None
+
+    async with ppu_flow(api_key, post="api-sunoai-cover"):
+        task = await suno.create_task_for_cover(request.get("audio"), request.get("lyrics"))
+        if task and task.status:
+            suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
+
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+
+            return task.model_dump(exclude={"system_fingerprint"})
+
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
+
+
+@router.post(f"/tasks/suno-stems")
+async def create_tasks(
+        request: dict = Body(),  # audio
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+
+):
+    logger.debug(request)
+
+    api_key = auth and auth.credentials or None
+
+    async with ppu_flow(api_key, post="api-sunoai-stems"):
+        task = await suno.create_task_for_stems(request.get("audio"))
+        if task and task.status:
+            suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
+
+            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+
+            return task.model_dump(exclude={"system_fingerprint"})
+
+        else:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
+
+
 @router.post(f"/tasks/{TaskType.haimian}")
 async def create_tasks(
         request: HaimianRequest,
