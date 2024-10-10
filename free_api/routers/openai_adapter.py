@@ -7,6 +7,7 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
+import os
 
 from aiostream import stream
 
@@ -66,6 +67,17 @@ async def create_chat_completions(
         if request.stream:
             response = response.choices[0].message.content
 
+    elif request.model.lower().startswith(("perplexity", "net")):  # 前置联网
+        # model="net-gpt-4o",
+        if request.model.lower().startswith(("net-gpt-4",)):
+            request.model = "net-gpt-4o-mini"
+        else:
+            request.model = "net-gpt-3.5-turbo-16k"
+
+        data = to_openai_completion_params(request)
+        client = AsyncClient(api_key=api_key, base_url=os.getenv("GOD_BASE_URL"), timeout=100)
+        response = await client.chat.completions.create(**data)
+
     elif request.model.lower().startswith(("sensechat",)):
         client = sensechat.Completions(threshold=threshold)
         response = await client.create(request)
@@ -92,6 +104,8 @@ async def create_chat_completions(
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
 
     if inspect.isasyncgen(response):
+        logger.debug("ISASYNCGEN")
+
         chunks = await stream.list(response)
         response = create_chat_completion(chunks)
 
