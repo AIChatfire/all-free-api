@@ -30,7 +30,9 @@ TAGS = ["图片编辑"]
 @router.get("/watermark/remove")  # addition
 async def remove_watermark(
         url: str,
+        user_token: str = "821480df15b637852f7e4a0dabb8a156",
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+
 ):
     api_key = auth and auth.credentials or None
 
@@ -50,7 +52,7 @@ async def remove_watermark(
             logger.error(e)
 
             file = await to_bytes(url)
-            data = await textin.document_process(file, service="watermark-remove")
+            data = await textin.document_process(file, service="watermark-remove", token=user_token)
             return data
 
 
