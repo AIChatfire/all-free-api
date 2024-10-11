@@ -109,8 +109,15 @@ async def create_chat_completions(
         chunks = await stream.list(response)
         response = create_chat_completion(chunks)
 
-        response.usage.prompt_tokens = int(len(str(request.messages)) // 1.25)
-        response.usage.completion_tokens = int(len(''.join(chunks)) // 1.25)
+        prompt_tokens = int(len(str(request.messages)) // 1.25)
+        completion_tokens = int(len(''.join(chunks)) // 1.25)
+
+        if hasattr(response, "prompt_tokens"):
+            response.usage.prompt_tokens = int(len(str(request.messages)) // 1.25)
+            response.usage.completion_tokens = int(len(''.join(chunks)) // 1.25)
+        else:
+            response.usage['prompt_tokens'] = prompt_tokens
+            response.usage['completion_tokens'] = completion_tokens
 
     if hasattr(response, "model"):
         response.model = raw_model  # 以请求体为主
