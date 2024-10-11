@@ -46,12 +46,7 @@ async def remove_watermark(
 
     async with ppu_flow(api_key, post="api-watermark-remove"):
         data = await textin.document_process(file, service="watermark-remove")
-
-        base64_data = data['data']['result']['image']
-
-        data['data']['result']['image'] = await to_url(base64_data)
         return data
-
 
 
 if __name__ == '__main__':
