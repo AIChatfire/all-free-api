@@ -10,7 +10,8 @@
 from meutils.pipe import *
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 from meutils.llm.openai_utils import to_openai_images_params
-from meutils.io.image import base64_to_url, image2nowatermark_image
+from meutils.io.image import image2nowatermark_image
+from meutils.io.files_utils import to_url
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ImageRequest
@@ -105,7 +106,7 @@ async def generate(
         ).images.generate(**to_openai_images_params(request))
         # 正方形：256x256, 512x512, 768x768, 1024x1024；长方形（16:9）：1280x800, 800x1280。
 
-        response.data = [{"url": await base64_to_url(image.b64_json)} for image in response.data]
+        response.data = [{"url": await to_url(image.b64_json)} for image in response.data]
         return response
 
     elif request.url:  # 支持图生图：只支持几个

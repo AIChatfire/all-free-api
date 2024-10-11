@@ -10,7 +10,7 @@
 from meutils.pipe import *
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 from meutils.llm.openai_utils import to_openai_images_params
-from meutils.io.image import base64_to_url, image2nowatermark_image
+from meutils.io.image import image2nowatermark_image
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.schemas.openai_types import ImageRequest

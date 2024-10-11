@@ -24,7 +24,7 @@ from meutils.apis.kuaishou import klingai_video
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 from meutils.apis.jina import rerank
 from meutils.apis.baidu import bdaitpzs
-from meutils.io.image import base64_to_bytes
+from meutils.io.files_utils import base64_to_bytes
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header
 from fastapi.responses import StreamingResponse

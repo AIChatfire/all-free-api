@@ -10,7 +10,8 @@
 from asgiref.sync import sync_to_async, async_to_sync
 
 from meutils.pipe import *
-from meutils.io.image import base64_to_bytes, image_to_base64
+from meutils.io.files_utils import to_bytes, file_to_base64
+
 from dashscope import Application, Generation, MultiModalConversation
 
 from chatllm.schemas.openai_api_protocol import ChatCompletionRequest, UsageInfo
@@ -44,7 +45,7 @@ class Completions(object):
                 from chatllm.llmchain.completions import chatglm_web
                 upload = async_to_sync(chatglm_web.Completions().put_object_for_openai)
 
-                file_object = upload(base64_to_bytes(image_url), purpose="file_upload")
+                file_object = upload(to_bytes(image_url), purpose="file_upload")
                 image_url = file_object.filename
 
                 logger.debug(file_object)

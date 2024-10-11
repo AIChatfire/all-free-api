@@ -24,7 +24,6 @@ from meutils.apis import textin
 from meutils.io.files_utils import to_bytes, to_url
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 from meutils.apis.baidu import bdaitpzs
-from meutils.io.image import base64_to_bytes
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header
 from fastapi.responses import StreamingResponse
