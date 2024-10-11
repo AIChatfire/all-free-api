@@ -103,7 +103,7 @@ async def create_chat_completions(
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
 
-    if inspect.isasyncgen(response):
+    if inspect.isasyncgen(response):  # 非流
         logger.debug("ISASYNCGEN")
 
         chunks = await stream.list(response)
@@ -113,8 +113,8 @@ async def create_chat_completions(
         completion_tokens = int(len(''.join(chunks)) // 1.25)
 
         if hasattr(response, "prompt_tokens"):
-            response.usage.prompt_tokens = int(len(str(request.messages)) // 1.25)
-            response.usage.completion_tokens = int(len(''.join(chunks)) // 1.25)
+            response.usage.prompt_tokens = prompt_tokens
+            response.usage.completion_tokens = completion_tokens
         else:
             response.usage['prompt_tokens'] = prompt_tokens
             response.usage['completion_tokens'] = completion_tokens

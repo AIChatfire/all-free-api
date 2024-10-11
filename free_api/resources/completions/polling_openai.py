@@ -63,8 +63,17 @@ class Completions(object):
 
                 if e.status_code == 400:  # todo: 细分错误
                     send_message(f"{e.response}\n\n{e}\n\n{request.model_dump()}", title=self.base_url)
-                    if any(i in str(e) for i in {"The parameter is invalid", "'role' has invalid value"}):
+
+                    if any(i in str(e) for i in {
+                        "The parameter is invalid",
+                        "'role' has invalid value",
+                        "角色信息不能为空",  # 智谱
+                        "'assistant' must not be empty", # moonshot
+                    }):
                         data['messages'] = [{'role': 'user', 'content': str(request.messages)}]  # 重构 messages
+                        continue
+                    elif "max_tokens: Must be less than" in str(e):
+                        data['max_tokens'] = 4096
                         continue
 
                     else:
