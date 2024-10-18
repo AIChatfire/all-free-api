@@ -26,7 +26,7 @@ ENV DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
 ENV ZHIPUAI_BASE_URL=https://open.bigmodel.cn/api/paas/v4
 ENV HUNYUAN_BASE_URL=https://api.hunyuan.cloud.tencent.com/v1
 ENV SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
-
+ENV TOGETHER_BASE_URL=https://api.together.xyz/v1
 
 
 # 暴露端口

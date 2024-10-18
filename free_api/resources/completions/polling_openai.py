@@ -75,7 +75,6 @@ class Completions(object):
                     elif "max_tokens: Must be less than" in str(e):
                         data['max_tokens'] = 4096
                         continue
-
                     else:
                         chat_completion.choices[0].message.content = chat_completion_chunk.choices[
                             0].delta.content = str(e)

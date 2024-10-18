@@ -13,7 +13,7 @@ from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
 from free_api.routers import openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
-from free_api.routers import files, images
+from free_api.routers import files, images, api_images
 from free_api.routers import audio
 from free_api.routers import tasks, reranker
 
@@ -23,7 +23,7 @@ from free_api.routers.oneapi import extra_api
 from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import kling, cogvideox
 
-from free_api.routers.tools import document_intelligence
+from free_api.routers.aitools import document_intelligence, images as aitools_images
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
 
 app = App()
@@ -47,10 +47,11 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 app.include_router(chatfire_all.router, '/all/v1', tags=chatfire_all.TAGS)
 
 # Audio
-app.include_router(audio.router, '/audio/v1', tags=audio.TAGS)
+app.include_router(audio.router, '/audio/v1', tags=audio.TAGS)  # todo: 反代
 
 # Image
 app.include_router(images.router, '/images/v1', tags=images.TAGS)
+app.include_router(api_images.router, '/api/images/v1', tags=api_images.TAGS)  # 反代
 
 # files
 app.include_router(files.router, '/files/v1', tags=files.TAGS)
@@ -68,7 +69,9 @@ app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不兼容openai
 
 # 小工具
-app.include_router(document_intelligence.router, '/document-intelligence/v1', tags=document_intelligence.TAGS)  # 文档智能
+app.include_router(aitools_images.router, '/aitools/images', tags=aitools_images.TAGS)
+app.include_router(document_intelligence.router, '/aitools/document-intelligence',
+                   tags=document_intelligence.TAGS)  # 文档智能： todo: 标准化
 
 app.include_router(templates.router, tags=templates.TAGS)
 app.include_router(prompter.router, '/tools/v1', tags=prompter.TAGS)
