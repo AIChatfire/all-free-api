@@ -51,7 +51,7 @@ app.include_router(audio.router, '/audio/v1', tags=audio.TAGS)  # todo: 反代
 
 # Image
 app.include_router(images.router, '/images/v1', tags=images.TAGS)
-app.include_router(api_images.router, '/api/images/v1', tags=api_images.TAGS)  # 反代
+app.include_router(api_images.router, '/api/v1', tags=api_images.TAGS)  # 反代
 
 # files
 app.include_router(files.router, '/files/v1', tags=files.TAGS)
@@ -69,9 +69,8 @@ app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不兼容openai
 
 # 小工具
-app.include_router(aitools_images.router, '/aitools/images', tags=aitools_images.TAGS)
-app.include_router(document_intelligence.router, '/aitools/document-intelligence',
-                   tags=document_intelligence.TAGS)  # 文档智能： todo: 标准化
+app.include_router(aitools_images.router, '/aitools', tags=aitools_images.TAGS)
+app.include_router(document_intelligence.router, '/aitools', tags=document_intelligence.TAGS)  # 文档智能： todo: 标准化
 
 app.include_router(templates.router, tags=templates.TAGS)
 app.include_router(prompter.router, '/tools/v1', tags=prompter.TAGS)
