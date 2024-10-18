@@ -41,20 +41,20 @@ async def image_process(
     task = request.get("task")
     if task in HUNYUAN_TASKS:  # hunyuan
         request = HunyuanImageProcessRequest(**request)
-        async with ppu_flow(api_key, post=f"api-aitools-{request.task}"):
+        async with ppu_flow(api_key, post=f"api-aitools"):
             data = await hunyuan_process(request)
             return data
 
     elif task in TEXTIN_TASKS:
         request = TextinImageProcessRequest(**request)
-        async with ppu_flow(api_key, post=f"api-aitools-{request.task}"):
+        async with ppu_flow(api_key, post=f"api-aitools"):
             file = await to_bytes(request.image)
             data = await textin_process(file, service=request.task, response_format=response_format)
             return data
 
     elif task in BAIDU_TASKS:
         request = BaiduImageProcessRequest(**request)
-        async with ppu_flow(api_key, post=f"api-aitools-{request.task}"):
+        async with ppu_flow(api_key, post=f"api-aitools"):
             data = await baidu_process(request)
             return data
 
