@@ -40,7 +40,7 @@ async def generate(
     logger.debug(request)
 
     model = request.get('model', '').lower().lstrip("api-images-").lstrip("api-")
-    if model.startswith(("flux1.1", "flux1.0-turbo", "flux-turbo")):
+    if model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
         request = TogetherImageRequest(**request)
 
         N = eval(request.size.replace('x', '*')) / 1024 / 1024  # 计费

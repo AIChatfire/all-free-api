@@ -26,10 +26,10 @@ router = APIRouter()
 TAGS = ["文档智能"]
 
 
-@router.post("/v1/{service}")  # addition
+@router.post("/v1//document-intelligence/{service}")  # addition
 async def document_process(
         service: str,
-        kwargs: dict = Body(),
+        kwargs: dict = Body(),  # todo: service
         response_format: str = Query("url"),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 ):
