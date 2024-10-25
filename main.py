@@ -24,9 +24,9 @@ from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import kling, cogvideox
 
 from free_api.routers.audio import v1 as audio_v1, fish
-from free_api.routers.images import v1 as images_v1, v2 as images_v2
+from free_api.routers.images import v1 as images_v1, v2 as images_v2, virtual_try_on
 
-from free_api.routers.aitools import document_intelligence, images as aitools_images, virtual_try_on
+from free_api.routers.aitools import document_intelligence, images as aitools_images
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
 
 app = App()
