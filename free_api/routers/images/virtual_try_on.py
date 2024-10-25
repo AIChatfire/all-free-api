@@ -20,7 +20,7 @@ router = APIRouter()
 TAGS = ["虚拟换衣"]
 
 
-@router.post("/virtual-try-on")  # todo: sd3 兜底
+@router.post("/images/virtual-try-on")  # todo: sd3 兜底
 async def generate(
         request: kolors_virtual_try_on.KolorsTryOnRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
