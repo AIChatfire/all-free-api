@@ -163,8 +163,9 @@ async def create_reply(
             data = await kolors_virtual_try_on.create(request)
             url = data["data"][0]["url"]
             responses += [
+                HookResponse(type="image", content=url),
                 HookResponse(type="image", content=request.human_image),
-                HookResponse(type="image", content=url)
+
             ]
 
     return responses
