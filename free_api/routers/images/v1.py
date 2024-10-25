@@ -34,12 +34,18 @@ TAGS = ["图片生成"]
 async def generate(
         request: dict = Body(...),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+
+        redirect_flux: Optional[bool] = Query(None),
 ):
     api_key = auth and auth.credentials or None
 
     logger.debug(request)
 
     model = request.get('model', '').lower().lstrip("api-images-").lstrip("api-")
+
+    if model.startswith("flux") and redirect_flux:  # 重定向 flux
+        request.model = "flux"
+
     if model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
         request = TogetherImageRequest(**request)
 
