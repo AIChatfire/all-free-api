@@ -51,7 +51,7 @@ app.include_router(chatfire_all.router, '/all/v1', tags=chatfire_all.TAGS)
 
 # Audio
 app.include_router(audio_v1.router, '/audio/v1', tags=audio_v1.TAGS)  # todo: 反代
-app.include_router(fish.router, '/audio/fish', tags=fish.TAGS)
+app.include_router(fish.router, '/fish', tags=fish.TAGS)
 
 # Image
 app.include_router(images_v1.router, '/images/v1', tags=images_v1.TAGS)

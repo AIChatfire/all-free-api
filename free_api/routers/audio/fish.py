@@ -19,7 +19,7 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, BackgroundTasks, D
 from fastapi.responses import Response, FileResponse
 
 router = APIRouter()
-TAGS = ['语音合成']
+TAGS = ["Audio"]
 
 
 @router.post("/v1/tts")
