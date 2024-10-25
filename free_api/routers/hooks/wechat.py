@@ -165,7 +165,6 @@ async def create_reply(
             responses += [
                 HookResponse(type="image", content=url),
                 HookResponse(type="image", content=request.human_image),
-
             ]
 
     return responses
