@@ -29,3 +29,4 @@ jinja2
 sensenova
 qianfan
 zhipuai
+fish_audio_sdk
