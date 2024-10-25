@@ -50,13 +50,13 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 app.include_router(chatfire_all.router, '/all/v1', tags=chatfire_all.TAGS)
 
 # Audio
-app.include_router(audio_v1.router, '/audio/v1', tags=audio_v1.TAGS)  # todo: 反代
+app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)  # todo: 反代
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
 
 # Image
-app.include_router(images_v1.router, '/images/v1', tags=images_v1.TAGS)
-app.include_router(images_v2.router, '/images/v2', tags=images_v2.TAGS)  # 反代
-app.include_router(virtual_try_on.router, '/images/v1', tags=virtual_try_on.TAGS)
+app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
+app.include_router(images_v2.router, '/v2', tags=images_v2.TAGS)  # 反代
+app.include_router(virtual_try_on.router, '/v1', tags=virtual_try_on.TAGS)
 
 # files
 app.include_router(files.router, '/files/v1', tags=files.TAGS)
