@@ -150,6 +150,23 @@ async def create_reply(
             url = f"https://api.chatfire.cn/render/{file.name}"
             responses += [HookResponse(content=url)]
 
+    elif content.startswith('/换衣'):
+        from meutils.apis.hf import kolors_virtual_try_on
+        urls = parse_url(content, for_image=True)
+
+        if len(urls):
+            request = kolors_virtual_try_on.KolorsTryOnRequest(
+                human_image=urls[0],
+                cloth_image=urls[-1]
+            )
+
+            data = await kolors_virtual_try_on.create(request)
+            url = data["data"][0]["url"]
+            responses += [
+                HookResponse(type="image", content=request.human_image),
+                HookResponse(type="image", content=url)
+            ]
+
     return responses
 
 
