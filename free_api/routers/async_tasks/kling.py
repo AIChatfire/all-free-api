@@ -20,7 +20,7 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
-TAGS = ["kling"]
+TAGS = ["视频生成"]
 
 
 @router.get("/{action}/{action2}/{task_id}")
