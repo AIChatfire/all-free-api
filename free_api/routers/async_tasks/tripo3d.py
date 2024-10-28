@@ -12,17 +12,17 @@ from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import ppu_flow
 
-from meutils.apis.hailuoai import videos
-from meutils.schemas.hailuo_types import VideoRequest
+from meutils.apis.tripo3d import images
+from meutils.schemas.tripo3d_types import ImageRequest
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
-TAGS = ["视频生成"]
+TAGS = ["图片生成"]
 
 
-@router.get("/query/video_generation")  # GET https://api.minimax.chat/v1/query/video_generation?task_id={task_id}
+@router.get("/task/{task_id}")
 @alru_cache(ttl=15)
 async def get_task(
         task_id: str,
@@ -32,13 +32,13 @@ async def get_task(
     if token is None:
         raise HTTPException(status_code=404, detail="TaskID not found")
 
-    data = await videos.get_task(task_id, token)
-    return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
+    data = await images.get_task(task_id, token)
+    return data
 
 
-@router.post("/video_generation")  # POST https://api.minimax.chat/v1/video_generation
+@router.post("/task")
 async def create_task(
-        request: VideoRequest,
+        request: ImageRequest,
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
         vip: Optional[bool] = Query(True)
@@ -46,12 +46,13 @@ async def create_task(
     api_key = auth and auth.credentials or None
 
     N = 1
-    async with ppu_flow(api_key, post="official-api-hailuo-video" if vip else "api-hailuo-video", n=N):
-        videos.send_message(request)
-        task = await videos.create_task(request, vip=vip)
-        videos.send_message(task)
+    async with ppu_flow(api_key, post="api-tripo3d", n=N):
+        images.send_message(request)
+        task = await images.create_task(request, vip=vip)
+        images.send_message(task)
 
-        await redis_aclient.set(task.task_id, task.system_fingerprint, ex=1 * 24 * 3600)
+        for task_id in task.task_ids:
+            await redis_aclient.set(task_id, task.system_fingerprint, ex=7 * 24 * 3600)
 
         return task.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 

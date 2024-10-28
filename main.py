@@ -21,7 +21,7 @@ from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
 from free_api.routers.oneapi import extra_api
 from free_api.routers.cv import ocr
-from free_api.routers.async_tasks import kling, cogvideox, hailuo
+from free_api.routers.async_tasks import kling, cogvideox, hailuo, tripo3d
 
 from free_api.routers.audio import v1 as audio_v1, fish
 from free_api.routers.images import v1 as images_v1, v2 as images_v2, virtual_try_on
@@ -68,6 +68,7 @@ app.include_router(ocr.router, '/ocr/v1', tags=ocr.TAGS)
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
+app.include_router(tripo3d.router, '/tripo3d/v1', tags=tripo3d.TAGS)
 
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai

@@ -71,6 +71,8 @@ async def create_chat_completions(
         # model="net-gpt-4o",
         if request.model.lower().startswith(("net-gpt-4",)):
             request.model = "net-gpt-4o-mini"
+        elif request.model.lower().startswith(("net-claude",)):
+            request.model = "net-claude-1.3-100k"
         else:
             request.model = "net-gpt-3.5-turbo-16k"
 
