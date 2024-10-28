@@ -2,6 +2,11 @@
 FROM python:3.10-slim
 LABEL maintainer="313303303@qq.com"
 
+
+# 依赖
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
+RUN apt-get update && apt-get install -y nodejs -y
+
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
 
