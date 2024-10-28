@@ -31,3 +31,4 @@ qianfan
 zhipuai
 fish_audio_sdk
 oss2
+execjs
