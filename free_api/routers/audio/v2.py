@@ -8,6 +8,7 @@
 # @Software     : PyCharm
 # @Description  :
 from meutils.pipe import *
+from meutils.io.files_utils import to_bytes
 from meutils.apis.siliconflow import audio as siliconflow_audio
 from meutils.schemas.openai_types import TTSRequest, AudioRequest
 
@@ -68,6 +69,8 @@ async def create_transcriptions(
     N = None
     N = 1
     async with ppu_flow(api_key, post='api-asr', n=None):
+        file = await to_bytes(file)
+
         request = AudioRequest(
             file=file,
             model=model,
