@@ -8,3 +8,10 @@
 - 预警通知
 
 
+
+```shell
+docker run -d --name=all-free-api -p 8080:8080 \
+  --log-driver json-file \
+  --log-opt max-size=1m \
+  --log-opt max-file=10
+```
