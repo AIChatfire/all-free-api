@@ -9,7 +9,6 @@
 # @Description  : 
 
 from meutils.pipe import *
-from meutils.schemas.openai_types import AudioRequest
 from meutils.notice.feishu import send_message as _send_message
 
 from openai import OpenAI, AsyncOpenAI, APIStatusError
