@@ -9,12 +9,12 @@
 # @Description  :
 from meutils.pipe import *
 from meutils.io.files_utils import to_base64
-
 from meutils.llm.openai_utils import ppu_flow
-
-from meutils.schemas.image_types import ImageRequest, FluxImageRequest, SDImageRequest, TogetherImageRequest
+from meutils.schemas.image_types import ImageRequest, FluxImageRequest, SDImageRequest, TogetherImageRequest, \
+    RecraftImageRequest
 from meutils.schemas.image_types import KlingImageRequest, CogviewImageRequest, HunyuanImageRequest
 
+from meutils.apis.images import deepinfra, recraft
 from meutils.apis.siliconflow import images as siliconflow_images
 from meutils.apis.together import images as together_images
 from meutils.apis.chatglm import images as cogview_images
@@ -32,10 +32,12 @@ TAGS = ["图片生成"]
 
 @router.post("/images/generations")  # todo: sd3 兜底
 async def generate(
-        request: dict = Body(...),
+        request: dict = Body(..., examples=[{"model": "recraftv3", "prompt": "画条狗"}]),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
         redirect_flux: Optional[bool] = Query(None),
+
+        n: Optional[float] = Query(1),
 ):
     api_key = auth and auth.credentials or None
 
@@ -44,25 +46,26 @@ async def generate(
     model = request.get('model', '').lower().lstrip("api-images-").lstrip("api-")
 
     if model.startswith("flux") and redirect_flux:  # 重定向 flux
-        request.model = "flux"
+        request["model"] = "flux"
 
-    if model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
+    if any(i in model for i in {"1.1", "pro", "dev", "turbo"}):
+        request = ImageRequest(**request)
+
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
+            response = await deepinfra.generate(request)
+            return response
+
+    elif model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
         request = TogetherImageRequest(**request)
 
-        N = eval(request.size.replace('x', '*')) / 1024 / 1024  # 计费
-        N = None
-
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=N):
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await together_images.generate(request)
             return response
 
     elif model.startswith(("flux",)):
         request = FluxImageRequest(**request)
 
-        N = eval(request.size.replace('x', '*')) / 1024 / 1024  # 计费
-        N = None
-
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=N):
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await siliconflow_images.generate(request)
             return response
 
@@ -70,48 +73,42 @@ async def generate(
         request = SDImageRequest(**request)
         request.image = request.image and await to_base64(request.image)  # 图生图
 
-        N = eval(request.size.replace('x', '*')) / 1024 / 1024  # 计费
-        N = None
-
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=N):
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await siliconflow_images.generate(request)
             return response
 
     elif model.startswith(("cogview",)):  # todo: 官方api
         request = CogviewImageRequest(**request)
 
-        N = 1
-        N = None
-
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=N):
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await cogview_images.generate(request)
             return response
 
     elif model.startswith(("hunyuan", "yuanbao")):  # 默认4张
         request = HunyuanImageRequest(**request)
 
-        N = None
-
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=N):
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await hunyuan_images.generate(request)
             return response
 
     elif model.startswith(("kling",)):  # 默认4张
         request = KlingImageRequest(**request)
 
-        N = request.n / 4
-        N = None
-
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=N):
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await kling_images.generate(request)
+            return response
+
+    elif model.startswith(("recraftv3",)):
+        request = RecraftImageRequest(**request)
+
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
+            response = await recraft.generate(request)
             return response
 
     else:  # 其他
         request = FluxImageRequest(**request)
 
-        N = None
-
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=N):
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await siliconflow_images.generate(request)
             return response
 

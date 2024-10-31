@@ -6,7 +6,8 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
+# @Description  :
+import os
 
 from meutils.pipe import *
 
@@ -22,7 +23,7 @@ class Completions(object):
     def __init__(self, api_key):
         self.api_key = api_key
 
-    async def create(self, request: ChatCompletionRequest):
+    async def create(self, request: ChatCompletionRequest) -> AsyncGenerator:
 
         vip = "vip" in request.model  # todo: 增强
 
@@ -97,6 +98,8 @@ class Completions(object):
                 if chunk == "DONE": break
 
         return gen_chunks(func)
+        # async for i in gen_chunks(func):
+        #     yield i
 
     async def create_task(self, task_type, video_request, vip: bool = False):
         headers = {'Authorization': f'Bearer {self.api_key}'}
@@ -121,3 +124,25 @@ class Completions(object):
             response = await client.post(f"/{task_type}", json=payload)
             if response.is_success:
                 return Task(**response.json())
+
+
+if __name__ == '__main__':
+    _ = Completions(os.getenv("OPENAI_API_KEY_SSVIP")).create(
+        ChatCompletionRequest(messages = [{'role': 'user', 'content': '比卡丘'}])
+    )
+
+    # async def main():
+    #     async for i in await _:
+    #         print(i, end='')
+
+    # print(inspect.isasyncgen( _))
+    # print(inspect.isasyncgenfunction(_))
+    # print(type(_))
+    #
+    # print(inspect.isawaitable(_))
+
+    arun(_)
+
+    # arun(main())
+
+

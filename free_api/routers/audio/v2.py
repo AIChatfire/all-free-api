@@ -10,7 +10,7 @@
 from meutils.pipe import *
 from meutils.io.files_utils import to_bytes
 from meutils.apis.siliconflow import audio as siliconflow_audio
-from meutils.schemas.openai_types import TTSRequest, AudioRequest
+from meutils.schemas.openai_types import TTSRequest, STTRequest
 
 from meutils.llm.openai_utils import ppu_flow
 
@@ -63,15 +63,15 @@ async def create_transcriptions(
         temperature: Optional[float] = Form(None),
         timestamp_granularities: Optional[List[Literal["word", "segment"]]] = Form(None),
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+
+        n: Optional[int] = Query(1),
 ):
     api_key = auth and auth.credentials or None
 
-    N = None
-    N = 1
-    async with ppu_flow(api_key, post='api-asr', n=None):
+    async with ppu_flow(api_key, post='api-asr', n=n):
         file = await to_bytes(file)
 
-        request = AudioRequest(
+        request = STTRequest(
             file=file,
             model=model,
             language=language,
