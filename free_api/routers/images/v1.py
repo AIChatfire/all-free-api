@@ -55,7 +55,7 @@ async def generate(
     #         response = await together_images.generate(request)
     #         return response
 
-    if model.startswith(("flux",)):
+    if model.startswith(("flux",)):  # flux.1.1-pro
         request = FluxImageRequest(**request)
 
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
