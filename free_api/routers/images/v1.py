@@ -37,7 +37,7 @@ async def generate(
 
         redirect_flux: Optional[bool] = Query(None),
 
-        n: Optional[float] = Query(1),
+        n: Optional[int] = Query(1),  # 默认收费
 ):
     api_key = auth and auth.credentials or None
 
@@ -48,14 +48,7 @@ async def generate(
     if model.startswith("flux") and redirect_flux:  # 重定向 flux
         request["model"] = "flux"
 
-    if any(i in model for i in {"1.1", "pro", "dev", "turbo"}):
-        request = ImageRequest(**request)
-
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
-            response = await deepinfra.generate(request)
-            return response
-
-    elif model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
+    if model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
         request = TogetherImageRequest(**request)
 
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
@@ -101,6 +94,7 @@ async def generate(
     elif model.startswith(("recraftv3",)):
         request = RecraftImageRequest(**request)
 
+        n *= request.n
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await recraft.generate(request)
             return response

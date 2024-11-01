@@ -23,8 +23,8 @@ from free_api.routers.oneapi import extra_api
 from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import kling, cogvideox, hailuo, tripo3d
 
-from free_api.routers.audio import v1 as audio_v1, fish, v2 as audio_v2
-from free_api.routers.images import v1 as images_v1, v2 as images_v2, virtual_try_on
+from free_api.routers.audio import v1 as audio_v1, fish
+from free_api.routers.images import v1 as images_v1, virtual_try_on
 
 from free_api.routers.aitools import document_intelligence, images as aitools_images
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
@@ -50,13 +50,13 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 app.include_router(chatfire_all.router, '/all/v1', tags=chatfire_all.TAGS)
 
 # Audio
-app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)
-app.include_router(audio_v2.router, '/v2', tags=audio_v2.TAGS)  # 反代
+app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)  # newapi不兼容
+app.include_router(audio_v1.router, '/v2', tags=audio_v1.TAGS)  # 反代
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
 
-# Image
+# Images
 app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
-app.include_router(images_v2.router, '/v2', tags=images_v2.TAGS)  # 反代
+app.include_router(images_v1.router, '/v2', tags=images_v1.TAGS)  # 反代
 app.include_router(virtual_try_on.router, '/v1', tags=virtual_try_on.TAGS)
 
 # files
