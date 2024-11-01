@@ -48,14 +48,14 @@ async def generate(
     if model.startswith("flux") and redirect_flux:  # 重定向 flux
         request["model"] = "flux"
 
-    if model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
-        request = TogetherImageRequest(**request)
+    # if model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
+    #     request = TogetherImageRequest(**request)
+    #
+    #     async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
+    #         response = await together_images.generate(request)
+    #         return response
 
-        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
-            response = await together_images.generate(request)
-            return response
-
-    elif model.startswith(("flux",)):
+    if model.startswith(("flux",)):
         request = FluxImageRequest(**request)
 
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
