@@ -50,12 +50,10 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 app.include_router(chatfire_all.router, '/all/v1', tags=chatfire_all.TAGS)
 
 # Audio
-app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)  # newapi不兼容
-app.include_router(audio_v1.router, '/v2', tags=audio_v1.TAGS)  # 反代
+app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)  # 反代
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
 
 # Images
-app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
 app.include_router(images_v1.router, '/v2', tags=images_v1.TAGS)  # 反代
 app.include_router(virtual_try_on.router, '/v1', tags=virtual_try_on.TAGS)
 
