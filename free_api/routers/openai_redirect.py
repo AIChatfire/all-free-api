@@ -33,11 +33,12 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/{model:path}/to/{redirect_model:path}/v1/chat/completions")  # {model:path} {redirect_model:path}
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),  # oneapi配置
 
         model: str = 'gpt-3.5-turbo',
         base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),
 
+        # 兜底模型
         redirect_api_key: Optional[str] = Query(None),
         redirect_model: str = "deepseek-chat",  # 默认走 chatfire
         redirect_base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),

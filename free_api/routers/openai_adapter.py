@@ -7,7 +7,6 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import os
 
 from aiostream import stream
 

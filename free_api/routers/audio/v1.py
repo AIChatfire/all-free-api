@@ -85,7 +85,7 @@ async def create_transcriptions(
             temperature=temperature,
             timestamp_granularities=timestamp_granularities
         )
-        response = await siliconflow_audio.asr(request)
+        response = await siliconflow_audio.asr(request)  # oi用不了
         return response
 
 

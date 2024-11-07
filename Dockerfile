@@ -20,8 +20,13 @@ ENV HF_TOKEN=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
 # FEISHU_APP_SECRET
 # MINIO_ACCESS_KEY
 
+# 自建
 ENV OPENAI_BASE_URL=https://api.chatfire.cn/v1
-ENV DIFY_BASE_URL=http://flow.chatfire.cn/v1
+ENV DIFY_BASE_URL=http://dify.chatfire.cn/v1
+ENV SEARXNG_BASE_URL=https://search.chatfire.cn
+
+
+# 第三方
 ENV GOD_BASE_URL=https://api.gptgod.online/v1
 
 ENV STEP_BASE_URL=https://api.stepfun.com/v1

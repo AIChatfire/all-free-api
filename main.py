@@ -9,6 +9,8 @@
 # @Description  :
 
 from meutils.serving.fastapi import App
+
+from free_api.routers import search
 from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
 from free_api.routers import openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
 from free_api.routers import chat_image, chat_to_audio, chat_video
@@ -30,6 +32,9 @@ from free_api.routers.aitools import document_intelligence, images as aitools_im
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
 
 app = App()
+
+# search
+app.include_router(search.router, '', tags=search.TAGS)
 
 # Chat
 app.include_router(openai_adapter.router, '/adapter/v1', tags=openai_adapter.TAGS)

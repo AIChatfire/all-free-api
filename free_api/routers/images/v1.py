@@ -87,6 +87,7 @@ async def generate(
     elif model.startswith(("kling",)):  # 默认4张
         request = KlingImageRequest(**request)
 
+        n *= request.n or 1
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await kling_images.generate(request)
             return response
@@ -94,7 +95,7 @@ async def generate(
     elif model.startswith(("recraftv3",)):
         request = RecraftImageRequest(**request)
 
-        n *= request.n
+        n *= request.n or 1
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await recraft.generate(request)
             return response

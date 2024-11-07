@@ -30,10 +30,11 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/chat/completions")
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
         base_url: Optional[str] = Query("https://api.siliconflow.cn/v1"),
         feishu_url: Optional[str] = Query(None),
         redis_key: Optional[str] = Query(None),
+
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 ):
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
@@ -41,13 +42,12 @@ async def create_chat_completions(
     # logger.debug(feishu_url)
 
     raw_model = request.model
-    if any(i in base_url for i in {"spark-api", "siliconflow", "together"}):  # 实际调用
+    request.max_tokens = request.max_tokens or min(request.max_tokens, 4096)
+    if any(i in base_url for i in {"spark-api", "siliconflow", "together", "lingyiwanwu"}):  # 实际调用
         if request.model.startswith("gemini-1.5"):
             request.model = REDIRECT_MODEL.get("gemini-1.5")
         else:  # https://spark-api-open.xf-yun.com/v1
             request.model = REDIRECT_MODEL.get(request.model, request.model)
-    if "groq" in base_url:
-        request.last_content = None
 
     client = Completions(api_key=api_key, base_url=base_url, feishu_url=feishu_url, redis_key=redis_key)
     response = await client.acreate(request)
