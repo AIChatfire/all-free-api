@@ -21,7 +21,7 @@ from free_api.routers import tasks, reranker
 
 from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
-from free_api.routers.oneapi import extra_api
+from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import kling, cogvideox, hailuo, tripo3d
 
@@ -99,7 +99,7 @@ app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)
 app.include_router(wechat.router, '/hooks/v1', tags=wechat.TAGS)
 
 # ONEAPI: extra-api
-app.include_router(extra_api.router, tags=extra_api.TAGS)
+app.include_router(oneapi.router, '/oneapi', tags=oneapi.TAGS)
 
 if __name__ == '__main__':
     app.run()

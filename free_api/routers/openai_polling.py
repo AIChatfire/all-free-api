@@ -42,7 +42,6 @@ async def create_chat_completions(
     # logger.debug(feishu_url)
 
     raw_model = request.model
-    request.max_tokens = request.max_tokens or min(request.max_tokens, 4096)
     if any(i in base_url for i in {"spark-api", "siliconflow", "together", "lingyiwanwu"}):  # 实际调用
         if request.model.startswith("gemini-1.5"):
             request.model = REDIRECT_MODEL.get("gemini-1.5")
