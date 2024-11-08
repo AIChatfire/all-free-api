@@ -19,6 +19,8 @@ ENV HF_TOKEN=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
 # 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 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
 # FEISHU_APP_SECRET
 # MINIO_ACCESS_KEY
+ENV FEISHU_APP_ID=cli_a45451400dfd900b
+ENV MINIO_ENDPOINT=oss.ffire.cc
 
 # 自建
 ENV OPENAI_BASE_URL=https://api.chatfire.cn/v1
