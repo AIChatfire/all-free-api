@@ -34,7 +34,7 @@ from free_api.routers.tools import prompter, translator, imager, news, textcard,
 app = App()
 
 # search
-app.include_router(search.router, '', tags=search.TAGS)
+app.include_router(search.router, '/v1', tags=search.TAGS)
 
 # Chat
 app.include_router(openai_adapter.router, '/adapter/v1', tags=openai_adapter.TAGS)
@@ -63,7 +63,7 @@ app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)  # 反代
 app.include_router(virtual_try_on.router, '/v1', tags=virtual_try_on.TAGS)
 
 # files
-app.include_router(files.router, '/files/v1', tags=files.TAGS)
+app.include_router(files.router, '/v1', tags=files.TAGS)
 
 # CV
 app.include_router(ocr.router, '/ocr/v1', tags=ocr.TAGS)
