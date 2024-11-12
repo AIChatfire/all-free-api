@@ -13,9 +13,9 @@ from aiostream import stream
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_completion_params
-from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
 from meutils.llm.completions import dify, tryblend, tune, delilegal
-from meutils.config_utils.lark_utils import get_next_token_for_polling
+from meutils.apis.search import metaso
+from meutils.schemas.openai_types import ChatCompletionRequest
 
 from openai import AsyncClient
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
@@ -40,7 +40,7 @@ async def create_chat_completions(
         max_turns: Optional[int] = None,
 
         vip: Optional[bool] = Query(False),
-
+        response_format: Optional[str] = Query(None),
 ):
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
@@ -86,6 +86,9 @@ async def create_chat_completions(
     elif request.model.lower().startswith(("ernie",)):
         client = chat_qianfan.Completions(threshold=threshold)
         response = await client.create(request)
+
+    elif request.model.startswith(("search",)):  # 搜索
+        response = metaso.create(request, response_format=response_format)
 
     elif api_key.startswith(("app-",)):  # 适配dify
         client = dify.Completions(api_key=api_key)

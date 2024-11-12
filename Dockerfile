@@ -12,6 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 # Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Shanghai
 
 # 环境变量
 ENV HF_ENDPOINT=https://hf.chatfire.cc
@@ -21,6 +22,8 @@ ENV HF_TOKEN=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
 # MINIO_ACCESS_KEY
 ENV FEISHU_APP_ID=cli_a45451400dfd900b
 ENV MINIO_ENDPOINT=oss.ffire.cc
+
+ENV FAL_KEY=7f9f3f03-fa08-4734-9bc2-cb5b549a77fa:b3fc9389d508c17b6981e698e742bf9c
 
 # 自建
 ENV OPENAI_BASE_URL=https://api.chatfire.cn/v1
