@@ -40,7 +40,7 @@ async def create_chat_completions(
         max_turns: Optional[int] = None,
 
         vip: Optional[bool] = Query(False),
-        response_format: Optional[str] = Query(None),
+        engine_type: str = "",
 ):
     api_key = auth and auth.credentials or None
     logger.debug(request.model_dump_json(indent=4))
@@ -88,7 +88,7 @@ async def create_chat_completions(
         response = await client.create(request)
 
     elif request.model.startswith(("search",)):  # 搜索
-        response = metaso.create(request, response_format=response_format)
+        response = metaso.create(request, engine_type=engine_type)
 
     elif api_key.startswith(("app-",)):  # 适配dify
         client = dify.Completions(api_key=api_key)

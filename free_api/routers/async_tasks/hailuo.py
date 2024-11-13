@@ -23,7 +23,7 @@ TAGS = ["视频生成"]
 
 
 @router.get("/query/video_generation")  # GET https://api.minimax.chat/v1/query/video_generation?task_id={task_id}
-@alru_cache(ttl=15)
+@alru_cache(ttl=30)
 async def get_task(
         task_id: str,
 ):
