@@ -86,7 +86,7 @@ async def create_chat_completions(
         client = chat_qianfan.Completions(threshold=threshold)
         response = await client.create(request)
 
-    elif request.model.startswith(("search",)):  # 搜索
+    elif request.model.startswith(("ai-search",)):  # 搜索
         response = metaso.create(request)
 
     elif api_key.startswith(("app-",)):  # 适配dify
