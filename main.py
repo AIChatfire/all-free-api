@@ -15,9 +15,8 @@ from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
 from free_api.routers import openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
-from free_api.routers import files
-
-from free_api.routers import tasks, reranker
+from free_api.routers import test
+from free_api.routers import files, tasks, reranker
 
 from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
@@ -32,6 +31,9 @@ from free_api.routers.aitools import document_intelligence, images as aitools_im
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
 
 app = App()
+
+# 空服务方便开发调试
+app.include_router(test.router, '', tags=test.TAGS)
 
 # search
 app.include_router(search.router, '/v1', tags=search.TAGS)

@@ -100,7 +100,7 @@ async def create_chat_completions(
     elif api_key.startswith(("deli",)):  # 逆向
         response = delilegal.create(request)
 
-    elif api_key.startswith(("tune",)):  # 逆向
+    elif api_key.startswith(("tune",)):  # 逆向 o1 c35 ###################
         response = tune.create(request, vip=vip)
 
     if request.stream:
