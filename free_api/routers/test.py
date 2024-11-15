@@ -17,7 +17,7 @@ router = APIRouter()
 TAGS = ["空服务"]
 
 
-@router.post("/test")
+@router.post("")
 async def create_request(
         request: Request,
 ):

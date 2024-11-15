@@ -33,7 +33,7 @@ from free_api.routers.tools import prompter, translator, imager, news, textcard,
 app = App()
 
 # 空服务方便开发调试
-app.include_router(test.router, '', tags=test.TAGS)
+app.include_router(test.router, '/v1/predictions', tags=test.TAGS)
 
 # search
 app.include_router(search.router, '/v1', tags=search.TAGS)
