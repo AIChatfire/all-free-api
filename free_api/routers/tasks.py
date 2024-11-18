@@ -55,7 +55,7 @@ async def get_tasks(
 
     token = await redis_aclient.get(task_id)  # 绑定对应的 token
     token = token and token.decode()
-    if token is None:
+    if not token:
         raise HTTPException(status_code=404, detail="Task ID not found")
 
     task_type = None
@@ -369,7 +369,7 @@ async def create_tasks(
     # 任务对应的 token
     token = await redis_aclient.get(request.task_id)
     token = token and token.decode()
-    if token is None:
+    if not token:
         raise HTTPException(status_code=404, detail="Task ID not found")
 
     async with ppu_flow(api_key, post="api-vidu-vip" if vip else "api-vidu"):

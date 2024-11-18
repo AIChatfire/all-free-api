@@ -77,7 +77,7 @@ async def get_task(
 
     token = await redis_aclient.get(task_id)  # 绑定对应的 token
     token = token and token.decode()
-    if token is None:
+    if not token:
         raise HTTPException(status_code=404, detail="Task ID not found")
 
     clips = await suno.get_task(task_id, token)

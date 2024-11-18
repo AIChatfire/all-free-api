@@ -38,6 +38,7 @@ async def create_request(
     return data
 
 
+
 if __name__ == '__main__':
     from meutils.serving.fastapi import App
 
