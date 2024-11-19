@@ -24,6 +24,7 @@ TAGS = ["异步任务"]
 
 # 数据库获取任务 https://api.chatfire.cn/replicate/v1/predictions/d42c7e90a577bdec0a68797e77a8e0d8
 
+# @router.get("/{path:path}/{task_id}") # 通用
 @router.get("/predictions/{task_id}")
 @alru_cache(ttl=15)
 async def get_task(
@@ -46,9 +47,11 @@ async def get_task(
     #     return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
     response = await redis_aclient.get(task_id)
-    data = json.loads(response)
-    data.pop('system_fingerprint', None)
-    return data
+
+    response = ReplicateResponse.model_validate_json(response)
+    response.status = "succeeded"
+
+    return response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
 
 # /models/black-forest-labs/flux-1.1-pro/predictions
@@ -65,36 +68,22 @@ async def create_task(
     logger.debug(request.model_dump_json(indent=4))
 
     provider, model = model.split("/")
+    if provider == "stabilityai":
+        model = "stabilityai"
+
     image_request = images.ImageRequest(
         model=model,
         **request.input
     )
 
-    # image_response = await images.generate(image_request)
-    url = "https://oss.ffire.cc/files/kling_watermark.png"
+    async with ppu_flow(api_key, post=f"api-replicate-{model}"):
+        image_response = await images.generate(image_request)
+        urls = [i.url for i in image_response.data]
 
-    response = ReplicateResponse(input=request.input, output=[url])
-    await redis_aclient.set(response.id, response.model_dump_json(), ex=7 * 24 * 3600)
+        response = ReplicateResponse(model=model, input=request.input, output=urls)
+        await redis_aclient.set(response.id, response.model_dump_json(), ex=7 * 24 * 3600)
 
-    return response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
-
-
-#
-
-@router.post("/test/{model:path}/predictions")
-async def create_task(
-        model: str,
-        request: ReplicateRequest,
-
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-
-):
-    api_key = auth and auth.credentials or None
-
-    # image_response = await images.generate(request.input)
-    # url = "https://oss.ffire.cc/files/kling_watermark.png"
-
-    return json.loads(request.input.get('prompt', '{}'))
+        return response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
 
 if __name__ == '__main__':

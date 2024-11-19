@@ -72,7 +72,6 @@ app.include_router(ocr.router, '/ocr/v1', tags=ocr.TAGS)
 
 # 异步任务 async_tasks
 app.include_router(replicate.router, '/replicate/v1', tags=replicate.TAGS)
-app.include_router(replicate.router, '/atask/v1', tags=replicate.TAGS)
 
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
