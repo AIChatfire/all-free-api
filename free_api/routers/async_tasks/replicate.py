@@ -51,47 +51,8 @@ async def get_task(
     return data
 
 
-# @router.post("/models/{provider}/{model}/predictions")
-# async def create_task(
-#         provider: str,
-#         model: str,
-#         request: ReplicateRequest,
-#
-#         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-#
-# ):
-#     api_key = auth and auth.credentials or None
-#
-#     logger.debug(request.model_dump_json(indent=4))
-#
-#     # image_response = await images.generate(request.input)
-#     # url = "https://oss.ffire.cc/files/kling_watermark.png"
-#
-#     response = ReplicateResponse(input=request.input, output=[])
-#     await redis_aclient.set(response.id, response.model_dump_json(), ex=7 * 24 * 3600)
-#
-#     return response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
-#
-# @router.post("/models/{provider}/{model}/predictions")
-# async def create_task(
-#         provider: str,
-#         model: str,
-#         request: ReplicateRequest,
-#
-#         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-#
-# ):
-#     api_key = auth and auth.credentials or None
-#
-#     logger.debug(request.model_dump_json(indent=4))
-#
-#     # image_response = await images.generate(request.input)
-#     # url = "https://oss.ffire.cc/files/kling_watermark.png"
-#
-#     return json.loads(request.input.get('prompt', '{}'))
-#
-
-@router.post("/{model:path}/predictions")
+# /models/black-forest-labs/flux-1.1-pro/predictions
+@router.post("/models/{model:path}/predictions")
 async def create_task(
         model: str,
         request: ReplicateRequest,
@@ -101,11 +62,40 @@ async def create_task(
 ):
     api_key = auth and auth.credentials or None
 
+    logger.debug(request.model_dump_json(indent=4))
+
+    provider, model = model.split("/")
+    image_request = images.ImageRequest(
+        model=model,
+        **request.input
+    )
+
+    # image_response = await images.generate(image_request)
+    url = "https://oss.ffire.cc/files/kling_watermark.png"
+
+    response = ReplicateResponse(input=request.input, output=[url])
+    await redis_aclient.set(response.id, response.model_dump_json(), ex=7 * 24 * 3600)
+
+    return response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
+
+
+#
+
+@router.post("/test/{model:path}/predictions")
+async def create_task(
+        model: str,
+        request: ReplicateRequest,
+
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+
+):
+    api_key = auth and auth.credentials or None
 
     # image_response = await images.generate(request.input)
     # url = "https://oss.ffire.cc/files/kling_watermark.png"
 
     return json.loads(request.input.get('prompt', '{}'))
+
 
 if __name__ == '__main__':
     from meutils.serving.fastapi import App
