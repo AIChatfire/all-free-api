@@ -17,7 +17,7 @@ router = APIRouter()
 TAGS = ["空服务"]
 
 
-@router.post("/{path:path}")
+@router.api_route("/{path:path}", methods=["GET", "POST"])
 async def create_request(
         path: str,
         request: Request,
@@ -27,11 +27,23 @@ async def create_request(
     logger.debug(request.url)
 
     params = request.query_params._dict
-    payload = await request.json()
+
+    try:
+        payload = await request.json()
+    except Exception as e:
+        payload = (await request.body()).decode()
+
+    form = (await request.form())._dict
 
     data = {
-        "params": params,
+        "headers": dict(request.headers),
+        "url": str(request.url),
+        "method": request.method,
+        "path": path,
         "payload": payload,
+        "form": form,
+        "params": params,
+        **params
     }
 
     logger.debug(bjson(data))
@@ -44,7 +56,7 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '/v1')
+    app.include_router(router, '/v0')
 
     app.run()
 
