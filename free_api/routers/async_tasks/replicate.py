@@ -7,7 +7,7 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  : 可当作通用异步任务接口
-
+import json
 
 from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
@@ -49,6 +49,27 @@ async def get_task(
     return data
 
 
+# @router.post("/models/{provider}/{model}/predictions")
+# async def create_task(
+#         provider: str,
+#         model: str,
+#         request: ReplicateRequest,
+#
+#         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+#
+# ):
+#     api_key = auth and auth.credentials or None
+#
+#     logger.debug(request.model_dump_json(indent=4))
+#
+#     # image_response = await images.generate(request.input)
+#     # url = "https://oss.ffire.cc/files/kling_watermark.png"
+#
+#     response = ReplicateResponse(input=request.input, output=[])
+#     await redis_aclient.set(response.id, response.model_dump_json(), ex=7 * 24 * 3600)
+#
+#     return response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
+
 @router.post("/models/{provider}/{model}/predictions")
 async def create_task(
         provider: str,
@@ -65,10 +86,7 @@ async def create_task(
     # image_response = await images.generate(request.input)
     # url = "https://oss.ffire.cc/files/kling_watermark.png"
 
-    response = ReplicateResponse(input=request.input, output=[])
-    await redis_aclient.set(response.id, response.model_dump_json(), ex=7 * 24 * 3600)
-
-    return response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
+    return json.loads(request.input.get('prompt', '{}'))
 
 
 if __name__ == '__main__':
