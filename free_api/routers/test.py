@@ -36,6 +36,7 @@ async def create_request(
     form = (await request.form())._dict
 
     data = {
+        "id": "test",
         "headers": dict(request.headers),
         "url": str(request.url),
         "method": request.method,
