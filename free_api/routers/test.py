@@ -46,6 +46,8 @@ async def create_request(
         "params": params,
         **params
     }
+    if isinstance(payload, dict):
+        data.update(payload)
 
     logger.debug(bjson(data))
 
