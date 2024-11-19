@@ -22,6 +22,8 @@ router = APIRouter()
 TAGS = ["异步任务"]
 
 
+# 数据库获取任务 https://api.chatfire.cn/replicate/v1/predictions/d42c7e90a577bdec0a68797e77a8e0d8
+
 @router.get("/predictions/{task_id}")
 @alru_cache(ttl=15)
 async def get_task(
@@ -69,26 +71,41 @@ async def get_task(
 #     await redis_aclient.set(response.id, response.model_dump_json(), ex=7 * 24 * 3600)
 #
 #     return response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
+#
+# @router.post("/models/{provider}/{model}/predictions")
+# async def create_task(
+#         provider: str,
+#         model: str,
+#         request: ReplicateRequest,
+#
+#         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+#
+# ):
+#     api_key = auth and auth.credentials or None
+#
+#     logger.debug(request.model_dump_json(indent=4))
+#
+#     # image_response = await images.generate(request.input)
+#     # url = "https://oss.ffire.cc/files/kling_watermark.png"
+#
+#     return json.loads(request.input.get('prompt', '{}'))
+#
 
-@router.post("/models/{provider}/{model}/predictions")
+@router.post("/{model:path}/predictions")
 async def create_task(
-        provider: str,
         model: str,
-        request: ReplicateRequest,
+        request: Request,
 
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
 ):
     api_key = auth and auth.credentials or None
 
-    logger.debug(request.model_dump_json(indent=4))
 
     # image_response = await images.generate(request.input)
     # url = "https://oss.ffire.cc/files/kling_watermark.png"
 
     return json.loads(request.input.get('prompt', '{}'))
-
-
 if __name__ == '__main__':
     from meutils.serving.fastapi import App
 

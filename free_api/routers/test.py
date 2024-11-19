@@ -17,8 +17,9 @@ router = APIRouter()
 TAGS = ["空服务"]
 
 
-@router.post("")
+@router.post("/{path:path}")
 async def create_request(
+        path: str,
         request: Request,
 ):
     logger.debug(request.method)
@@ -36,7 +37,6 @@ async def create_request(
     logger.debug(bjson(data))
 
     return data
-
 
 
 if __name__ == '__main__':
