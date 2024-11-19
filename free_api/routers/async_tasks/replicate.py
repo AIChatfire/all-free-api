@@ -94,7 +94,7 @@ async def get_task(
 @router.post("/{model:path}/predictions")
 async def create_task(
         model: str,
-        request: Request,
+        request: ReplicateRequest,
 
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 
@@ -106,6 +106,7 @@ async def create_task(
     # url = "https://oss.ffire.cc/files/kling_watermark.png"
 
     return json.loads(request.input.get('prompt', '{}'))
+
 if __name__ == '__main__':
     from meutils.serving.fastapi import App
 
