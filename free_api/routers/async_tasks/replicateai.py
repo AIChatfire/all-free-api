@@ -62,12 +62,12 @@ async def create_task(
     if onelog := await get_api_key_log(api_key):
         user_id = onelog[0]['user_id']
 
-    n = request.inputs.get('num_outputs', 1)  # n张图片
+    n = request.input.get('num_outputs', 1)  # n张图片
     async with ppu_flow(api_key, post=f"api-replicate-{request.ref.split('/')[-1]}", n=n):
         data = await replicate.create_task(request)
 
         async def update_fn(task: Tasks):
-            if task.status == "SUCCESS": return  # 跳出轮询
+            if task.status == "SUCCESS": return False  # 跳出轮询
 
             task_data = await replicate.get_task(data.id, data.system_fingerprint)
 
@@ -88,7 +88,7 @@ async def create_task(
             "platform": "replicate",
             "action": request.ref,
         }
-        backgroundtasks.add_task(update_or_insert, Tasks, kwargs, update_fn, 5)
+        backgroundtasks.add_task(update_or_insert, Tasks, kwargs, update_fn, 10)
 
         await redis_aclient.set(data.id, data.system_fingerprint, ex=7 * 24 * 3600)
         return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
