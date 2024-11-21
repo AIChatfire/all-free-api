@@ -51,7 +51,7 @@ async def create_task(
         task = await videos.create_task(request, vip=vip)
         videos.send_message(task)
 
-        await redis_aclient.set(task.task_id, task.system_fingerprint, ex=1 * 24 * 3600)
+        await redis_aclient.set(task.task_id, task.system_fingerprint, ex=30 * 24 * 3600)
 
         return task.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 

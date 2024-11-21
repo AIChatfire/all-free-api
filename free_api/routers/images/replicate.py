@@ -11,7 +11,7 @@
 from meutils.pipe import *
 from meutils.llm.openai_utils import ppu_flow
 
-from meutils.apis.replicate import images
+from meutils.apis.replicateai import images
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks

@@ -5,33 +5,38 @@ fastapi
 uvicorn
 sse_starlette
 gunicorn
-
-openai
-tiktoken
-langchain
-websocket
-
+python-multipart
+jinja2
 
 minio
 redis
+aiomysql
+sqlmodel
 
 jsonpath
 json_repair
 
 tabulate
 tenacity
-edge_tts
 
+pyexecjs
+PyJWT
+
+openai
+websocket
+tiktoken
+langchain
+fal-client
+replicate
 gradio_client==1.3.0
-python-multipart
-jinja2
-
+edge_tts
 sensenova
 qianfan
 zhipuai
 fish_audio_sdk
 oss2
-pyexecjs
-PyJWT
 
-fal-client
+
+
+
+

@@ -14,6 +14,7 @@ from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import ppu_flow
 from meutils.apis.siliconflow import images
 from meutils.schemas.replicate_types import ReplicateRequest, ReplicateResponse
+from meutils.apis.replicateai import raw as replicate
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
