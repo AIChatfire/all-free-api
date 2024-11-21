@@ -98,6 +98,7 @@ app.include_router(watermark.router, '/tools/v1', tags=watermark.TAGS)
 
 # GOAMZ
 app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)
+app.include_router(suno.router, '/suno/v1', tags=suno.TAGS)
 
 # Hook
 app.include_router(wechat.router, '/hooks/v1', tags=wechat.TAGS)
