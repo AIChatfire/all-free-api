@@ -62,7 +62,8 @@ async def create_task(
     if onelog := await get_api_key_log(api_key):
         user_id = onelog[0]['user_id']
 
-    async with ppu_flow(api_key, post=f"api-replicate-{request.ref.split('/')[-1]}"):
+    n = request.inputs.get('num_outputs', 1)  # n张图片
+    async with ppu_flow(api_key, post=f"api-replicate-{request.ref.split('/')[-1]}", n=n):
         data = await replicate.create_task(request)
 
         async def update_fn(task: Tasks):
