@@ -22,48 +22,49 @@ from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks, \
     Path
 
-from free_api.resources.completions.redirect import Completions
 
 router = APIRouter()
-TAGS = ["文本生成"]
+TAGS = ["重定向"]
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 
-@router.post("/{model:path}/to/{redirect_model:path}/v1/chat/completions")  # {model:path} {redirect_model:path}
+@router.post("/{model:path}/to/{redirect_model:path}")  # {model:path} {redirect_model:path}
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),  # oneapi配置
 
-        model: str = 'gpt-3.5-turbo',
-        base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),
+        model: str = 'gpt-3.5-turbo',  # 源模型
 
         # 兜底模型
-        redirect_api_key: Optional[str] = Query(None),
-        redirect_model: str = "deepseek-chat",  # 默认走 chatfire
-        redirect_base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),
+        redirect_model: str = "deepseek-chat",  # 目标模型 支持lambda "lambda m: m.split('-')[0]"
+        redirect_base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),  # 目标地址
 
         threshold: Optional[int] = None,
         max_turns: Optional[int] = None,
+
+        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),  # 渠道密钥
 ):
     logger.debug(request.model_dump_json(indent=4))
 
+    # 渠道密钥
     api_key = auth and auth.credentials or None
-    if api_key.startswith('http'):
-        api_key = await get_next_token_for_polling(feishu_url=api_key)  # 飞书轮询
+    if api_key.startswith('http'):  # 飞书轮询
+        api_key = await get_next_token_for_polling(feishu_url=api_key)
+    elif ',' in api_key:  # 字符串：todo redis
+        api_key = np.random.choice(api_key.split(','))
 
     if max_turns:  # 限制对话轮次
         request.messages = request.messages[-(2 * max_turns - 1):]
 
-    request.model = model
     if (threshold is None
             or len(str(request.messages)) > threshold  # 动态切模型: 默认切换模型，可设置大于1000才切换
             or "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content)
     ):
-        request.model = redirect_model
-        openai = AsyncClient(api_key=redirect_api_key, base_url=redirect_base_url)  # 重定向兜底
+        request.model = redirect_model if 'lambda' not in redirect_model else eval(redirect_model)(model)  # 模型映射
+        openai = AsyncClient(api_key=api_key, base_url=redirect_base_url)
     else:
-        openai = AsyncClient(api_key=api_key, base_url=base_url)  # 重定向
+        request.model = model
+        openai = AsyncClient()
 
     data = to_openai_completion_params(request)
     response = await openai.chat.completions.create(**data)

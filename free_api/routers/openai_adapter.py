@@ -13,7 +13,7 @@ from aiostream import stream
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_completion_params
-from meutils.llm.completions import dify, tryblend, tune, delilegal
+from meutils.llm.completions import dify, tryblend, tune, delilegal, rag
 from meutils.apis.search import metaso
 from meutils.schemas.openai_types import ChatCompletionRequest
 
@@ -103,11 +103,18 @@ async def create_chat_completions(
     elif api_key.startswith(("tune",)):  # 逆向 o1 c35 ###################
         response = tune.create(request, vip=vip)
 
+    # elif api_key.startswith(("yuanbao",)):
+    #     client = yuanbao.Completions()
+    #     response = await client.create(request)
+
+
+
+    #########################################################################################################
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
 
     if inspect.isasyncgen(response):  # 非流：将流转换为非流
-        logger.debug("ISASYNCGEN")
+        logger.debug("IS_ASYNC_GEN")
 
         chunks = await stream.list(response)
         response = create_chat_completion(chunks)

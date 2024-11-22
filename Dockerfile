@@ -43,6 +43,7 @@ ENV HUNYUAN_BASE_URL=https://api.hunyuan.cloud.tencent.com/v1
 ENV SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
 ENV TOGETHER_BASE_URL=https://api.together.xyz/v1
 ENV BAICHUAN_BASE_URL=https://api.baichuan-ai.com/v1
+ENV DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 
 
 # 暴露端口
