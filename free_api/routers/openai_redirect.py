@@ -22,7 +22,6 @@ from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks, \
     Path
 
-
 router = APIRouter()
 TAGS = ["重定向"]
 
@@ -37,7 +36,7 @@ async def create_chat_completions(
 
         # 兜底模型
         redirect_model: str = "deepseek-chat",  # 目标模型 支持lambda "lambda m: m.split('-')[0]"
-        redirect_base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),  # 目标地址
+        redirect_base_url: Optional[str] = Query('https://api.chatfire.cn/v1'),  # 目标地址 => base_url
 
         threshold: Optional[int] = None,
         max_turns: Optional[int] = None,

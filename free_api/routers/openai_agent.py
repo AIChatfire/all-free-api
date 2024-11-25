@@ -34,7 +34,7 @@ async def create_chat_completions(
 
         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth and auth.credentials or None  # 指定渠道key
 
     logger.debug(request.model_dump_json(indent=4))
 
