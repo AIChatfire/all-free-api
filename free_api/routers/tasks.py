@@ -29,7 +29,7 @@ from meutils.schemas.vidu_types import ViduRequest, ViduUpscaleRequest
 from meutils.apis.vidu import vidu_video
 
 from meutils.schemas.prodia_types import FaceswapRequest
-from meutils.apis.prodia import faceswap
+from meutils.apis.images.prodia import faceswap
 
 from meutils.schemas.baidu_types import BDAITPZSRequest
 from meutils.apis.baidu import bdaitpzs
