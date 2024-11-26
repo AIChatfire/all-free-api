@@ -102,13 +102,13 @@ async def create_task_image2video(
         task_id = data.data.task_id
 
         async def update_fn(task: Tasks):
-            if task.status == "SUCCESS": return False  # 跳出轮询
+            if task.status in {"SUCCESS", "FAILURE"}: return False  # 跳出轮询
 
             task_data = await kolors_virtual_try_on.get_task(task_id, data.system_fingerprint)
 
             task.data = task_data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
             task.status = STATUSES.get(task_data.data.task_status.lower(), "UNKNOWN")
-            task.progress = time.time() / 10 % 100
+            task.progress = time.time() // 10 % 100
 
             if task.status == "SUCCESS":
                 task.progress = "100%"

@@ -10,11 +10,12 @@
 
 from meutils.pipe import *
 from meutils.io.files_utils import to_bytes
-from meutils.apis.siliconflow import audio as siliconflow_audio
 from meutils.schemas.openai_types import TTSRequest, STTRequest
 
 from meutils.llm.openai_utils import ppu_flow
 from meutils.ai_audio.tts import EdgeTTS
+from meutils.apis.siliconflow import audio as siliconflow_audio
+from meutils.apis.audio import deepinfra as deepinfra_audio
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
@@ -85,8 +86,13 @@ async def create_transcriptions(
             temperature=temperature,
             timestamp_granularities=timestamp_granularities
         )
-        response = await siliconflow_audio.asr(request)  # oi用不了
-        return response
+        if model.startswith("whisper"):
+            try:
+                return await deepinfra_audio.asr(request)
+            except Exception as e:
+                logger.error(e)
+
+        return await siliconflow_audio.asr(request)  # 兜底
 
 
 if __name__ == '__main__':

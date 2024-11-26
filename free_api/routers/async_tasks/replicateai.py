@@ -67,7 +67,7 @@ async def create_task(
         data = await replicate.create_task(request)
 
         async def update_fn(task: Tasks):
-            if task.status == "SUCCESS": return False  # 跳出轮询
+            if task.status in {"SUCCESS", "FAILURE"}: return False  # 跳出轮询
 
             task_data = await replicate.get_task(data.id, data.system_fingerprint)
 
