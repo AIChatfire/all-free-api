@@ -87,4 +87,4 @@ USER appuser
 
 #CMD ["sh", "-c", "sh rq-worker.sh & python -m meutils.clis.server gunicorn-run main:app --port 8000 --workers ${WORKERS:-1} --threads 2"]
 
-CMD ["./startup.sh"]
+CMD ["sh", "-c", "sh ./startup.sh"]
