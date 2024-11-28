@@ -14,6 +14,10 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV TZ=Asia/Shanghai
 
+# 任务类型
+ENV WORKER_TYPE=fastapi
+ENV FLOWER_UNAUTHENTICATED_API=true
+
 # 环境变量
 ENV HF_ENDPOINT=https://hf.chatfire.cc
 ENV HF_TOKEN=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
@@ -77,9 +81,11 @@ USER appuser
 # ${WORKERS:-1} 默认1
 #ENV WORKERS=${WORKERS:-1}
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]
+#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "3"]
 
 #CMD ["python",  "-m",  "meutils.clis.server",  "gunicorn-run",  "main:app",  "--port",  "8000",  "--workers", "${WORKERS:-1}",  "--threads",  "2",  "--timeout",  "100"]
 
-CMD ["sh", "-c", "sh rq-worker.sh & python -m meutils.clis.server gunicorn-run main:app --port 8000 --workers ${WORKERS:-1} --threads 2"]
+#CMD ["sh", "-c", "sh rq-worker.sh & python -m meutils.clis.server gunicorn-run main:app --port 8000 --workers ${WORKERS:-1} --threads 2"]
 
+
+CMD ["./start.sh"]
