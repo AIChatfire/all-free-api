@@ -26,7 +26,7 @@ case "$WORKER_TYPE" in
 
 "flower")
   echo "开启异步任务监控..."
-  python -m celery --app celery-flower -A meutils.serving.celery.tasks flower --address='127.0.0.1' --port=5001
+  python -m celery --app celery-flower -A meutils.serving.celery.tasks flower --port=5001
   ;;
 
 "scheduler")
