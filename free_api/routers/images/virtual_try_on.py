@@ -23,9 +23,9 @@ TAGS = ["虚拟换衣"]
 @router.post("/images/virtual-try-on")  # todo: sd3 兜底
 async def generate(
         request: kolors_virtual_try_on.KolorsTryOnRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request.model_dump_json(indent=4))
     # return await text_to_image.create(request)

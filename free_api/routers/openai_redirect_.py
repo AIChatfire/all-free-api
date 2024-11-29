@@ -29,7 +29,7 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/chat/completions")
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        # auth: Optional[str] = Depends(get_bearer_token),
 
         model: Optional[str] = Query('ep-20240515073524-xj4m2'),
         base_url: Optional[str] = Query('https://ark.cn-beijing.volces.com/api/v3'),
@@ -42,7 +42,7 @@ async def create_chat_completions(
         threshold: Optional[int] = Query(32000),
 
 ):
-    # api_key = auth and auth.credentials or None
+    # api_key = auth
     logger.debug(request.model_dump_json(indent=4))
 
     raw_model = request.model

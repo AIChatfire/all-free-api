@@ -21,12 +21,12 @@ case "$WORKER_TYPE" in
 
 "worker")
   echo "开启异步队列..."
-  python -m celery --app celery-worker -A meutils.serving.celery.tasks worker -l DEBUG -c 3
+  python -m celery --app celery-worker -A meutils.async_task.tasks._all worker -l INFO -E # -c ${WORKERS:-1}
   ;;
 
 "flower")
   echo "开启异步任务监控..."
-  python -m celery --app celery-flower -A meutils.serving.celery.tasks flower --port=5001
+  python -m celery --app celery-flower -A meutils.async_task.tasks._all flower -l INFO --port=8000
   ;;
 
 "scheduler")

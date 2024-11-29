@@ -55,9 +55,9 @@ async def get_task(
 @router.post("/videos/generations")  # todo: sd3 兜底
 async def generate(
         request: VideoRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request.model_dump_json(indent=4))
 

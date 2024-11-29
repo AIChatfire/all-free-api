@@ -24,10 +24,10 @@ get_user_with_cache = alru_cache(ttl=60)(get_user)
 
 @router.get("/token")
 async def get_user_info(
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     data = await get_api_key_log(api_key)
     if data and (user_id := data[0]['user_id']):

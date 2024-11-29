@@ -25,15 +25,15 @@ TAGS = ["Audio"]
 @router.post("/v1/tts")
 async def _create_tts(
         request: TTSRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
-        backgroundtasks: BackgroundTasks = BackgroundTasks,
 
         response_format: Optional[str] = Query(None),
 
-):
-    api_key = auth and auth.credentials or None
+        auth: Optional[str] = Depends(get_bearer_token),
 
-    async with ppu_flow(api_key, post="official-api-fish-model"):
+):
+    api_key = auth
+
+    async with ppu_flow(api_key, post="official-api-fish-tts"):
         data = await create_tts(request, response_format=response_format)
 
         if response_format == 'url':
@@ -47,12 +47,12 @@ async def _create_model(
         voices: List[UploadFile] = File(...),
         texts: Optional[List[str]] = Form(None),
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
-    async with ppu_flow(api_key, post="official-api-fish-tts"):
+    async with ppu_flow(api_key, post="official-api-fish-model"):
         voices = [await voice.read() for voice in voices]
         return await create_tts_model(title, voices, texts)
 

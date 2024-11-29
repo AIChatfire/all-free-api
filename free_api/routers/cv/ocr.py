@@ -32,9 +32,9 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/ocr")
 async def create_ocr(
         request: OCRRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
     logger.debug(request.model_dump_json(indent=4))
 
     task_type = "api-ocr" if request.mode == "simple" else "api-ocr-pro"

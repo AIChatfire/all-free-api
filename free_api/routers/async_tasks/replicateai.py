@@ -11,7 +11,8 @@
 from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.db.orm import update_or_insert
-from meutils.schemas.db.oneapi_types import Hero, Tasks, STATUSES
+from meutils.schemas.db.oneapi_types import Hero, OneapiTask
+from meutils.schemas.task_types import STATUSES
 from meutils.apis.oneapi.user import get_api_key_log
 
 from meutils.llm.openai_utils import ppu_flow
@@ -50,10 +51,10 @@ async def create_task(
         model: str,
         request: ReplicateRequest,
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     request.ref = model
     logger.debug(request.model_dump_json(indent=4))
@@ -66,7 +67,7 @@ async def create_task(
     async with ppu_flow(api_key, post=f"api-replicate-{request.ref.split('/')[-1]}", n=n):
         data = await replicate.create_task(request)
 
-        async def update_fn(task: Tasks):
+        async def update_fn(task: OneapiTask):
             if task.status in {"SUCCESS", "FAILURE"}: return False  # 跳出轮询
 
             task_data = await replicate.get_task(data.id, data.system_fingerprint)
@@ -88,7 +89,7 @@ async def create_task(
             "platform": "replicate",
             "action": request.ref,
         }
-        backgroundtasks.add_task(update_or_insert, Tasks, kwargs, update_fn, 10)
+        backgroundtasks.add_task(update_or_insert, OneapiTask, kwargs, update_fn, 10)
 
         await redis_aclient.set(data.id, data.system_fingerprint, ex=7 * 24 * 3600)
         return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})

@@ -30,11 +30,11 @@ TAGS = ["Audio"]
 async def create_speech(
         request: TTSRequest,
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         n: Optional[int] = Query(1),  # 默认收费
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request.model_dump_json(indent=4))
 
@@ -68,11 +68,11 @@ async def create_transcriptions(
         temperature: Optional[float] = Form(None),
         timestamp_granularities: Optional[List[Literal["word", "segment"]]] = Form(None),
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         n: Optional[int] = Query(1),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     async with ppu_flow(api_key, post='api-stt', n=n):
         file = await to_bytes(file)

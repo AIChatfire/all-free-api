@@ -13,8 +13,9 @@ from meutils.db.redis_db import redis_aclient
 from meutils.db.orm import update_or_insert
 
 from meutils.llm.openai_utils import ppu_flow
-from meutils.schemas.task_types import TaskType, Task
-from meutils.schemas.db.oneapi_types import Tasks, STATUSES
+from meutils.schemas.task_types import STATUSES, TaskType, Task
+from meutils.schemas.db.oneapi_types import OneapiTask
+
 from meutils.apis.oneapi.user import get_api_key_log
 
 from meutils.apis.kling import images, videos, kolors_virtual_try_on
@@ -62,11 +63,11 @@ async def get_task(
 @router.post("/images/generations")
 async def create_task_images(
         request: ImageRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         vip: Optional[bool] = Query(True)
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request.model_dump_json(indent=4))
 
@@ -85,11 +86,11 @@ async def create_task_images(
 async def create_task_image2video(
         request: TryOnRequest,
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request.model_dump_json(indent=4))
 
@@ -101,7 +102,7 @@ async def create_task_image2video(
         data = await kolors_virtual_try_on.create_task(request)
         task_id = data.data.task_id
 
-        async def update_fn(task: Tasks):
+        async def update_fn(task: OneapiTask):
             if task.status in {"SUCCESS", "FAILURE"}: return False  # 跳出轮询
 
             task_data = await kolors_virtual_try_on.get_task(task_id, data.system_fingerprint)
@@ -124,7 +125,7 @@ async def create_task_image2video(
             "platform": "kling",
             "action": request.model_name,
         }
-        backgroundtasks.add_task(update_or_insert, Tasks, kwargs, update_fn, 100)
+        backgroundtasks.add_task(update_or_insert, OneapiTask, kwargs, update_fn, 100)
 
         await redis_aclient.set(task_id, data.system_fingerprint, ex=7 * 24 * 3600)
         return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
@@ -133,11 +134,11 @@ async def create_task_image2video(
 @router.post("/videos/text2video")
 async def create_task_text2video(
         request: VideoRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         vip: Optional[bool] = Query(True)
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request.model_dump_json(indent=4))
 
@@ -159,11 +160,11 @@ async def create_task_text2video(
 @router.post("/videos/image2video")
 async def create_task_image2video(
         request: VideoRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         vip: Optional[bool] = Query(True)
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request.model_dump_json(indent=4))
 

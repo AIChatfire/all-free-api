@@ -43,11 +43,11 @@ examples = [
 @router.post("/chat/completions")  # todo: chat models
 async def create_chat_completions(
         request: ChatCompletionRequest = Body(examples=examples),
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks(),
 ):
     logger.debug(request)
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     models = re.findall(r'@([\w-]+)', request.last_content)
     logger.debug(models)

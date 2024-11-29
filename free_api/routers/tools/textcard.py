@@ -37,11 +37,11 @@ async def create_chat_completions(
         request: ChatCompletionRequest,
         model: str = Query("Pro/THUDM/glm-4-9b-chat"),
         title: str = Query("🔥汉语新解"),
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     if '/' in request.model:  # 替换内置模型
         model = request.model
@@ -60,11 +60,11 @@ async def create_chat_completions(
 # @router.get("/") # html
 # async def create_chat_completions(
 #         request: ChatCompletionRequest,
-#         auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+#         auth: Optional[str] = Depends(get_bearer_token),
 # ):
 #     logger.debug(request.model_dump_json(indent=4))
 #
-#     api_key = auth and auth.credentials or None
+#     api_key = auth
 #
 #     model = "汉语新解"
 #     await appu(model, api_key)

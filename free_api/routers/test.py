@@ -21,10 +21,15 @@ TAGS = ["空服务"]
 async def create_request(
         path: str,
         request: Request,
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
+
     logger.debug(request.method)
     logger.debug(request.headers)
     logger.debug(request.url)
+
+    logger.debug(auth)
+
 
     params = request.query_params._dict
 

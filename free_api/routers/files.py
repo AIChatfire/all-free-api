@@ -47,7 +47,7 @@ client = OpenAI(
 async def upload_files(
         file: UploadFile = File(...),
         purpose: Purpose = Form(...),
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 
         vip: Optional[bool] = Query(False),
@@ -55,7 +55,7 @@ async def upload_files(
         response_format: Optional[str] = Query(None),
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     vip = 'vip' in purpose or vip
 
@@ -190,16 +190,16 @@ async def upload_files(
 @router.get("/files/{file_id}")
 async def get_file(
         file_id: str,
-        # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        # auth: Optional[str] = Depends(get_bearer_token),
 ):
     return client.files.retrieve(file_id=file_id)
 
 
 @router.get("/files")
 async def get_files(
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     return client.files.list()
 
@@ -207,10 +207,10 @@ async def get_files(
 @router.get("/files/{file_id}/content")
 async def get_file_content(
         file_id: str,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     if Purpose.textin_fileparser in file_id:
         file_content = await redis_aclient.get(file_id)
@@ -223,9 +223,9 @@ async def get_file_content(
 @router.delete("/files/{file_id}")
 async def delete_file(
         file_id: str,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     return client.files.delete(file_id=file_id)
 

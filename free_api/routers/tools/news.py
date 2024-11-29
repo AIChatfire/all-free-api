@@ -24,9 +24,9 @@ TAGS = ["热榜"]
 @alru_cache(ttl=30)
 async def translate(
         biz: str = "baidu",
-        # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        # auth: Optional[str] = Depends(get_bearer_token),
 ):
-    # api_key = auth and auth.credentials or None
+    # api_key = auth
 
     if biz == "baidu":
         url = "https://top.baidu.com/board?tab=realtime"

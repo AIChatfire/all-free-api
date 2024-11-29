@@ -25,11 +25,11 @@ TAGS = ["Translator"]
 @router.post("/translator")
 async def translate(
         request: DeeplxRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
     # logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     async with ppu_flow(api_key, post="api-translator"):
         data = await deeplx.translate(request)

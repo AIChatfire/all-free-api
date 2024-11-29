@@ -28,7 +28,7 @@ TAGS = ["Audio"]
 @router.post("/audio/speech")
 async def create_speech(
         request: TTSRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         voice: Optional[str] = Query(None),  # todo: 枚举
 ):
     logger.debug(request.model_dump_json(indent=4))
@@ -72,7 +72,7 @@ async def create_transcriptions(
         response_format: Literal["json", "text", "srt", "verbose_json", "vtt"] = Form("json"),
         temperature: Optional[float] = Form(None),
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         feishu_url: Optional[str] = Query("https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=NWOIr9"),
 ):
     groq_api_key = await get_next_token_for_polling(feishu_url=feishu_url)
@@ -110,7 +110,7 @@ async def create_translations(
         response_format: Literal["json", "text", "srt", "verbose_json", "vtt"] = Form("json"),
         temperature: Optional[float] = Form(None),
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         feishu_url: Optional[str] = Query("https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=NWOIr9"),
 ):
     groq_api_key = await get_next_token_for_polling(feishu_url=feishu_url)

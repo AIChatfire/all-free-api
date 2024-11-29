@@ -31,10 +31,10 @@ TAGS = ["图片编辑"]
 async def remove_watermark(
         url: str,
         user_token: str = "821480df15b637852f7e4a0dabb8a156",
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     async with ppu_flow(api_key, post="api-watermark-remove"):
         try:

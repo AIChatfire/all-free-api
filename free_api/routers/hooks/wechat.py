@@ -38,9 +38,9 @@ TAGS = ["HOOK"]
 @router.post("/wechat")  # todo: sd3 兜底，增加 key
 async def create_reply(
         request: Message,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request.model_dump_json(indent=4))
 

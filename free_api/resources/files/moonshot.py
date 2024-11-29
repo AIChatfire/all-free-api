@@ -36,9 +36,9 @@ class Purpose(str, Enum):
 
 @router.get("/files")
 async def get_files(
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
     if api_key is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="认证失败")
 
@@ -53,10 +53,10 @@ async def get_files(
 @router.get("/files/{file_id}")
 async def get_file(
         file_id: str,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
     if api_key is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="认证失败")
     try:
@@ -70,10 +70,10 @@ async def get_file(
 @router.get("/files/{file_id}/content")
 async def get_file_content(
         file_id: str,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
     if api_key is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="认证失败")
     try:
@@ -88,9 +88,9 @@ async def get_file_content(
 @router.delete("/files/{file_id}")
 async def delete_file(
         file_id: str,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
     if api_key is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="认证失败")
 
@@ -107,10 +107,10 @@ async def upload_files(
         file: UploadFile = File(...),
         purpose: Purpose = Form(...),
         # return_url=Form(...)
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
     if api_key is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="认证失败")
 

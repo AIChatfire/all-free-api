@@ -10,7 +10,7 @@
 
 
 from meutils.pipe import *
-from meutils.schemas.db.oneapi_types import Hero, Tasks
+from meutils.schemas.db.oneapi_types import Hero, OneapiTask
 from meutils.db.orm import AsyncSession, get_session, update_or_insert
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
@@ -26,7 +26,7 @@ async def create_request(
         id: str,
         session: AsyncSession = Depends(get_session),
 ):
-    if task := await session.get(Tasks, id):
+    if task := await session.get(OneapiTask, id):
         task.finish_time = int(time.time())
 
         await session.commit()
@@ -49,7 +49,7 @@ async def create_request(
         entity.status = "SUCCESS"
         entity.finish_time = int(time.time())
 
-    backgroundtasks.add_task(update_or_insert, Tasks, ident, update_fn)
+    backgroundtasks.add_task(update_or_insert, OneapiTask, ident, update_fn)
 
     return
 

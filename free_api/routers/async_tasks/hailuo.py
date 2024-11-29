@@ -39,11 +39,11 @@ async def get_task(
 @router.post("/video_generation")  # POST https://api.minimax.chat/v1/video_generation
 async def create_task(
         request: VideoRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         vip: Optional[bool] = Query(True)
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     N = 1
     async with ppu_flow(api_key, post="official-api-hailuo-video" if vip else "api-hailuo-video", n=N):

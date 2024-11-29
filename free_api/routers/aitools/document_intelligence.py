@@ -31,9 +31,9 @@ async def document_process(
         service: str,
         kwargs: dict = Body(),  # todo: service
         response_format: str = Query("url"),
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(kwargs)
 

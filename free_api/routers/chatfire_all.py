@@ -33,11 +33,11 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/chat/completions")
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         x: Optional[int] = Query(None),
         y: Optional[int] = Query(None)
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
     logger.debug(request.model_dump_json(indent=4))
 
     raw_model = request.model

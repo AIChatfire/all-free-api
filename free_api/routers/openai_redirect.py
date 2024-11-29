@@ -41,12 +41,12 @@ async def create_chat_completions(
         threshold: Optional[int] = None,
         max_turns: Optional[int] = None,
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),  # 渠道密钥
+        auth: Optional[str] = Depends(get_bearer_token),  # 渠道密钥
 ):
     logger.debug(request.model_dump_json(indent=4))
 
     # 渠道密钥
-    api_key = auth and auth.credentials or None
+    api_key = auth
     if api_key.startswith('http'):  # 飞书轮询
         api_key = await get_next_token_for_polling(feishu_url=api_key)
     elif ',' in api_key:  # 字符串：todo redis

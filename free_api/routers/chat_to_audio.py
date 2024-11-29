@@ -29,14 +29,14 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/chat/completions")
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         tts_model: str = Query("tts-1"),
         is_html: bool = Query(True),
 
         background_tasks: BackgroundTasks = BackgroundTasks(),
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     data = to_openai_completion_params(request)
     client = AsyncOpenAI(api_key=api_key)

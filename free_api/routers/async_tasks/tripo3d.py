@@ -39,11 +39,11 @@ async def get_task(
 @router.post("/task")
 async def create_task(
         request: ImageRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         vip: Optional[bool] = Query(True)
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     N = 1
     async with ppu_flow(api_key, post="api-tripo3d", n=N):

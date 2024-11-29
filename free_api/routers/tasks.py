@@ -48,10 +48,10 @@ TAGS = ["异步任务"]
 async def get_tasks(
         task_id: str,
         response_format: Optional[str] = Query(None),
-        # auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        # auth: Optional[str] = Depends(get_bearer_token),
         # backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
-    # api_key = auth and auth.credentials or None
+    # api_key = auth
 
     token = await redis_aclient.get(task_id)  # 绑定对应的 token
     token = token and token.decode()
@@ -112,14 +112,14 @@ async def get_tasks(
 async def create_tasks(
         request: KlingaiVideoRequest,
         # task_type: TaskType,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         vip: Optional[bool] = Query(False),
 
         background_tasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.kling_vip if vip else TaskType.kling
 
     n = int(np.ceil(request.duration / 5))
@@ -138,7 +138,7 @@ async def create_tasks(
 async def create_tasks(
         request: RunwayRequest,
         # task_type: TaskType,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         upstream_base_url: Optional[str] = Header(None),
         upstream_api_key: Optional[str] = Header(None),
         downstream_base_url: Optional[str] = Header(None),
@@ -147,7 +147,7 @@ async def create_tasks(
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.runwayml
 
     async with ppu_flow(api_key, post="api-runwayml-gen3"):
@@ -169,7 +169,7 @@ async def create_tasks(
 async def create_tasks(
         request: SunoAIRequest,
         # task_type: TaskType,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         upstream_base_url: Optional[str] = Header(None),
         upstream_api_key: Optional[str] = Header(None),
         downstream_base_url: Optional[str] = Header(None),
@@ -178,7 +178,7 @@ async def create_tasks(
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.suno
     token = request.continue_clip_id and await redis_aclient.get(request.continue_clip_id)  # 针对上传的音频
     token = token and token.decode()
@@ -201,11 +201,11 @@ async def create_tasks(
 @router.post(f"/tasks/suno-cover")
 async def create_tasks(
         request: dict = Body(),  # audio lyrics
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
     logger.debug(request)
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     async with ppu_flow(api_key, post="api-sunoai-cover"):
         task = await suno.create_task_for_cover(request.get("audio"), request.get("lyrics"))
@@ -223,12 +223,12 @@ async def create_tasks(
 @router.post(f"/tasks/suno-stems")
 async def create_tasks(
         request: dict = Body(),  # audio
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
 ):
     logger.debug(request)
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     async with ppu_flow(api_key, post="api-sunoai-stems"):
         task = await suno.create_task_for_stems(request.get("audio"))
@@ -246,11 +246,11 @@ async def create_tasks(
 @router.post(f"/tasks/{TaskType.haimian}")
 async def create_tasks(
         request: HaimianRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.haimian
 
     async with ppu_flow(api_key, post="api-haimian"):
@@ -268,11 +268,11 @@ async def create_tasks(
 async def create_tasks(
         request: LyricsRequest,
         # task_type: TaskType,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.lyrics
 
     async with ppu_flow(api_key, post="api-sunoai-lyrics"):
@@ -290,7 +290,7 @@ async def create_tasks(
 async def create_tasks(
         request: VideoRequest,
         # task_type: TaskType,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         upstream_base_url: Optional[str] = Header(None),
         upstream_api_key: Optional[str] = Header(None),
         downstream_base_url: Optional[str] = Header(None),
@@ -299,7 +299,7 @@ async def create_tasks(
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.cogvideox
 
     token = request.source_list and await redis_aclient.get(request.source_list[0])  # 照片对应的token
@@ -319,7 +319,7 @@ async def create_tasks(
 async def create_tasks(
         request: ViduRequest,
         # task_type: TaskType,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         vip: Optional[bool] = Query(False),
 
         upstream_base_url: Optional[str] = Header(None),
@@ -330,7 +330,7 @@ async def create_tasks(
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.vidu_vip if vip else TaskType.vidu
 
     token = request.url and await redis_aclient.get(request.url)  # 照片对应的token
@@ -352,7 +352,7 @@ async def create_tasks(
 async def create_tasks(
         request: ViduUpscaleRequest,
         # task_type: TaskType,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         upstream_base_url: Optional[str] = Header(None),
         upstream_api_key: Optional[str] = Header(None),
@@ -362,7 +362,7 @@ async def create_tasks(
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.vidu
     vip = 'vip' in request.task_id
 
@@ -384,13 +384,13 @@ async def create_tasks(
 @router.post(f"/tasks/{TaskType.faceswap}")
 async def create_tasks(
         request: FaceswapRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         background_tasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.faceswap
     token = None  ###
 
@@ -406,13 +406,13 @@ async def create_tasks(
 @router.post(f"/tasks/{TaskType.pcedit}")
 async def create_tasks(
         request: BDAITPZSRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         background_tasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     task_type = TaskType.pcedit
     token = None
 

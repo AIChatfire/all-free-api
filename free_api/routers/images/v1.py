@@ -33,13 +33,13 @@ TAGS = ["图片生成"]
 @router.post("/images/generations")  # todo: sd3 兜底
 async def generate(
         request: dict = Body(..., examples=[{"model": "recraftv3", "prompt": "画条狗"}]),
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 
         redirect_flux: Optional[bool] = Query(None),
 
         n: Optional[int] = Query(1),  # 默认收费
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request)
 

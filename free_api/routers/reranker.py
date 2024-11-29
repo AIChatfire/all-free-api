@@ -24,7 +24,7 @@ TAGS = ["reranker"]
 @router.post("/reranker")
 async def create_reranker(
         request: RerankRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         # upstream_base_url: Optional[str] = Header(None),
         # upstream_api_key: Optional[str] = Header(None),
         # downstream_base_url: Optional[str] = Header(None),
@@ -32,7 +32,7 @@ async def create_reranker(
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     async with ppu_flow(api_key, post='api-reranker'):
         return await rerank(request)

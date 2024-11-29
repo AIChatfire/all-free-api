@@ -27,11 +27,11 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/chat/completions")
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
     logger.debug(request)
 
-    api_key = auth and auth.credentials or None
+    api_key = auth
     api_key = np.random.choice(api_key.strip().split(','))  # 随机轮询
 
     response = await Completions(api_key=api_key).acreate(request)

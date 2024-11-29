@@ -26,11 +26,11 @@ async def create_query(
         query: str,
         request: Request,
 
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         n: Optional[int] = Query(1),  # 默认收费
 
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     params = dict(request.query_params)
     params['query'] = query

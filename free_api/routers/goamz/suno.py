@@ -39,9 +39,9 @@ TAGS = ["GOAMZ"]
 @router.post("/music")
 async def create_tasks(
         request: Request,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     request_data = json_repair.loads((await request.body()).decode())
     request_data = {**request_data, **request_data['input']}
@@ -71,9 +71,9 @@ async def create_tasks(
 @router.get("/music/{task_id}")
 async def get_task(
         task_id: str,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     token = await redis_aclient.get(task_id)  # 绑定对应的 token
     token = token and token.decode()

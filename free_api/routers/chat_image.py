@@ -45,10 +45,10 @@ examples = [
 @router.post("/chat/completions")
 async def create_chat_completions(
         request: ChatCompletionRequest = Body(examples=examples),
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     logger.debug(request)
 

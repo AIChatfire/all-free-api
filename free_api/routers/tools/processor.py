@@ -23,9 +23,9 @@ TAGS = ["预处理"]
 @router.post("/html2image")
 async def create_chat_completions(
         request: ScreenshotRequest,
-        auth: Optional[HTTPAuthorizationCredentials] = Depends(get_bearer_token),
+        auth: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth and auth.credentials or None
+    api_key = auth
 
     async with ppu_flow(api_key, post="api-html2image"):
         return await capture_screenshot(request)
