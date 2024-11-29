@@ -59,8 +59,9 @@ async def _get_task(
         "action": action2,
     }
     ########################################################################################
+
     if action2 == "kolors-virtual-try-on":  # 官方接口
-        data = await get_task(task_id, kolors_virtual_try_on.get_task, filter_kwargs)
+        data = await get_task(task_id, kolors_virtual_try_on.get_task, filter_kwargs)  # 排队获取任务
         return data  # .model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
 
