@@ -42,10 +42,10 @@ async def _get_task(
 ):
     logger.debug(api_key)
 
-    token = await redis_aclient.get(task_id)  # 绑定对应的 token
-    token = token and token.decode()
-    if not token:
-        raise HTTPException(status_code=404, detail="TaskID not found")
+    # token = await redis_aclient.get(task_id)  # 绑定对应的 token
+    # token = token and token.decode()
+    # if not token:
+    #     raise HTTPException(status_code=404, detail="TaskID not found")
 
     ########################################################################################
     user_id = None
