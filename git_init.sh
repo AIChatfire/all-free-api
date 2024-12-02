@@ -10,6 +10,7 @@ git commit -m "init"
 #git remote add origin git@github.com:yuanjie-ai/MeUtils.git
 #git branch -M master
 git push -u origin master -f
+
 # git remote remove origin
 
 #git config --global user.name Betterme
