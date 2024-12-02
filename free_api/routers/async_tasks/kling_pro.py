@@ -80,6 +80,8 @@ async def _create_task(
         }
         background_tasks.add_task(get_task, task_id, kolors_virtual_try_on.get_task, filter_kwargs)
 
+        logger.debug(task_response)
+
         return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
     # todo: get下任务记录
