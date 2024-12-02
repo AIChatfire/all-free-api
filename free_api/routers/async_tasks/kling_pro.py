@@ -38,6 +38,7 @@ async def _get_task(
         task_id: str,  # kling-xxx
 
         api_key: Optional[str] = Depends(get_bearer_token),
+        background_tasks: BackgroundTasks = BackgroundTasks,
 
 ):
     logger.debug(api_key)
@@ -47,22 +48,9 @@ async def _get_task(
     # if not token:
     #     raise HTTPException(status_code=404, detail="TaskID not found")
 
-    ########################################################################################
-    user_id = None
-    if onelog := await get_api_key_log(api_key):  # todo: 优化查询
-        user_id = onelog[0]['user_id']
-
-    filter_kwargs = {
-        "task_id": task_id,
-        "user_id": user_id,
-        "platform": "kling",
-        "action": action2,
-    }
-    ########################################################################################
-
     if action2 == "kolors-virtual-try-on":  # 官方接口
-        data = await get_task(task_id, kolors_virtual_try_on.get_task, filter_kwargs)  # 排队获取任务
-        return data  # .model_dump(exclude_none=True, exclude={"system_fingerprint"})
+        data = await get_task(task_id, kolors_virtual_try_on.get_task, background_tasks=background_tasks)
+        return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
 
 @router.post("/images/kolors-virtual-try-on")
@@ -70,14 +58,31 @@ async def _create_task(
         request: TryOnRequest,
 
         api_key: Optional[str] = Depends(get_bearer_token),
-        backgroundtasks: BackgroundTasks = BackgroundTasks,
+        background_tasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(request.model_dump_json(indent=4))
 
+    ########################################################################################
+    user_id = None
+    if onelog := await get_api_key_log(api_key):  # todo: 优化查询
+        user_id = onelog[0]['user_id']
+
+    ########################################################################################
+
     async with ppu_flow(api_key, post="official-api-kolors-virtual-try-on"):
         task_response = await create_task(kling.create_task, request)
+        task_id = task_response.task_id
+        filter_kwargs = {
+            "task_id": task_id,
+            "user_id": user_id,
+            "platform": "kling",
+            "action": "kolors-virtual-try-on",
+        }
+        background_tasks.add_task(get_task, task_id, kolors_virtual_try_on.get_task, filter_kwargs)
 
-        return task_response  # .model_dump(exclude_none=True, exclude={"system_fingerprint"})
+        return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
+
+    # todo: get下任务记录
 
 
 if __name__ == '__main__':
