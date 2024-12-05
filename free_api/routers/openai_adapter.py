@@ -31,17 +31,16 @@ TAGS = ["文本生成"]
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 
-@router.post("/chat/completions")
+@router.post("/chat/completions")  # todo: 映射函数
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        auth: Optional[str] = Depends(get_bearer_token),
 
         threshold: Optional[int] = Query(None),
-        max_turns: Optional[int] = None,
+        max_turns: Optional[int] = Query(None),
 
-        vip: Optional[bool] = Query(False),
+        api_key: Optional[str] = Depends(get_bearer_token),
+
 ):
-    api_key = auth
     logger.debug(request.model_dump_json(indent=4))
 
     raw_model = request.model
@@ -83,7 +82,8 @@ async def create_chat_completions(
         response = await client.create(request)
 
     elif request.model.lower().startswith(("ernie",)):
-        client = chat_qianfan.Completions(threshold=threshold)
+        client = chat_qianfan.Completions()
+        request.model = "ERNIE-Speed-128K"
         response = await client.create(request)
 
     elif request.model.startswith(("ai-search",)):  # 搜索
@@ -93,21 +93,15 @@ async def create_chat_completions(
         client = dify.Completions(api_key=api_key)
         response = client.create(request)  # List[str]
 
-    elif api_key.startswith(("tryblend",)):
-        client = tryblend.Completions(vip=vip)
-        response = await client.create(request)
-
     elif api_key.startswith(("deli",)):  # 逆向
         response = delilegal.create(request)
 
     elif api_key.startswith(("tune",)):  # 逆向 o1 c35 ###################
-        response = tune.create(request, vip=vip)
+        response = tune.create(request)
 
     # elif api_key.startswith(("yuanbao",)):
     #     client = yuanbao.Completions()
     #     response = await client.create(request)
-
-
 
     #########################################################################################################
     if request.stream:

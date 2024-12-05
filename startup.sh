@@ -7,14 +7,14 @@
 # @Description  :
 
 # 检查WORKER_TYPE环境变量是否设置
-if [ -z "$WORKER_TYPE" ]; then
-  echo "Error: WORKER_TYPE environment variable is not set"
-  exit 1
-fi
+#if [ -z "$WORKER_TYPE" ]; then
+#  echo "Error: WORKER_TYPE environment variable is not set"
+#  exit 1
+#fi
 
 # 使用case语句根据WORKER_TYPE执行不同的任务
-case "$WORKER_TYPE" in
-"web")
+case "${WORKER_TYPE:-fastapi}" in # 如果 WORKER_TYPE 为空则使用 fastapi 作为默认值
+"web" | "fastapi")
   echo "开启 fastapi..."
   python -m meutils.clis.server gunicorn-run main:app --port 8000 --workers ${WORKERS:-1} --threads 2
   ;;

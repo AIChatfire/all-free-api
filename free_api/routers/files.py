@@ -134,26 +134,24 @@ async def upload_files(
             return file_object
 
     elif purpose.startswith(purpose.kling):
-        async with ppu_flow(api_key, post="ppu-01"):
-            file_task = await klingai.upload(await file.read(), vip=vip)
+        file_task = await klingai.upload(await file.read(), vip=vip)
 
-            file_object.id = file_task.id
-            file_object.url = file_task.url
-            file_object.data = file_task.data
-            file_object.status = "uploaded" if file_task.url else "error"
+        file_object.id = file_task.id
+        file_object.url = file_task.url
+        file_object.data = file_task.data
+        file_object.status = "uploaded" if file_task.url else "error"
 
-            return file_object
+        return file_object
 
     elif purpose.startswith(purpose.vidu):  # 绑定token
-        async with ppu_flow(api_key, post="ppu-01"):
-            file_task = await vidu_video.upload(await file.read(), vip=vip)
+        file_task = await vidu_video.upload(await file.read(), vip=vip)
 
-            file_object.id = file_task.id
-            file_object.url = file_task.url
-            file_object.data = file_task.data
+        file_object.id = file_task.id
+        file_object.url = file_task.url
+        file_object.data = file_task.data
 
-            await redis_aclient.set(file_task.url, file_task.system_fingerprint, ex=1 * 24 * 3600)
-            return file_object
+        await redis_aclient.set(file_task.url, file_task.system_fingerprint, ex=1 * 24 * 3600)
+        return file_object
 
     elif purpose == purpose.suno:  # 1分
         async with ppu_flow(api_key, post="api-sunoai-audio"):
@@ -169,15 +167,14 @@ async def upload_files(
             return file_object
 
     elif purpose == purpose.cogvideox:
-        async with ppu_flow(api_key, post="ppu-01"):
-            data, token = await glm_video.upload(await file.read())
+        data, token = await glm_video.upload(await file.read())
 
-            file_object.data = data
-            file_object.id = data['result']['source_id']
-            file_object.url = data['result']['source_url']
+        file_object.data = data
+        file_object.id = data['result']['source_id']
+        file_object.url = data['result']['source_url']
 
-            await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
-            return file_object
+        await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
+        return file_object
 
     elif purpose == purpose.voice_clone:
         async with ppu_flow(api_key, post="api-voice-clone"):
