@@ -6,7 +6,7 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  :
+# @Description  : 适配功能： file video image audio 等等
 
 from aiostream import stream
 
