@@ -32,11 +32,9 @@ TAGS = ["图片处理工具"]
 async def image_process(
         request: dict = Body(...),
         response_format: str = Query("url"),
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    logger.debug(request)
-
-    api_key = auth
+    logger.debug(bjson(request))
 
     task = request.get("task")
     if task in HUNYUAN_TASKS:  # hunyuan
