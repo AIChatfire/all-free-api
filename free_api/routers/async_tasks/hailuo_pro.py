@@ -25,7 +25,7 @@ TAGS = ["视频生成"]
 
 @router.get("/query/video_generation")  # GET https://api.minimax.chat/v1/query/video_generation?task_id={task_id}
 @alru_cache(ttl=30)
-async def get_task(
+async def _get_task(
         task_id: str,
 
         api_key: Optional[str] = Depends(get_bearer_token),
@@ -36,7 +36,7 @@ async def get_task(
 
 
 @router.post("/video_generation")  # POST https://api.minimax.chat/v1/video_generation
-async def create_task(
+async def _create_task(
         request: VideoRequest,
 
         api_key: Optional[str] = Depends(get_bearer_token),
@@ -58,8 +58,8 @@ async def create_task(
         filter_kwargs = {
             "task_id": task_id,
             "user_id": user_id,
-            "platform": "kling",
-            "action": "kolors-virtual-try-on",
+            "platform": "minimax",
+            "action": f"hailuo-{request.model}",
         }
         background_tasks.add_task(get_task, task_id, hailuo.get_task, filter_kwargs)
 
