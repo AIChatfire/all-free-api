@@ -9,19 +9,12 @@
 # @Description  : 
 
 from meutils.pipe import *
-from meutils.db.redis_db import redis_aclient
-
 from meutils.llm.openai_utils import ppu_flow
-
 from meutils.apis.oneapi.user import get_api_key_log
 
-from meutils.apis.kling import images, videos, kolors_virtual_try_on
-from meutils.schemas.kling_types import STATUSES, ImageRequest, VideoRequest, TryOnRequest
-
-#
 from meutils.async_task.utils import get_task, create_task
-from meutils.async_task.tasks import kling
-from meutils.schemas.task_types import TaskResponse
+from meutils.async_task.tasks import hailuo
+from meutils.schemas.hailuo_types import VideoRequest
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
@@ -30,32 +23,21 @@ router = APIRouter()
 TAGS = ["视频生成"]
 
 
-@router.get("/{action}/{action2}/{task_id}")  # todo: 通用
+@router.get("/query/video_generation")  # GET https://api.minimax.chat/v1/query/video_generation?task_id={task_id}
 @alru_cache(ttl=30)
-async def _get_task(
-        action: str,
-        action2: str,
-        task_id: str,  # kling-xxx
+async def get_task(
+        task_id: str,
 
         api_key: Optional[str] = Depends(get_bearer_token),
         background_tasks: BackgroundTasks = BackgroundTasks,
-
 ):
-    logger.debug(api_key)
-
-    # token = await redis_aclient.get(task_id)  # 绑定对应的 token
-    # token = token and token.decode()
-    # if not token:
-    #     raise HTTPException(status_code=404, detail="TaskID not found")
-
-    if action2 == "kolors-virtual-try-on":  # 官方接口
-        data = await get_task(task_id, kolors_virtual_try_on.get_task, background_tasks=background_tasks)
-        return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
+    data = await get_task(task_id, hailuo.get_task, background_tasks=background_tasks)
+    return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
 
-@router.post("/images/kolors-virtual-try-on")
-async def _create_task(
-        request: TryOnRequest,
+@router.post("/video_generation")  # POST https://api.minimax.chat/v1/video_generation
+async def create_task(
+        request: VideoRequest,
 
         api_key: Optional[str] = Depends(get_bearer_token),
         background_tasks: BackgroundTasks = BackgroundTasks,
@@ -69,8 +51,9 @@ async def _create_task(
 
     ########################################################################################
 
-    async with ppu_flow(api_key, post="official-api-kolors-virtual-try-on"):
-        task_response = await create_task(kling.create_task, request)
+    async with ppu_flow(api_key, post="official-api-hailuo-video"):
+        task_response = await create_task(hailuo.create_task, request)
+
         task_id = task_response.task_id
         filter_kwargs = {
             "task_id": task_id,
@@ -78,13 +61,11 @@ async def _create_task(
             "platform": "kling",
             "action": "kolors-virtual-try-on",
         }
-        background_tasks.add_task(get_task, task_id, kolors_virtual_try_on.get_task, filter_kwargs)
+        background_tasks.add_task(get_task, task_id, hailuo.get_task, filter_kwargs)
 
         logger.debug(task_response)
 
         return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
-
-    # todo: get下任务记录
 
 
 if __name__ == '__main__':

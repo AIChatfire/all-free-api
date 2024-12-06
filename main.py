@@ -22,7 +22,7 @@ from free_api.routers.goamz import suno
 from free_api.routers.hooks import wechat
 from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.cv import ocr
-from free_api.routers.async_tasks import replicateai, kling, kling_pro, cogvideox, hailuo, tripo3d
+from free_api.routers.async_tasks import replicateai, kling, kling_pro, cogvideox, hailuo, hailuo_pro, tripo3d
 
 from free_api.routers.audio import v1 as audio_v1, fish
 from free_api.routers.images import v1 as images_v1, virtual_try_on
@@ -79,6 +79,8 @@ app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
 app.include_router(kling_pro.router, '/kling_pro/v1', tags=kling_pro.TAGS)
 
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
+app.include_router(hailuo_pro.router, '/hailuo-pro/v1', tags=hailuo.TAGS)
+
 app.include_router(tripo3d.router, '/tripo3d/v1', tags=tripo3d.TAGS)
 
 # 反代
