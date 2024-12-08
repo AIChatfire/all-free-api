@@ -57,7 +57,6 @@ async def generate(
 
     if model.startswith(("flux",)):  # flux.1.1-pro
         request = FluxImageRequest(**request)
-        request.model = siliconflow_images.MODELS.get(request.model, siliconflow_images.DEFAULT_MODEL)
 
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await siliconflow_images.generate(request)

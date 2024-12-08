@@ -61,7 +61,7 @@ async def _create_task(
             "platform": "minimax",
             "action": f"hailuo-{request.model}",
         }
-        background_tasks.add_task(get_task, task_id, hailuo.get_task, filter_kwargs)  ##### 实际并没有执行
+        background_tasks.add_task(get_task, task_id, None, filter_kwargs)  ##### 实际并没有执行 不知道为啥
 
         logger.debug(task_response)
 
