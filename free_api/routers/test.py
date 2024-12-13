@@ -9,7 +9,8 @@
 # @Description  : 空服务调试
 
 from meutils.pipe import *
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
+from meutils.serving.fastapi.dependencies.auth import get_bearer_token
+from meutils.serving.fastapi.lifespans import resources, nacos_lifespan
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
@@ -21,15 +22,13 @@ TAGS = ["空服务"]
 async def create_request(
         path: str,
         request: Request,
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 ):
-
     logger.debug(request.method)
     logger.debug(request.headers)
     logger.debug(request.url)
 
-    logger.debug(auth)
-
+    logger.debug(api_key)
 
     params = request.query_params._dict
 
@@ -49,6 +48,7 @@ async def create_request(
         "payload": payload,
         "form": form,
         "params": params,
+        "config": resources.config_manager.text,
         **params
     }
     if isinstance(payload, dict):
@@ -62,7 +62,7 @@ async def create_request(
 if __name__ == '__main__':
     from meutils.serving.fastapi import App
 
-    app = App()
+    app = App(lifespan=nacos_lifespan)
 
     app.include_router(router, '/v0')
 
