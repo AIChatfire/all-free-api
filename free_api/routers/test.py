@@ -10,7 +10,7 @@
 
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
-from meutils.serving.fastapi.lifespans import resources, nacos_lifespan
+from meutils.serving.fastapi.lifespans import nacos_lifespan
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
@@ -48,7 +48,6 @@ async def create_request(
         "payload": payload,
         "form": form,
         "params": params,
-        "config": resources.config_manager.text,
         **params
     }
     if isinstance(payload, dict):
