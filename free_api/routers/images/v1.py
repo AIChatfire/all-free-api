@@ -21,7 +21,7 @@ from meutils.apis.chatglm import images as cogview_images
 from meutils.apis.kling import images as kling_images
 from meutils.llm.completions.yuanbao import Completions as hunyuan_images
 
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
+from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi import File, UploadFile, Query, Form, Body, Request, HTTPException, status
@@ -33,17 +33,15 @@ TAGS = ["图片生成"]
 @router.post("/images/generations")  # todo: sd3 兜底
 async def generate(
         request: dict = Body(..., examples=[{"model": "recraftv3", "prompt": "画条狗"}]),
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 
         redirect_flux: Optional[bool] = Query(None),
 
         n: Optional[int] = Query(1),  # 默认收费
 ):
-    api_key = auth
-
     logger.debug(request)
 
-    model = request.get('model', '').lower().lstrip("api-images-").lstrip("api-")
+    model = request.get('model', '').lower().removeprefix("api-images-").removeprefix("api-")
 
     if model.startswith("flux") and redirect_flux:  # 重定向 flux
         request["model"] = "flux"
