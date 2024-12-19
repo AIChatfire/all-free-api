@@ -45,11 +45,9 @@ examples = [
 @router.post("/chat/completions")
 async def create_chat_completions(
         request: ChatCompletionRequest = Body(examples=examples),
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
         backgroundtasks: BackgroundTasks = BackgroundTasks,
 ):
-    api_key = auth
-
     logger.debug(request)
 
     if isinstance(request.last_content, str) and request.last_content.startswith(  # 跳过nextchat
@@ -63,7 +61,7 @@ async def create_chat_completions(
 
     image_request = ImageRequest(
         prompt=request.last_content,
-        model=request.model.strip('chat-'),
+        model=request.model.removeprefix('chat-'),
         n=1,  # dall-e-3 仅支持 1
     )
 

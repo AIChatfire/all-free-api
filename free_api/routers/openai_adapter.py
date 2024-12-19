@@ -54,7 +54,7 @@ async def create_chat_completions(
 
         base_url = None
 
-        request.model = request.model.strip('-all')
+        request.model = request.model.removesuffix('-all')
         request.messages = [message for message in request.messages if message['role'] != 'system']
 
         data = to_openai_completion_params(request)
