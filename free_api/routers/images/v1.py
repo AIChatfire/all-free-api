@@ -100,6 +100,19 @@ async def generate(
             response = await recraft.generate(request)
             return response
 
+    elif model.startswith(("seededit",)):  # 即梦
+        from meutils.apis.jimeng import images
+
+        request = ImageRequest(**request)
+
+        n *= request.n or 1
+        task_response = await images.create_task(request)
+        for i in range(1, 10):
+            await asyncio.sleep(5 / i)
+            response = await images.get_task(task_response.task_id, task_response.system_fingerprint)
+            if data := response.data:
+                return {"data": data}
+
     else:  # 其他
         request = FluxImageRequest(**request)
 

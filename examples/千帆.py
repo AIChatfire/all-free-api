@@ -16,13 +16,16 @@ from qianfan import QfResponse
 
 # 【推荐】使用安全认证AK/SK鉴权，通过环境变量初始化认证信息
 # 替换下列示例中参数，安全认证Access Key替换your_iam_ak，Secret Key替换your_iam_sk
-os.environ["QIANFAN_AK"] = "BDFfKLrzBxDjqPwDUPQYz3gpp"
-os.environ["QIANFAN_SK"] = "ER3XaVE73TV3rg0GpJoCeJac2vEz33Foo"
+os.environ["QIANFAN_AK"] = "jWXrtNT1RkYkwrzxvanY0jG9"
+os.environ["QIANFAN_SK"] = "koDITE8doSDB7CUvcYnG74e4772DUXGW"
 
+# jWXrtNT1RkYkwrzxvanY0jG9|koDITE8doSDB7CUvcYnG74e4772DUXGW
+# puqOcopjZ9DsvtRmhY6Fu2ce|neGF6MEvB1SMCWyO2GFs5yClxHMI9NCF
+# QKuRkh0KJ6sRoZG9XhfxqAaq|fV6eJ3OqtJhJFwHFWq7pRgC7DCN3TDlN
 chat_comp = qianfan.ChatCompletion()
 
 # 指定特定模型
-resp = chat_comp.do(stream=True, model="ERNIE-", messages=[{
+resp = chat_comp.do(stream=True, model="ERNIE-Speed-128K", messages=[{
     "role": "user",
     "content": "1+1"
 }])
