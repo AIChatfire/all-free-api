@@ -22,7 +22,7 @@ router = APIRouter()
 TAGS = ["图片"]
 
 
-@router.get("/tasks")  # GET https://api.minimax.chat/v1/query/video_generation?task_id={task_id}
+@router.get("/tasks/{task_id}")
 @alru_cache(ttl=30)
 async def get_task(
         task_id: str,
