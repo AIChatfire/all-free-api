@@ -19,6 +19,8 @@ from meutils.apis.siliconflow import images as siliconflow_images
 from meutils.apis.together import images as together_images
 from meutils.apis.chatglm import images as cogview_images
 from meutils.apis.kling import images as kling_images
+from meutils.apis.kling import kolors_virtual_try_on
+
 from meutils.llm.completions.yuanbao import Completions as hunyuan_images
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
@@ -88,6 +90,14 @@ async def generate(
         n *= request.n or 1
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await kling_images.generate(request)
+            return response
+
+    elif model.startswith(("kolors-virtual-try-on",)):
+        request = ImageRequest(**request)
+
+        n *= request.n or 1
+        async with ppu_flow(api_key, post="kolors-virtual-try-on", n=n):
+            response = await kolors_virtual_try_on.generate(request)
             return response
 
     elif model.startswith(("recraftv3",)):

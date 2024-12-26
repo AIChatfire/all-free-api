@@ -9,7 +9,7 @@
 # @Description  : 
 
 from meutils.pipe import *
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
+from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
 from meutils.config_utils.lark_utils import get_next_token_for_polling
@@ -48,7 +48,10 @@ async def create_chat_completions(
     # 渠道密钥
     if api_key.startswith('http'):  # 飞书轮询
         api_key = await get_next_token_for_polling(feishu_url=api_key)
-    elif ',' in api_key:  # 字符串：todo redis
+    elif ',' in api_key:
+        api_key = np.random.choice(api_key.split(','))
+
+    elif api_key.startswith('redis:'):  # 字符串：todo redis
         api_key = np.random.choice(api_key.split(','))
 
     if max_turns:  # 限制对话轮次
