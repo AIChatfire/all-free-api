@@ -22,7 +22,6 @@ tenacity
 pyexecjs
 PyJWT
 
-openai
 websocket
 tiktoken
 langchain

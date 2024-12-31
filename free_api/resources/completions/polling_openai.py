@@ -68,13 +68,18 @@ class Completions(object):
                         "The parameter is invalid",
                         "'role' has invalid value",
                         "角色信息不能为空",  # 智谱
-                        "'assistant' must not be empty", # moonshot
+                        "'assistant' must not be empty",  # moonshot
                     }):
                         data['messages'] = [{'role': 'user', 'content': str(request.messages)}]  # 重构 messages
                         continue
                     elif "max_tokens: Must be less than" in str(e):
+                        data['model'] = "Qwen/Qwen2.5-7B-Instruct"
+                        continue
+
+                    elif "Model disabled" in str(e):
                         data['max_tokens'] = 4096
                         continue
+
                     else:
                         chat_completion.choices[0].message.content = chat_completion_chunk.choices[
                             0].delta.content = str(e)

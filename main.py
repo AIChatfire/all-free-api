@@ -12,6 +12,7 @@ from meutils.serving.fastapi import App
 
 from free_api.routers import search
 from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
+from free_api.routers import openai_spark
 from free_api.routers import openai_agent, openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
@@ -41,6 +42,8 @@ app.include_router(search.router, '/v1', tags=search.TAGS)
 
 # Chat
 app.include_router(openai_agent.router, '/agent', tags=openai_agent.TAGS)
+app.include_router(openai_spark.router, '/spark', tags=openai_spark.TAGS)
+
 app.include_router(openai_redirect.router, '/redirect', tags=openai_redirect.TAGS)
 app.include_router(openai_adapter.router, '/adapter/v1', tags=openai_adapter.TAGS)
 app.include_router(openai_polling.router, '/polling/v1', tags=openai_polling.TAGS)
