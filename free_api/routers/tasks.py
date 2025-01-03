@@ -112,18 +112,16 @@ async def get_tasks(
 async def create_tasks(
         request: KlingaiVideoRequest,
         # task_type: TaskType,
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
         vip: Optional[bool] = Query(False),
 
         background_tasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    api_key = auth
     task_type = TaskType.kling_vip if vip else TaskType.kling
 
-    n = int(np.ceil(request.duration / 5))
-    async with ppu_flow(api_key, post="api-kling-vip" if vip else "api-kling", n=n):
+    async with ppu_flow(api_key, post=f"{request.model}-{request.mode}-{request.duration}s"):
         task = await klingai_video.create_task(request, vip=vip)
         if task and task.status:
             klingai_video.send_message(f"任务提交成功：\n\n{task.id}")
