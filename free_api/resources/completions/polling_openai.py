@@ -73,11 +73,11 @@ class Completions(object):
                         data['messages'] = [{'role': 'user', 'content': str(request.messages)}]  # 重构 messages
                         continue
                     elif "max_tokens: Must be less than" in str(e):
-                        data['model'] = "Qwen/Qwen2.5-7B-Instruct"
+                        data['max_tokens'] = 4096
                         continue
 
                     elif "Model disabled" in str(e):
-                        data['max_tokens'] = 4096
+                        data['model'] = "Qwen/Qwen2.5-7B-Instruct"
                         continue
 
                     else:

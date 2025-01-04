@@ -32,10 +32,8 @@ async def create_chat_completions(
         agent: str = "rag",  # 代理
         model: str = 'qwen-turbo-2024-11-01',  # 1M
 
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth  # 指定渠道key
-
     logger.debug(request.model_dump_json(indent=4))
 
     request.model = model

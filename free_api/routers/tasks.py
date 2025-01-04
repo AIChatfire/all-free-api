@@ -121,7 +121,7 @@ async def create_tasks(
 
     task_type = TaskType.kling_vip if vip else TaskType.kling
 
-    async with ppu_flow(api_key, post=f"{request.model}-{request.mode}-{request.duration}s"):
+    async with ppu_flow(api_key, post=f"api-{request.model}-{request.mode}-{request.duration}s"):
         task = await klingai_video.create_task(request, vip=vip)
         if task and task.status:
             klingai_video.send_message(f"任务提交成功：\n\n{task.id}")
