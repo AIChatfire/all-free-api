@@ -41,6 +41,8 @@ async def create_chat_completions(
         threshold: Optional[int] = None,
         max_turns: Optional[int] = None,
 
+        incremental_output: Optional[bool] = None,  # 强制增量输出 1 12 123 => 1 2 3
+
         api_key: Optional[str] = Depends(get_bearer_token),  # 渠道密钥
 ):
     logger.debug(request.model_dump_json(indent=4))
@@ -48,11 +50,6 @@ async def create_chat_completions(
     # 渠道密钥
     if api_key.startswith('http'):  # 飞书轮询
         api_key = await get_next_token_for_polling(feishu_url=api_key)
-    elif ',' in api_key:
-        api_key = np.random.choice(api_key.split(','))
-
-    elif api_key.startswith('redis:'):  # 字符串：todo redis
-        api_key = np.random.choice(api_key.split(','))
 
     if max_turns:  # 限制对话轮次
         request.messages = request.messages[-(2 * max_turns - 1):]
@@ -85,5 +82,3 @@ if __name__ == '__main__':
     app.include_router(router, '/v1')
 
     app.run()
-
-
