@@ -18,7 +18,7 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
-TAGS = ["图片"]
+TAGS = ["对口型"]
 
 
 @router.get("/tasks/{task_id:path}")
