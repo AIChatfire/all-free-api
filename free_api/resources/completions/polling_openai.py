@@ -64,6 +64,11 @@ class Completions(object):
                 if e.status_code == 400:  # todo: 细分错误
                     send_message(f"{e.response}\n\n{e}\n\n{request.model_dump()}", title=self.base_url)
 
+                    # Error
+                    # code: 429 - {'error': {
+                    #     'message': 'Your account cog830hkqq4ttrgnvpfg【ak-eria54hskes111c9t6ji】 request reached max request: 3, please try again after 1 seconds',
+                    #     'type': 'rate_limit_reached_error'}}
+
                     if any(i in str(e) for i in {
                         "The parameter is invalid",
                         "'role' has invalid value",
@@ -77,6 +82,8 @@ class Completions(object):
                         continue
 
                     elif "Model disabled" in str(e):
+                        send_message(f"Model disabled：{data['model']}", title=self.base_url)
+
                         data['model'] = "Qwen/Qwen2.5-7B-Instruct"
                         continue
 

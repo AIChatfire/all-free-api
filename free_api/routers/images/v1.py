@@ -16,10 +16,11 @@ from meutils.schemas.image_types import KlingImageRequest, CogviewImageRequest, 
 
 from meutils.apis.images import deepinfra, recraft
 from meutils.apis.siliconflow import images as siliconflow_images
-from meutils.apis.together import images as together_images
+
 from meutils.apis.chatglm import images as cogview_images
 from meutils.apis.kling import images as kling_images
 from meutils.apis.kling import kolors_virtual_try_on
+from meutils.apis.gitee.images import kolors
 
 from meutils.llm.completions.yuanbao import Completions as hunyuan_images
 
@@ -48,14 +49,13 @@ async def generate(
     if model.startswith("flux") and redirect_flux:  # 重定向 flux
         request["model"] = "flux"
 
-    # if model.startswith(("flux.1.1", "flux1.1", "flux1.0-turbo", "flux-turbo")):
-    #     request = TogetherImageRequest(**request)
-    #
-    #     async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
-    #         response = await together_images.generate(request)
-    #         return response
+    if model.startswith(("kolors",)):
+        request = kolors.KolorsRequest(**request)
+        async with ppu_flow(api_key, post="kolors", n=n):
+            response = await kolors.generate(request)
+            return response
 
-    if model.startswith(("flux",)):  # flux.1.1-pro
+    elif model.startswith(("flux",)):  # flux.1.1-pro
         request = FluxImageRequest(**request)
 
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
@@ -92,13 +92,13 @@ async def generate(
             response = await kling_images.generate(request)
             return response
 
-    elif model.startswith(("kolors-virtual-try-on",)):
-        request = ImageRequest(**request)
-
-        n *= request.n or 1
-        async with ppu_flow(api_key, post="kolors-virtual-try-on", n=n):
-            response = await kolors_virtual_try_on.generate(request)
-            return response
+    # elif model.startswith(("kolors-virtual-try-on",)):
+    #     request = ImageRequest(**request)
+    #
+    #     n *= request.n or 1
+    #     async with ppu_flow(api_key, post="kolors-virtual-try-on", n=n):
+    #         response = await kolors_virtual_try_on.generate(request)
+    #         return response
 
     elif model.startswith(("recraftv3",)):
         request = RecraftImageRequest(**request)
