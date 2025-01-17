@@ -47,8 +47,7 @@ async def create_chat_completions(
     logger.debug(redirect_model)
 
     raw_model = request.model
-    if redirect_model.startswith("v1"):
-        # 重定向
+    if not redirect_model.startswith("v1"):  # 重定向
         request.model = redirect_model  # qwen-plus-latest
 
     if max_turns:  # 限制对话轮次
