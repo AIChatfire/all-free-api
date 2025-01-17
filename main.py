@@ -46,7 +46,7 @@ app.include_router(openai_agent.router, '/agent', tags=openai_agent.TAGS)
 app.include_router(openai_spark.router, '/spark', tags=openai_spark.TAGS)
 
 app.include_router(openai_redirect.router, '/redirect', tags=openai_redirect.TAGS)
-app.include_router(openai_adapter.router, '/adapter/v1', tags=openai_adapter.TAGS)
+app.include_router(openai_adapter.router, '/adapter', tags=openai_adapter.TAGS)
 app.include_router(openai_polling.router, '/polling/v1', tags=openai_polling.TAGS)
 app.include_router(vision_llm.router, '/vision/v1', tags=vision_llm.TAGS)
 

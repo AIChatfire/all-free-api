@@ -28,6 +28,7 @@ TAGS = ["重定向"]
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 
+######## todo: 设计的有问题 model本身就在request里
 @router.post("/{model:path}/to/{redirect_model:path}")  # {model:path} {redirect_model:path}
 async def create_chat_completions(
         request: ChatCompletionRequest,

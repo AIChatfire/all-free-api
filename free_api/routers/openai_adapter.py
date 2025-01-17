@@ -31,9 +31,11 @@ TAGS = ["文本生成"]
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 
-@router.post("/chat/completions")  # todo: 映射函数
+@router.post("/{redirect_model:path}")  # todo: 映射函数
 async def create_chat_completions(
         request: ChatCompletionRequest,
+
+        redirect_model: str = '目标值模型',  # 源模型
 
         threshold: Optional[int] = Query(None),
         max_turns: Optional[int] = Query(None),
@@ -42,8 +44,12 @@ async def create_chat_completions(
 
 ):
     logger.debug(request.model_dump_json(indent=4))
+    logger.debug(redirect_model)
 
     raw_model = request.model
+    if redirect_model.startswith("v1"):
+        # 重定向
+        request.model = redirect_model  # qwen-plus-latest
 
     if max_turns:  # 限制对话轮次
         request.messages = request.messages[-(2 * max_turns - 1):]
