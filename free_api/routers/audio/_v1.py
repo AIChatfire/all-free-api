@@ -96,7 +96,7 @@ async def create_transcriptions(
 # TODO:
 
 # curl --request POST \
-#      --url https://api.siliconflow.cn/v1/audio/transcriptions \
+#      --url https://api.siliconflow.com/v1/audio/transcriptions \
 #      --header 'accept: application/json' \
 #      --header 'content-type: multipart/form-data' \
 #      --form model=iic/SenseVoiceSmall

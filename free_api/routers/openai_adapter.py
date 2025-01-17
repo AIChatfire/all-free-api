@@ -13,7 +13,7 @@ from aiostream import stream
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_completion_params
-from meutils.llm.completions import dify, tryblend, tune, delilegal, rag
+from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm
 from meutils.apis.search import metaso
 from meutils.schemas.openai_types import ChatCompletionRequest
 
@@ -99,6 +99,9 @@ async def create_chat_completions(
     elif api_key.startswith(("tune",)):  # 逆向 o1 c35 ###################
         response = tune.create(request)
 
+    elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
+        response = qwenllm.create(request)
+
     # elif api_key.startswith(("yuanbao",)):
     #     client = yuanbao.Completions()
     #     response = await client.create(request)
@@ -107,7 +110,7 @@ async def create_chat_completions(
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
 
-    if inspect.isasyncgen(response):  # 非流：将流转换为非流
+    if inspect.isasyncgen(response):  # 非流：将流转换为非流 tdoo 計算tokens
         logger.debug("IS_ASYNC_GEN")
 
         chunks = await stream.list(response)
@@ -115,8 +118,8 @@ async def create_chat_completions(
 
         # logger.debug(response)
 
-        prompt_tokens = int(len(str(request.messages)) // 1.25)
-        completion_tokens = int(len(''.join(chunks)) // 1.25)
+        prompt_tokens = int(len(str(request.messages)) // 2)
+        completion_tokens = int(len(''.join(chunks)) // 2)
 
         if hasattr(response.usage, "prompt_tokens"):
             response.usage.prompt_tokens = prompt_tokens
