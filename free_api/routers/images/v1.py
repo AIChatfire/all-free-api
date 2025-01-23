@@ -44,7 +44,7 @@ async def generate(
         n: Optional[int] = Query(1),  # 默认收费
 ):
     logger.debug(request)
-    async with ppu_flow(api_key, post=f"images-edits-{request.model}", n=n):
+    async with ppu_flow(api_key, post=f"api-images-edits-{request.model}", n=n):
         response = await edit_image(request)
         return response
 
@@ -65,7 +65,7 @@ async def generate(
     if model.startswith("flux") and redirect_flux:  # 重定向 flux
         request["model"] = "flux"
 
-    if model.startswith(("kolors",)): # kolors 1.0
+    if model.startswith(("kolors",)):  # kolors 1.0
         request = kolors.KolorsRequest(**request)
         async with ppu_flow(api_key, post="kolors", n=n):
             response = await kolors.generate(request)
@@ -125,17 +125,11 @@ async def generate(
             return response
 
     elif model.startswith(("seededit",)):  # 即梦
-        from meutils.apis.jimeng import images
+        from meutils.apis.jimeng import images as jimeng_images
 
         request = ImageRequest(**request)
 
-        n *= request.n or 1
-        task_response = await images.create_task(request)
-        for i in range(1, 10):
-            await asyncio.sleep(5 / i)
-            response = await images.get_task(task_response.task_id, task_response.system_fingerprint)
-            if data := response.data:
-                return {"data": data}
+        return await jimeng_images.generate(request)
 
     else:  # 其他
         request = FluxImageRequest(**request)

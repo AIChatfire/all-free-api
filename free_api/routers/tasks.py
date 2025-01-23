@@ -182,18 +182,19 @@ async def create_tasks(
     token = token and token.decode()
 
     async with ppu_flow(api_key, post="api-sunoai-chirp"):
-        task = await suno.create_task(request, token)
-        if task and task.status:
-            suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
-
-            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
-            for task_id in task.id.split(','):
-                await redis_aclient.set(task_id, task.system_fingerprint, ex=7 * 24 * 3600)
-
-            return task.model_dump(exclude={"system_fingerprint"})
-
-        else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
+        pass
+        # task = await suno.create_task(request, token)
+        # if task and task.status:
+        #     suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
+        #
+        #     await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+        #     for task_id in task.id.split(','):
+        #         await redis_aclient.set(task_id, task.system_fingerprint, ex=7 * 24 * 3600)
+        #
+        #     return task.model_dump(exclude={"system_fingerprint"})
+        #
+        # else:
+        #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
 
 
 @router.post(f"/tasks/suno-cover")
@@ -206,16 +207,17 @@ async def create_tasks(
     api_key = auth
 
     async with ppu_flow(api_key, post="api-sunoai-cover"):
-        task = await suno.create_task_for_cover(request.get("audio"), request.get("lyrics"))
-        if task and task.status:
-            suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
-
-            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
-
-            return task.model_dump(exclude={"system_fingerprint"})
-
-        else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
+        pass
+        # task = await suno.create_task_for_cover(request.get("audio"), request.get("lyrics"))
+        # if task and task.status:
+        #     suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
+        #
+        #     await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+        #
+        #     return task.model_dump(exclude={"system_fingerprint"})
+        #
+        # else:
+        #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
 
 
 @router.post(f"/tasks/suno-stems")
@@ -229,16 +231,17 @@ async def create_tasks(
     api_key = auth
 
     async with ppu_flow(api_key, post="api-sunoai-stems"):
-        task = await suno.create_task_for_stems(request.get("audio"))
-        if task and task.status:
-            suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
-
-            await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
-
-            return task.model_dump(exclude={"system_fingerprint"})
-
-        else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
+        pass
+        # task = await suno.create_task_for_stems(request.get("audio"))
+        # if task and task.status:
+        #     suno.send_message(f"任务提交成功：\n\n{task.id}")  # 三种查询方式
+        #
+        #     await redis_aclient.set(task.id, task.system_fingerprint, ex=7 * 24 * 3600)
+        #
+        #     return task.model_dump(exclude={"system_fingerprint"})
+        #
+        # else:
+        #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=task)
 
 
 @router.post(f"/tasks/{TaskType.haimian}")
@@ -274,14 +277,15 @@ async def create_tasks(
     task_type = TaskType.lyrics
 
     async with ppu_flow(api_key, post="api-sunoai-lyrics"):
-        if request.model == "haimian":
-            data = haimian.generate_lyrics(prompt=request.prompt)
-        else:
-            data = await suno.generate_lyrics(prompt=request.prompt)
-        if isinstance(data, str):
-            raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=data)  # 内容审核
-
-        return data
+        pass
+        # if request.model == "haimian":
+        #     data = haimian.generate_lyrics(prompt=request.prompt)
+        # else:
+        #     data = await suno.generate_lyrics(prompt=request.prompt)
+        # if isinstance(data, str):
+        #     raise HTTPException(status_code=status.HTTP_451_UNAVAILABLE_FOR_LEGAL_REASONS, detail=data)  # 内容审核
+        #
+        # return data
 
 
 @router.post(f"/tasks/{TaskType.cogvideox}")

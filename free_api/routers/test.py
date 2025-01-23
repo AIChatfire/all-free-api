@@ -41,6 +41,7 @@ async def create_request(
 
     data = {
         "id": "test",
+        "status": "SUBMITTED",
         "headers": dict(request.headers),
         "url": str(request.url),
         "method": request.method,
