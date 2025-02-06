@@ -41,14 +41,13 @@ async def create_task(
         request: VideoRequest,
         auth: Optional[str] = Depends(get_bearer_token),
 
-        vip: Optional[bool] = Query(True)
 ):
     api_key = auth
 
     N = 1
     async with ppu_flow(api_key, post="official-api-hailuo-video" if vip else "api-hailuo-video", n=N):
         videos.send_message(request)
-        task = await videos.create_task(request, vip=vip)
+        task = await videos.create_task(request)
         videos.send_message(task)
 
         await redis_aclient.set(task.task_id, task.system_fingerprint, ex=30 * 24 * 3600)

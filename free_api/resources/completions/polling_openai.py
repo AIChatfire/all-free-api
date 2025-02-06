@@ -47,9 +47,11 @@ class Completions(object):
         for i in range(5):  # 轮询个数
             try:
                 api_key = await self.get_next_api_key()
+                logger.debug(api_key)
                 client = AsyncOpenAI(
                     api_key=api_key,
                     base_url=self.base_url,
+                    default_headers={"X-Failover-Enabled": "true"},
                 )
                 completion = await client.chat.completions.create(**data)
                 if completion:
@@ -123,7 +125,7 @@ class Completions(object):
     @staticmethod
     def calculate_tokens(request: ChatCompletionRequest, completion, alfa: float = 1.02):
 
-        if request.stream or isinstance(completion, str): return completion
+        if request.stream or isinstance(completion, str) or not completion.choices[0].message: return completion
 
         # 非流&一般逆向api需要重新计算
         if completion.usage is None or (completion.usage and completion.usage.completion_tokens == 1):
