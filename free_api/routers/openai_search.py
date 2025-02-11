@@ -38,7 +38,6 @@ async def create_chat_completions(
 
     if request.model.endswith("metasearch"):
         response = metaso.create(request)
-
     else:
         response = await search.Completions(api_key=api_key).create(request)
 
