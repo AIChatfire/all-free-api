@@ -23,7 +23,6 @@ from meutils.apis.textin import document_process as textin_fileparser
 from meutils.apis.kuaishou import kolors, klingai
 from meutils.apis.sunoai import suno
 from meutils.apis.chatglm import glm_video
-from meutils.apis.vidu import vidu_video
 
 from meutils.schemas.task_types import Purpose
 
@@ -143,15 +142,7 @@ async def upload_files(
 
         return file_object
 
-    elif purpose.startswith(purpose.vidu):  # 绑定token
-        file_task = await vidu_video.upload(await file.read(), vip=vip)
 
-        file_object.id = file_task.id
-        file_object.url = file_task.url
-        file_object.data = file_task.data
-
-        await redis_aclient.set(file_task.url, file_task.system_fingerprint, ex=1 * 24 * 3600)
-        return file_object
 
     elif purpose == purpose.suno:  # 1分
         async with ppu_flow(api_key, post="api-sunoai-audio"):
@@ -180,8 +171,6 @@ async def upload_files(
         async with ppu_flow(api_key, post="api-voice-clone"):
             file_object = await fish.create_file_for_openai(file)
             return file_object
-
-
 
 
 @router.get("/files/{file_id}")

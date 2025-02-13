@@ -19,24 +19,30 @@ from meutils.llm.completions import reasoner
 from meutils.schemas.openai_types import ChatCompletionRequest
 
 from sse_starlette import EventSourceResponse
-from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, File, UploadFile, Header, Query, Form, Depends, Request, HTTPException, status, \
+    BackgroundTasks
 
 router = APIRouter()
 TAGS = ["reasoner"]
 
 
-@router.post("/{path:path}")
+@router.post("/{base_url:path}/v1/chat/completions")  # 兼容openai, 其他参数放路径或者headers
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        path: str = "/v1/chat/completions",  # 兼容性
 
-        reasoning_stream: bool = Query(True),
-        base_url: Optional[str] = Query(None),
+        base_url: str = "https://api.chatfire.cn/v1",  # 上游base url
+
         api_key: Optional[str] = Depends(get_bearer_token),
+
+        reasoning_stream: bool = Header(True),
+        # reasoning_stream: bool = Header(False),
 
 ):
     logger.debug(request.model_dump_json(indent=4))
-    # api_key = None
+
+    if not base_url.startswith("http"):  # chatfire
+        base_url = None
+
     response = reasoner.Completions(api_key, base_url, reasoning_stream).create(request)
 
     # logger.debug(response)
