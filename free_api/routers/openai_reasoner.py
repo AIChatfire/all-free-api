@@ -34,7 +34,6 @@ async def create_chat_completions(
 
         api_key: Optional[str] = Depends(get_bearer_token),
 
-        stream: bool = Query(True),
         reasoning_stream: bool = Header(True),
         # reasoning_stream: bool = Header(False),
 
@@ -44,7 +43,7 @@ async def create_chat_completions(
     if not base_url.startswith("http"):  # chatfire
         base_url = None
 
-    reasoning_stream = stream and reasoning_stream
+    # reasoning_stream = stream and reasoning_stream
     response = reasoner.Completions(api_key, base_url, reasoning_stream).create(request)
 
     # logger.debug(response)
