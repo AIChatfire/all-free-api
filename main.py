@@ -41,7 +41,7 @@ app = App()
 app.include_router(test.router, '/v0', tags=test.TAGS)
 
 # search
-app.include_router(search.router, '/v1', tags=search.TAGS)
+# app.include_router(search.router, '/v1', tags=search.TAGS)
 
 # Chat
 app.include_router(openai_search.router, '/s', tags=openai_search.TAGS)
