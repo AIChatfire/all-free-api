@@ -30,6 +30,7 @@ from free_api.routers.async_tasks import fal
 
 from free_api.routers.audio import v1 as audio_v1, fish
 from free_api.routers.images import v1 as images_v1, virtual_try_on
+from free_api.routers.images import fal as fal_images
 
 from free_api.routers.aitools import document_intelligence, images as aitools_images
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
@@ -73,6 +74,7 @@ app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)  # 反代
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
 
 # Images
+app.include_router(fal_images.router, '/fal/v1', tags=fal_images.TAGS)  # 反代
 app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)  # 反代
 app.include_router(virtual_try_on.router, '/v1', tags=virtual_try_on.TAGS)
 
