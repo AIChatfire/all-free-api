@@ -36,6 +36,7 @@ from free_api.routers.tools import prompter, translator, imager, news, textcard,
 
 app = App()
 
+
 # 空服务
 app.include_router(test.router, '/v0', tags=test.TAGS)
 
