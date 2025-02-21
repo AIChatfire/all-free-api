@@ -41,9 +41,7 @@ app.include_router(test.router, '/v0', tags=test.TAGS)
 
 # Chat
 app.include_router(openai_search.router, '/s', tags=openai_search.TAGS)
-app.include_router(openai_search.router, '/search', tags=openai_search.TAGS)
 app.include_router(openai_reasoner.router, '/r', tags=openai_reasoner.TAGS)
-app.include_router(openai_reasoner.router, '/reasoner', tags=openai_reasoner.TAGS)
 
 app.include_router(openai_agent.router, '/agent', tags=openai_agent.TAGS)
 app.include_router(openai_spark.router, '/spark', tags=openai_spark.TAGS)
