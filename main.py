@@ -10,7 +10,6 @@
 
 from meutils.serving.fastapi import App
 
-from free_api.routers import search
 from free_api.routers import chat_yuanbao, chat_suno, chat_lyrics
 from free_api.routers import openai_spark
 from free_api.routers import openai_search, openai_reasoner
