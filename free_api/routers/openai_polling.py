@@ -27,16 +27,17 @@ TAGS = ["文本生成", "轮询"]
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 
-@router.post("/chat/completions")
+@router.post("/{openai_path:path}")
 async def create_chat_completions(
         request: ChatCompletionRequest,
         base_url: Optional[str] = Query("https://api.siliconflow.com/v1"),
         feishu_url: Optional[str] = Query(None),
         redis_key: Optional[str] = Query(None),
 
-        auth: Optional[str] = Depends(get_bearer_token),
+        openai_path: Optional[str] = "chat/completions",
+
+        api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth
     logger.debug(request.model_dump_json(indent=4))
     # logger.debug(base_url)
     # logger.debug(feishu_url)
@@ -68,7 +69,3 @@ if __name__ == '__main__':
     app.include_router(router, '/v1')
 
     app.run()
-
-
-
-

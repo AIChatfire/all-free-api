@@ -8,13 +8,11 @@
 # @Software     : PyCharm
 # @Description  :
 
-import json_repair
 
 from meutils.pipe import *
 from meutils.schemas.openai_types import ChatCompletionRequest
 from meutils.schemas.suno_types import SunoAIRequest
-from meutils.apis.sunoai import suno
-from meutils.config_utils.lark_utils import get_next_token_for_polling
+from meutils.apis.sunoai import suno, suno_api
 
 template = """
 
@@ -71,9 +69,11 @@ class Completions(object):
             else:
                 return f"请按照规定格式提交任务（未知错误联系管理员）\n\n {template}"
 
-        task = await suno.create_task(request)
-        logger.debug(task.model_dump_json(indent=4))
-        return create_chunks(task.id, task.system_fingerprint)
+        task_id = await suno_api.create_task(request)
+        logger.debug(task_id)
+
+        # task_id = "5dc4c01c-7e7b-2d94-9868-f5f9742248cc"
+        return create_chunks(task_id)
 
 
 def music_info(df):
@@ -84,13 +84,15 @@ def music_info(df):
     :param df:
     :return:
     """
+    logger.debug(df)
+
     df['🎵音乐链接'] = df['id'].map(
         lambda x: f"**请两分钟后试听**[🎧音频](https://cdn1.suno.ai/{x}.mp3)[▶️视频](https://cdn1.suno.ai/{x}.mp4)"
     )
     # todo: 图片链接发生变化
     df['专辑图'] = df['id'].map(lambda x: f"![🖼](https://cdn1.suno.ai/image_{x}.jpeg)")  # _large
 
-    df_ = df[["id", "created_at", "model_name", "🎵音乐链接", "专辑图"]]
+    df_ = df[["id", "mv", "🎵音乐链接", "专辑图"]]
 
     return f"""
 🎵 **「{df['title'][0]}」**
@@ -106,16 +108,16 @@ def music_info(df):
     """
 
 
-async def create_chunks(task_id, token):
-    clip_ids = task_id.split("suno-", 1)[-1].split(",")
-
+async def create_chunks(task_id):
     yield "✅开始生成音乐\n\n"
     await asyncio.sleep(1)
 
-    yield f"音乐ID：\n"
-    for clip_id in clip_ids:
-        yield f"- [{clip_id}](https://cdn1.suno.ai/{clip_id}.mp3)\n\n"
-        await asyncio.sleep(1)
+    yield f"任务ID：{task_id}\n\n"
+
+    # yield f"音乐ID：\n"
+    # for clip_id in clip_ids:
+    #     yield f"- [{clip_id}](https://cdn1.suno.ai/{clip_id}.mp3)\n\n"
+    #     await asyncio.sleep(1)
 
     yield f"""[🔥音乐进度]("""
     await asyncio.sleep(1)
@@ -124,16 +126,17 @@ async def create_chunks(task_id, token):
         await asyncio.sleep(1) if i < 10 else await asyncio.sleep(3)
 
         # 监听歌曲
-        clips = await suno.get_task(task_id, token)
+        data = await suno_api.get_task(task_id)
+        logger.debug(bjson(data))
 
-        logger.debug(bjson(clips))
+        clips = data.get("data").get("data")
 
-        STATUS = {"streaming", "complete", "error"}  # submitted queued streaming complete/error
-        if all(clip.get('status') in STATUS for clip in clips):  # 可提前返回
+        STATUS = {"streaming", "complete", "error", "running"}  # submitted queued streaming complete/error
+        if clips and all(clip.get('status') in STATUS for clip in clips):  # 可提前返回
             yield f""") ✅\n\n"""
             df = pd.DataFrame(clips)
-            df['tags'] = [clip.get('metadata').get('tags') for clip in clips]
-            df['prompt'] = [clip.get('metadata').get('prompt') for clip in clips]
+            df['tags'] = [clip.get('tags') for clip in clips]
+            df['prompt'] = [clip.get('prompt') for clip in clips]
             md_string = music_info(df)
             yield md_string  # yield from
             break
@@ -146,4 +149,8 @@ async def create_chunks(task_id, token):
 
 
 if __name__ == '__main__':
-    pass
+    task_id = "5d10ae83-a0ee-205d-dc3f-f67ceb791496"
+
+    # arun(create_chunks(task_id))
+
+    # arun(Completions('x').create(ChatCompletionRequest(messages=[{'role': 'user', 'content': '写一首中国风的歌曲'}])))

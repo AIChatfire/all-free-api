@@ -39,15 +39,14 @@ async def get_task(
 @router.post("/video_generation")  # POST https://api.minimax.chat/v1/video_generation
 async def create_task(
         request: VideoRequest,
-        auth: Optional[str] = Depends(get_bearer_token),
-
+        api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth
-
     N = 1
     async with ppu_flow(api_key, post="official-api-hailuo-video", n=N):
         videos.send_message(request)
-        task = await videos.create_task(request)
+        #############################################
+        task = await videos.create_task(request) # core
+        #############################################
         videos.send_message(task)
 
         await redis_aclient.set(task.task_id, task.system_fingerprint, ex=30 * 24 * 3600)

@@ -38,6 +38,7 @@ async def create_chat_completions(
         # reasoning_stream: bool = Header(False),
 
 ):
+    logger.debug(reasoning_stream)
     logger.debug(request.model_dump_json(indent=4))
 
     if not base_url.startswith("http"):  # chatfire
@@ -62,3 +63,5 @@ if __name__ == '__main__':
     app.include_router(router, '/v1')
 
     app.run()
+
+

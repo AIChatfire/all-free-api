@@ -11,7 +11,7 @@
 from aiostream import stream
 
 from meutils.pipe import *
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
+from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_completion_params
 from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm
 from meutils.apis.search import metaso
@@ -105,7 +105,7 @@ async def create_chat_completions(
         response = tune.create(request)
 
     elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
-        response = qwenllm.create(request)
+        response = qwenllm.create(request, api_key)
 
     # elif api_key.startswith(("yuanbao",)):
     #     client = yuanbao.Completions()
@@ -129,9 +129,11 @@ async def create_chat_completions(
         if hasattr(response.usage, "prompt_tokens"):
             response.usage.prompt_tokens = prompt_tokens
             response.usage.completion_tokens = completion_tokens
+            response.usage.total_tokens = prompt_tokens + completion_tokens
         else:
             response.usage['prompt_tokens'] = prompt_tokens
             response.usage['completion_tokens'] = completion_tokens
+            response.usage['total_tokens'] = prompt_tokens + completion_tokens
 
     if hasattr(response, "model"):
         response.model = raw_model  # 以请求体为主

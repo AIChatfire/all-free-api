@@ -13,6 +13,7 @@ import jsonpath
 from meutils.pipe import *
 from meutils.oss.minio_oss import Minio
 from meutils.io.files_utils import to_url
+from meutils.llm.clients import qwen_client
 
 from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import appu, ppu_flow
@@ -87,6 +88,7 @@ async def upload_files(
             bucket_name = "files"
             extension = Path(file.filename).suffix
             filename = f"{shortuuid.random()}{extension}"
+
             # backgroundtasks.add_task(
             #     Minio().put_object_for_openai,
             #     bucket_name=bucket_name,
@@ -132,6 +134,11 @@ async def upload_files(
 
             return file_object
 
+    elif purpose == purpose.qwen:
+        file_object = await qwen_client.files.create(file=(file.filename, file.file), purpose="file-extract")
+
+        return file_object
+
     elif purpose.startswith(purpose.kling):
         file_task = await klingai.upload(await file.read(), vip=vip)
 
@@ -142,30 +149,6 @@ async def upload_files(
 
         return file_object
 
-
-
-    elif purpose == purpose.suno:  # 1分
-        async with ppu_flow(api_key, post="api-sunoai-audio"):
-            clip_data, token = await suno.upload(await file.read(), title=file.filename or file.file.name)  # clip
-            if not clip_data:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=clip_data)
-
-            # 获取clip_id
-            file_object.id, file_object.duration = jsonpath.jsonpath(clip_data, "$..[id,duration]")
-            file_object.data = clip_data
-
-            await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
-            return file_object
-
-    elif purpose == purpose.cogvideox:
-        data, token = await glm_video.upload(await file.read())
-
-        file_object.data = data
-        file_object.id = data['result']['source_id']
-        file_object.url = data['result']['source_url']
-
-        await redis_aclient.set(file_object.id, token, ex=1 * 24 * 3600)
-        return file_object
 
     elif purpose == purpose.voice_clone:
         async with ppu_flow(api_key, post="api-voice-clone"):
@@ -183,21 +166,17 @@ async def get_file(
 
 @router.get("/files")
 async def get_files(
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth
-
     return client.files.list()
 
 
 @router.get("/files/{file_id}/content")
 async def get_file_content(
         file_id: str,
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 
 ):
-    api_key = auth
-
     if Purpose.textin_fileparser in file_id:
         file_content = await redis_aclient.get(file_id)
     else:
