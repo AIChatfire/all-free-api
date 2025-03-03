@@ -40,13 +40,19 @@ async def get_task(
 async def create_task(
         request: images.ImageRequest,
         api_key: Optional[str] = Depends(get_bearer_token),
+        # api_key: Optional[str] = Depends(get_bearer_token),
+
+        token: Optional[str] = Query(None),
 ):
+    if token:
+        token = np.random.choice(token.split(','))
+        logger.debug(f"token: {token}")
+
     N = 1
     async with ppu_flow(api_key, post="api-images-seededit", n=N):
-        task_response = await images.create_task(request)
+        task_response = await images.create_task(request, token)
 
         await redis_aclient.set(task_response.task_id, task_response.system_fingerprint, ex=7 * 24 * 3600)
-
         return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
 

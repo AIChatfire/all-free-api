@@ -13,7 +13,7 @@ from aiostream import stream
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_completion_params
-from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm
+from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm, yuanbao
 from meutils.apis.search import metaso
 from meutils.schemas.openai_types import ChatCompletionRequest
 
@@ -23,7 +23,7 @@ from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
-from free_api.resources.completions import sensechat, chat_qianfan, yuanbao  # todo
+from free_api.resources.completions import sensechat, chat_qianfan
 
 router = APIRouter()
 TAGS = ["文本生成"]
@@ -107,9 +107,9 @@ async def create_chat_completions(
     elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
         response = qwenllm.create(request, api_key)
 
-    # elif api_key.startswith(("yuanbao",)):
-    #     client = yuanbao.Completions()
-    #     response = await client.create(request)
+    elif api_key.startswith(("yuanbao",)):
+        client = yuanbao.Completions()
+        response = await client.create(request)
 
     #########################################################################################################
     if request.stream:

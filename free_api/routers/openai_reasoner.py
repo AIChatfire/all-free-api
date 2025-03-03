@@ -34,7 +34,7 @@ async def create_chat_completions(
 
         api_key: Optional[str] = Depends(get_bearer_token),
 
-        reasoning_stream: bool = Header(True),
+        reasoning_stream: bool = Header(False),
         # reasoning_stream: bool = Header(False),
 
 ):
@@ -63,5 +63,3 @@ if __name__ == '__main__':
     app.include_router(router, '/v1')
 
     app.run()
-
-
