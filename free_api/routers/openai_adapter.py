@@ -104,7 +104,7 @@ async def create_chat_completions(
 
     elif api_key.startswith(("yuanbao",)):  ############ apikey判别
         client = yuanbao.Completions()
-        response = await client.create(request)
+        response = client.create(request)
 
     #########################################################################################################
     if request.stream:
