@@ -12,10 +12,10 @@ from aiostream import stream
 
 from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
-from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_completion_params
-from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm, yuanbao
+from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
+from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm, yuanbao, chat_gemini
 from meutils.apis.search import metaso
-from meutils.schemas.openai_types import ChatCompletionRequest
+from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest
 
 from openai import AsyncClient
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
@@ -33,7 +33,7 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 @router.post("/{redirect_model:path}")  # todo: 映射函数
 async def create_chat_completions(
-        request: ChatCompletionRequest,
+        request: CompletionRequest,
 
         redirect_model: str = '目标值模型',  # 源模型
 
@@ -41,7 +41,7 @@ async def create_chat_completions(
         max_turns: Optional[int] = Query(None),
 
         api_key: Optional[str] = Depends(get_bearer_token),
-
+        base_url: Optional[str] = None,
 ):
     logger.debug(request.model_dump_json(indent=4))
     logger.debug(redirect_model)
@@ -55,6 +55,8 @@ async def create_chat_completions(
 
     response = None
     if request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
+        request = ChatCompletionRequest(**request.model_dump())
+
         if "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content): return
 
         base_url = None
@@ -62,7 +64,7 @@ async def create_chat_completions(
         request.model = request.model.removesuffix('-all')
         request.messages = [message for message in request.messages if message['role'] != 'system']
 
-        data = to_openai_completion_params(request)
+        data = to_openai_params(request)
         data['stream'] = False
         data.pop('max_tokens', None)
         response = await AsyncClient(api_key=api_key, base_url=base_url, timeout=100).chat.completions.create(**data)
@@ -78,36 +80,29 @@ async def create_chat_completions(
         else:
             request.model = "net-gpt-3.5-turbo-16k"
 
-        data = to_openai_completion_params(request)
+        data = to_openai_params(request)
         client = AsyncClient(api_key=api_key, base_url=os.getenv("GOD_BASE_URL"), timeout=100)
         response = await client.chat.completions.create(**data)
 
-    elif request.model.lower().startswith(("sensechat",)):
-        client = sensechat.Completions(threshold=threshold)
-        response = await client.create(request)
-
-    elif request.model.lower().startswith(("ernie",)):
-        client = chat_qianfan.Completions()
-        request.model = "ERNIE-Speed-128K"
-        response = await client.create(request)
 
     elif request.model.startswith(("ai-search",)):  # 搜索
+        request = ChatCompletionRequest(**request.model_dump())
+
         response = metaso.create(request)
-
-    elif api_key.startswith(("app-",)):  # 适配dify
-        client = dify.Completions(api_key=api_key)
-        response = client.create(request)  # List[str]
-
-    elif api_key.startswith(("deli",)):  # 逆向
-        response = delilegal.create(request)
-
-    elif api_key.startswith(("tune",)):  # 逆向 o1 c35 ###################
-        response = tune.create(request)
+    #
+    # elif api_key.startswith(("app-",)):  # 适配dify
+    #     client = dify.Completions(api_key=api_key)
+    #     response = client.create(request)  # List[str]
 
     elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
         response = qwenllm.create(request, api_key)
 
-    elif api_key.startswith(("yuanbao",)):
+    elif request.model.startswith(("gemini",)):
+        base_url = "https://api.aiguoguo199.com/v1"
+        client = chat_gemini.Completions(base_url=base_url, api_key=api_key)
+        response = await client.create(request)  # 映射
+
+    elif api_key.startswith(("yuanbao",)):  ############ apikey判别
         client = yuanbao.Completions()
         response = await client.create(request)
 

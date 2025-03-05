@@ -36,7 +36,6 @@ from free_api.routers.tools import prompter, translator, imager, news, textcard,
 
 app = App()
 
-
 # 空服务
 app.include_router(test.router, '/v0', tags=test.TAGS)
 
@@ -55,10 +54,7 @@ app.include_router(vision_llm.router, '/vision/v1', tags=vision_llm.TAGS)
 app.include_router(chat_image.router, '/chat_image/v1', tags=chat_image.TAGS)
 app.include_router(chat_to_audio.router, '/chat_to_audio/v1', tags=chat_to_audio.TAGS)
 
-app.include_router(chat_yuanbao.router, '/yuanbao/v1', tags=['腾讯混元'])
-
 app.include_router(chat_suno.router, '/suno/v1', tags=chat_suno.TAGS)
-app.include_router(chat_lyrics.router, '/chat_lyrics/v1', tags=chat_lyrics.TAGS)
 
 app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 
