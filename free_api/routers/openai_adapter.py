@@ -84,8 +84,7 @@ async def create_chat_completions(
         client = AsyncClient(api_key=api_key, base_url=os.getenv("GOD_BASE_URL"), timeout=100)
         response = await client.chat.completions.create(**data)
 
-
-    elif request.model.startswith(("ai-search",)):  # 搜索
+    elif request.model.startswith(("ai-search", "meta")) or "meta" in request.model:  # 搜索
         request = ChatCompletionRequest(**request.model_dump())
 
         response = metaso.create(request)
@@ -104,6 +103,7 @@ async def create_chat_completions(
 
     elif api_key.startswith(("yuanbao",)):  ############ apikey判别
         client = yuanbao.Completions()
+        logger.debug(request)
         response = client.create(request)
 
     #########################################################################################################
@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '/v1')
+    app.include_router(router, '')
 
     app.run()
 

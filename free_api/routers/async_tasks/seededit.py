@@ -14,6 +14,7 @@ from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import ppu_flow
 
 from meutils.apis.jimeng import images
+from meutils.apis.jimeng.files import face_recognize
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
@@ -54,6 +55,18 @@ async def create_task(
 
         await redis_aclient.set(task_response.task_id, task_response.system_fingerprint, ex=7 * 24 * 3600)
         return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
+
+
+@router.post("/tasks/face_recognize")
+async def create_task(
+        request: dict,  # image: xxx
+        api_key: Optional[str] = Depends(get_bearer_token),
+):
+    if 'image' in request:
+        data = await face_recognize(request.get("image"))
+        return data
+    else:
+        raise HTTPException(status_code=404, detail="Image not found")
 
 
 if __name__ == '__main__':
