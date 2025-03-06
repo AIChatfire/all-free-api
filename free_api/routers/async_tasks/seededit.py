@@ -15,6 +15,10 @@ from meutils.llm.openai_utils import ppu_flow
 
 from meutils.apis.jimeng import images
 from meutils.apis.jimeng.files import face_recognize
+from meutils.schemas.jimeng_types import FEISHU_URL_MAPPER
+from meutils.apis.oneapi.user import get_user_from_api_key
+
+from meutils.config_utils.lark_utils import get_next_token_for_polling
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
@@ -41,13 +45,11 @@ async def get_task(
 async def create_task(
         request: images.ImageRequest,
         api_key: Optional[str] = Depends(get_bearer_token),
-        # api_key: Optional[str] = Depends(get_bearer_token),
-
-        token: Optional[str] = Query(None),
 ):
-    if token:
-        token = np.random.choice(token.split(','))
-        logger.debug(f"token: {token}")
+    user_data = await get_user_from_api_key(api_key)
+    token = None
+    if FEISHU_URL := FEISHU_URL_MAPPER.get(str(user_data.get("user_id"))):
+        token = await get_next_token_for_polling(FEISHU_URL)
 
     N = 1
     async with ppu_flow(api_key, post="api-images-seededit", n=N):
