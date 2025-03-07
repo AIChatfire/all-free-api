@@ -94,7 +94,7 @@ async def create_chat_completions(
     #     response = client.create(request)  # List[str]
 
     elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
-        response = qwenllm.create(request, api_key)
+        response = qwenllm.create(request)
 
     elif request.model.startswith(("gemini",)):
         base_url = "https://api.aiguoguo199.com/v1"
