@@ -56,6 +56,6 @@ class Completions(object):
 
 if __name__ == '__main__':
     messages = [{'role': 'system', 'content': '你是数学家'}, {'role': 'user', 'content': '你能干嘛'}]
-    model = "ERNIE-Speed-AppBuilder"
-    # model = "ERNIE-Speed-128K"
+    # model = "ERNIE-Speed-AppBuilder"
+    model = "ERNIE-Speed-128K"
     arun(Completions().create(ChatCompletionRequest(model=model, messages=messages)))

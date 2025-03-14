@@ -88,6 +88,12 @@ async def create_chat_completions(
         request = ChatCompletionRequest(**request.model_dump())
 
         response = metaso.create(request)
+
+    elif request.model.startswith(("ERNIE",)):  # 反向
+        request = ChatCompletionRequest(**request.model_dump())
+        request.model = "ERNIE-Speed-128K"
+
+        response = await chat_qianfan.Completions().create(request)
     #
     # elif api_key.startswith(("app-",)):  # 适配dify
     #     client = dify.Completions(api_key=api_key)
