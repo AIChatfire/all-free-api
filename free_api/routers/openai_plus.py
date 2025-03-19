@@ -26,12 +26,14 @@ from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
-TAGS = ["文本生成"]
+TAGS = ["全能模型"]
 
 
-@router.post("/{redirect_model:path}")  # todo: 映射函数
+@router.post("/{path:path}")  # todo: 映射函数
 async def create_chat_completions(
         request: CompletionRequest,
+
+        path: str = "",
 
         api_key: Optional[str] = Depends(get_bearer_token),
 ):
