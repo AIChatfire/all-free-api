@@ -40,7 +40,7 @@ app = App()
 app.include_router(test.router, '/v0', tags=test.TAGS)
 
 # 信息类
-app.include_router(assistants.router, '/v1', tags=assistants.TAGS)
+app.include_router(assistants.router, '/assistants/v1', tags=assistants.TAGS)
 
 # Chat
 app.include_router(openai_search.router, '/s', tags=openai_search.TAGS)
