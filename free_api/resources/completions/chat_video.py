@@ -111,24 +111,10 @@ class Completions(object):
             if response.is_success:
                 return Task(**response.json())
 
-    async def create_task_upscale(self, task_id, creation_id):
-        task_type = "vidu-upscale"
-
-        headers = {'Authorization': f'Bearer {self.api_key}'}
-        payload = {
-            "task_id": task_id,
-            "creation_id": creation_id
-        }
-
-        async with httpx.AsyncClient(base_url="https://api.chatfire.cn/tasks", headers=headers, timeout=100) as client:
-            response = await client.post(f"/{task_type}", json=payload)
-            if response.is_success:
-                return Task(**response.json())
-
 
 if __name__ == '__main__':
     _ = Completions(os.getenv("OPENAI_API_KEY_SSVIP")).create(
-        ChatCompletionRequest(messages = [{'role': 'user', 'content': '比卡丘'}])
+        ChatCompletionRequest(messages=[{'role': 'user', 'content': '比卡丘'}])
     )
 
     # async def main():
@@ -144,5 +130,3 @@ if __name__ == '__main__':
     arun(_)
 
     # arun(main())
-
-

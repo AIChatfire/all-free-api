@@ -14,6 +14,7 @@ from meutils.pipe import *
 from meutils.oss.minio_oss import Minio
 from meutils.io.files_utils import to_url
 from meutils.llm.clients import qwen_client
+from meutils.io.openai_files import file_extract
 
 from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import appu, ppu_flow
@@ -22,8 +23,6 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from meutils.apis.voice_clone import fish
 from meutils.apis.textin import document_process as textin_fileparser
 from meutils.apis.kuaishou import kolors, klingai
-from meutils.apis.sunoai import suno
-from meutils.apis.chatglm import glm_video
 
 from meutils.schemas.task_types import Purpose
 
@@ -121,7 +120,7 @@ async def upload_files(
                 await redis_aclient.set(file_object.id, markdown_text, ex=1 * 3600 * 24)
             return file_object
 
-    elif purpose == purpose.moonshot_fileparser:
+    elif purpose == purpose.moonshot_fileparser:  ###########
         async with ppu_flow(api_key, post="api-file-to-text"):
 
             file_object = client.files.create(file=(file.filename, file.file), purpose="file-extract")
@@ -188,10 +187,8 @@ async def get_file_content(
 @router.delete("/files/{file_id}")
 async def delete_file(
         file_id: str,
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    api_key = auth
-
     return client.files.delete(file_id=file_id)
 
 

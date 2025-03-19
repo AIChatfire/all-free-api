@@ -15,7 +15,7 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
 from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm, yuanbao, chat_gemini
 from meutils.apis.search import metaso
-from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest
+from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
 from openai import AsyncClient
 from openai.types.chat import ChatCompletion, ChatCompletionChunk

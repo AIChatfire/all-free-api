@@ -22,7 +22,6 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from meutils.llm.openai_utils import ppu_flow
 from meutils.apis.kuaishou import klingai_video
 from meutils.config_utils.lark_utils import get_next_token_for_polling
-from meutils.apis.jina import rerank
 from meutils.apis.baidu import bdaitpzs
 from meutils.io.files_utils import base64_to_bytes
 

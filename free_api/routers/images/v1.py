@@ -133,6 +133,7 @@ async def generate(
 
     else:  # 其他
         request = FluxImageRequest(**request)
+        request.model = "black-forest-labs/FLUX.1-schnell"
 
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await siliconflow_images.generate(request)
