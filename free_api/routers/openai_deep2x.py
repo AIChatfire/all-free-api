@@ -14,46 +14,43 @@ from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
-from meutils.llm.completions import reasoner
+from meutils.llm.completions import deep2x
 
-from meutils.schemas.openai_types import ChatCompletionRequest
+from meutils.schemas.openai_types import CompletionRequest
 
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Header, Query, Form, Depends, Request, HTTPException, status, \
     BackgroundTasks
 
 router = APIRouter()
-TAGS = ["reasoner"]
+TAGS = ["deep2x"]
 
 
-@router.post("/{base_url:path}/v1/chat/completions")  # 兼容openai, 其他参数放路径或者headers
+@router.post("/{path:path}")  # 兼容openai, 其他参数放路径或者headers
 async def create_chat_completions(
-        request: ChatCompletionRequest,
-
-        base_url: str = "https://api.chatfire.cn/v1",  # 上游base url
+        request: CompletionRequest,
 
         api_key: Optional[str] = Depends(get_bearer_token),
 
-        reasoning_stream: bool = Header(False),
         # reasoning_stream: bool = Header(False),
 
 ):
-    logger.debug(reasoning_stream)
     logger.debug(request.model_dump_json(indent=4))
 
+    redirect_model = f"deep-{request.model.split('-', )[0]}"
 
-    if not base_url.startswith("http"):  # chatfire
-        base_url = None
-
-    # reasoning_stream = stream and reasoning_stream
-    response = reasoner.Completions(api_key, base_url, reasoning_stream).create(request)
+    response = deep2x.Completions(api_key=api_key).create(request)
 
     # logger.debug(response)
 
     if request.stream:
-        return EventSourceResponse(create_chat_completion_chunk(response, redirect_model="deepseek-reasoner"))
+        return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=redirect_model))
 
-    return (await stream.list(response))[0]
+    else:
+        response = (await stream.list(response))[0]
+        if hasattr(response, "model"):
+            response.model = redirect_model
+        return response
 
 
 if __name__ == '__main__':

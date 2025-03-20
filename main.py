@@ -11,7 +11,7 @@
 from meutils.serving.fastapi import App
 
 from free_api.routers import chat_suno
-from free_api.routers import openai_spark, openai_plus
+from free_api.routers import openai_spark, openai_plus, openai_deep2x
 from free_api.routers import openai_search, openai_reasoner
 from free_api.routers import openai_agent, openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
 from free_api.routers import chat_image, chat_to_audio, chat_video
@@ -49,6 +49,7 @@ app.include_router(openai_reasoner.router, '/r', tags=openai_reasoner.TAGS)
 app.include_router(openai_plus.router, '/plus', tags=openai_plus.TAGS)
 app.include_router(openai_agent.router, '/agent', tags=openai_agent.TAGS)
 app.include_router(openai_spark.router, '/spark', tags=openai_spark.TAGS)
+app.include_router(openai_deep2x.router, '/deep2x', tags=openai_deep2x.TAGS)
 
 app.include_router(openai_redirect.router, '/redirect', tags=openai_redirect.TAGS)
 app.include_router(openai_adapter.router, '/adapter', tags=openai_adapter.TAGS)

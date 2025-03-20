@@ -49,13 +49,15 @@ async def create_chat_completions(
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
 
+    logger.debug(type(response))
+
     if inspect.isasyncgen(response):  # 非流：将流转换为非流 tdoo 計算tokens
         logger.debug("IS_ASYNC_GEN")
 
         chunks = await stream.list(response)
         response = create_chat_completion(chunks)
 
-        # logger.debug(response)
+        logger.debug(response)
 
         prompt_tokens = int(len(str(request.messages)) // 2)
         completion_tokens = int(len(''.join(chunks)) // 2)
@@ -71,6 +73,7 @@ async def create_chat_completions(
 
     if hasattr(response, "model"):
         response.model = raw_model  # 以请求体为主
+
     return response  # chat_completion
 
 
