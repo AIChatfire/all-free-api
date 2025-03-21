@@ -12,8 +12,6 @@ git commit -m "init"
 git push -u origin master -f
 
 
-
-
 # git remote remove origin
 
 

@@ -11,12 +11,12 @@
 from meutils.serving.fastapi import App
 
 from free_api.routers import chat_suno
-from free_api.routers import openai_spark, openai_plus, openai_deep2x
+from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
 from free_api.routers import openai_search, openai_reasoner
 from free_api.routers import openai_agent, openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
-from free_api.routers import test, assistants
+from free_api.routers import test
 from free_api.routers import files, tasks, reranker
 
 from free_api.routers.goamz import suno
@@ -40,7 +40,7 @@ app = App()
 app.include_router(test.router, '/v0', tags=test.TAGS)
 
 # 信息类
-app.include_router(assistants.router, '/assistants/v1', tags=assistants.TAGS)
+app.include_router(openai_assistants.router, '/assistants/v1', tags=openai_assistants.TAGS)
 
 # Chat
 app.include_router(openai_search.router, '/s', tags=openai_search.TAGS)
