@@ -34,6 +34,9 @@ from free_api.routers.images import fal as fal_images
 from free_api.routers.aitools import document_intelligence, images as aitools_images
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
 
+# 采购
+from free_api.routers.textin import v1 as textin_v1
+
 app = App()
 
 # 空服务
@@ -125,6 +128,9 @@ app.include_router(wechat.router, '/hooks/v1', tags=wechat.TAGS)
 
 # ONEAPI: extra-api
 app.include_router(oneapi.router, '/oneapi', tags=oneapi.TAGS)
+
+# 采购项
+app.include_router(textin_v1.router, '/textin/v1', tags=textin_v1.TAGS)
 
 if __name__ == '__main__':
     app.run()
