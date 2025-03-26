@@ -30,7 +30,7 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 @router.post("/{openai_path:path}")
 async def create_chat_completions(
         request: ChatCompletionRequest,
-        base_url: Optional[str] = Query("https://api.siliconflow.com/v1"),
+        base_url: Optional[str] = Query("https://api.siliconflow.cn/v1"),
         feishu_url: Optional[str] = Query(None),
         redis_key: Optional[str] = Query(None),
 

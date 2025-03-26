@@ -31,6 +31,8 @@ async def create_textin_service(
     logger.debug(bjson(request))
 
     if service == "image/watermark_remove":
+        logger.debug(service)
+
         request = WatermarkRemove(**request)
         async with ppu_flow(api_key, post=f"api-textin-{service}"):
             data = await Textin().image_watermark_remove(request)

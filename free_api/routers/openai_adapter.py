@@ -112,6 +112,8 @@ async def create_chat_completions(
         logger.debug(request)
         response = client.create(request)
 
+
+
     #########################################################################################################
     if request.stream:
         return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))

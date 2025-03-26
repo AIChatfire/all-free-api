@@ -14,7 +14,7 @@ from meutils.serving.fastapi.dependencies.headers import get_headers
 
 # from meutils.serving.fastapi.lifespans import nacos_lifespan
 
-from fastapi import APIRouter, File, UploadFile, Header, Query, Form, Depends, Request, HTTPException, status, \
+from fastapi import APIRouter, Body, File, UploadFile, Header, Query, Form, Depends, Request, HTTPException, status, \
     BackgroundTasks
 
 router = APIRouter()
@@ -29,6 +29,8 @@ class H(BaseModel):
 async def create_request(
         path: str,
         request: Request,
+        # request: dict = Body(...),
+
         api_key: Optional[str] = Depends(get_bearer_token),
 
         headers: H = Depends(get_headers),
@@ -36,6 +38,9 @@ async def create_request(
         reasoning_stream: bool = Header(True),
 
 ):
+    payload = (await request.body()).decode()
+
+    1/0
     logger.debug(headers)
     logger.debug(request.method)
     logger.debug(request.headers)
