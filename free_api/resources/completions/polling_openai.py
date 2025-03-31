@@ -57,7 +57,7 @@ class Completions(object):
                 )
                 completion = await client.chat.completions.create(**data)
                 if completion:
-                    return self.calculate_tokens(request, completion)
+                    return self.calculate_tokens(request, completion)  ####### todo重构
                 else:
                     send_message(f"{request}\n\ncompletion: {completion}", title=f"completion is str 很奇怪")
 
@@ -127,7 +127,8 @@ class Completions(object):
     @staticmethod
     def calculate_tokens(request: ChatCompletionRequest, completion, alfa: float = 1.02):
 
-        if request.stream or isinstance(completion, str) or not completion.choices[0].message: return completion
+        if request.stream or isinstance(completion, str) or not (completion.choices and completion.choices[0].message):
+            return completion
 
         # 非流&一般逆向api需要重新计算
         if completion.usage is None or (completion.usage and completion.usage.completion_tokens == 1):

@@ -13,7 +13,6 @@ import jsonpath
 from meutils.pipe import *
 from meutils.oss.minio_oss import Minio
 from meutils.io.files_utils import to_url
-from meutils.llm.clients import qwen_client
 from meutils.io.openai_files import file_extract
 
 from meutils.db.redis_db import redis_aclient
@@ -133,10 +132,7 @@ async def upload_files(
 
             return file_object
 
-    elif purpose == purpose.qwen:
-        file_object = await qwen_client.files.create(file=(file.filename, file.file), purpose="file-extract")
 
-        return file_object
 
     elif purpose.startswith(purpose.kling):
         file_task = await klingai.upload(await file.read(), vip=vip)
