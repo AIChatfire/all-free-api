@@ -31,6 +31,7 @@ from free_api.routers.audio import v1 as audio_v1, fish
 from free_api.routers.images import v1 as images_v1, virtual_try_on
 from free_api.routers.images import fal as fal_images
 from free_api.routers.crawler import reader
+from free_api.routers.search import web_search
 
 from free_api.routers.aitools import document_intelligence, images as aitools_images
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
@@ -120,8 +121,9 @@ app.include_router(news.router, '/tools/v1', tags=news.TAGS)
 app.include_router(textcard.router, '/tools/textcard/v1', tags=textcard.TAGS)
 app.include_router(watermark.router, '/tools/v1', tags=watermark.TAGS)
 
-# 爬虫
+# 搜索与爬虫
 app.include_router(reader.router, '/crawler/reader', tags=reader.TAGS)
+app.include_router(web_search.router, '/search/v1', tags=web_search.TAGS)
 
 # GOAMZ
 app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)

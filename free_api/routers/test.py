@@ -40,7 +40,12 @@ async def create_request(
 ):
     payload = (await request.body()).decode()
 
-    1/0
+    # try:
+    #     1/0
+    # except Exception as e:
+    #     logger.exception(e)
+    #     raise
+
     logger.debug(headers)
     logger.debug(request.method)
     logger.debug(request.headers)

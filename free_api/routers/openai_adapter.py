@@ -103,7 +103,6 @@ async def create_chat_completions(
         response = qwenllm.create(request)
 
     elif request.model.startswith(("gemini",)):
-        base_url = "https://api.aiguoguo199.com/v1"
         client = chat_gemini.Completions(base_url=base_url, api_key=api_key)
         response = await client.create(request)  # 映射
 

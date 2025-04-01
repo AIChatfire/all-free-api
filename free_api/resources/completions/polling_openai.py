@@ -44,6 +44,8 @@ class Completions(object):
         data = to_openai_completion_params(request)
         if 'gemini' in request.model:
             data.pop("extra_body", None)
+            data.pop("presence_penalty", None)
+            data.pop("frequency_penalty", None)
 
         client: Optional[AsyncOpenAI] = None
         for i in range(5):  # 轮询个数
