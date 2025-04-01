@@ -15,7 +15,6 @@ from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
 from meutils.llm.completions import chat_plus
-from meutils.apis.search import web_search
 
 from meutils.schemas.openai_types import CompletionRequest
 
