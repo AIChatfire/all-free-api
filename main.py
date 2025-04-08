@@ -94,7 +94,7 @@ app.include_router(replicateai.router, '/replicate/v1', tags=replicateai.TAGS)
 
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
-app.include_router(kling_apis.router, '/kling_apis', tags=kling_apis.TAGS)
+# app.include_router(kling_apis.router, '/kling_apis', tags=kling_apis.TAGS)
 
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
 app.include_router(hailuo_pro.router, '/hailuo-pro/v1', tags=hailuo.TAGS)
