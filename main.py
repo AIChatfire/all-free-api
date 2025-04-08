@@ -25,7 +25,7 @@ from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import replicateai, kling, kling_pro, cogvideox, hailuo, hailuo_pro, tripo3d, hunyuan
 from free_api.routers.async_tasks import seededit
-from free_api.routers.async_tasks import fal, kling_apis
+from free_api.routers.async_tasks import fal#, kling_apis
 
 from free_api.routers.audio import v1 as audio_v1, fish
 from free_api.routers.images import v1 as images_v1, virtual_try_on
