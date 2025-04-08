@@ -94,7 +94,7 @@ if __name__ == '__main__':
     # app = App(lifespan=nacos_lifespan)
     app = App()
 
-    app.include_router(router, '/v0')
+    app.include_router(router, '/v1')
 
     app.run()
 

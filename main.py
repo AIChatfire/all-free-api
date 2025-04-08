@@ -25,7 +25,7 @@ from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import replicateai, kling, kling_pro, cogvideox, hailuo, hailuo_pro, tripo3d, hunyuan
 from free_api.routers.async_tasks import seededit
-from free_api.routers.async_tasks import fal
+from free_api.routers.async_tasks import fal, kling_apis
 
 from free_api.routers.audio import v1 as audio_v1, fish
 from free_api.routers.images import v1 as images_v1, virtual_try_on
@@ -34,7 +34,7 @@ from free_api.routers.crawler import reader
 from free_api.routers.search import web_search
 
 from free_api.routers.aitools import document_intelligence, images as aitools_images
-from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, watermark
+from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, text_to_url
 
 # 采购
 from free_api.routers.textin import v1 as textin_v1
@@ -94,7 +94,7 @@ app.include_router(replicateai.router, '/replicate/v1', tags=replicateai.TAGS)
 
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
-app.include_router(kling_pro.router, '/kling_pro/v1', tags=kling_pro.TAGS)
+app.include_router(kling_apis.router, '/kling_apis', tags=kling_apis.TAGS)
 
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
 app.include_router(hailuo_pro.router, '/hailuo-pro/v1', tags=hailuo.TAGS)
@@ -119,7 +119,7 @@ app.include_router(imager.router, '/tools/v1', tags=imager.TAGS)
 app.include_router(news.router, '/tools/v1', tags=news.TAGS)
 # app.include_router(processor.router, '/tools/processor/v1', tags=processor.TAGS)
 app.include_router(textcard.router, '/tools/textcard/v1', tags=textcard.TAGS)
-app.include_router(watermark.router, '/tools/v1', tags=watermark.TAGS)
+app.include_router(text_to_url.router, '/tools/v1', tags=text_to_url.TAGS)
 
 # 搜索与爬虫
 app.include_router(reader.router, '/crawler/reader', tags=reader.TAGS)
