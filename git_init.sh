@@ -14,8 +14,6 @@ git push -u origin master -f
 
 
 
-
-
 # git remote remove origin
 
 

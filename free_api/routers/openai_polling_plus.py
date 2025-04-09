@@ -34,6 +34,8 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 5. 支持重定向
 6. 支持流转非流、非流转流
 7. 计算tokens
+
+“{model}:{redirect_model}”
 """
 
 

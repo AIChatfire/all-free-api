@@ -17,10 +17,9 @@ from free_api.routers import openai_agent, openai_adapter, openai_polling, opena
 from free_api.routers import chat_image, chat_to_audio, chat_video
 
 from free_api.routers import test
-from free_api.routers import files, tasks, reranker
+from free_api.routers import files, tasks
 
 from free_api.routers.goamz import suno
-from free_api.routers.hooks import wechat
 from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import replicateai, kling, kling_pro, cogvideox, hailuo, hailuo_pro, tripo3d, hunyuan
@@ -106,7 +105,6 @@ app.include_router(tripo3d.router, '/tripo3d/v1', tags=tripo3d.TAGS)
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 
-app.include_router(reranker.router, '/reranker/v1', tags=reranker.TAGS)  # 不兼容openai
 
 # 小工具
 app.include_router(aitools_images.router, '/aitools', tags=aitools_images.TAGS)
@@ -130,7 +128,6 @@ app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)
 app.include_router(suno.router, '/suno/v1', tags=suno.TAGS)
 
 # Hook
-app.include_router(wechat.router, '/hooks/v1', tags=wechat.TAGS)
 
 # ONEAPI: extra-api
 app.include_router(oneapi.router, '/oneapi', tags=oneapi.TAGS)
