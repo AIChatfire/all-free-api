@@ -15,7 +15,7 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
 from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm, yuanbao, chat_gemini
 from meutils.apis.search import metaso
-from meutils.apis.google_apis import GeminiClient
+from meutils.apis.google import chat as google
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -104,13 +104,19 @@ async def create_chat_completions(
     elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
         response = qwenllm.create(request)
 
-    elif request.model.endswith(("image-generation",)):
-
-        response = GeminiClient().create(request)
+    # google
+    elif request.model.startswith(("gemini-all",)):
+        client = chat_gemini.Completions(base_url=base_url, api_key=api_key)
+        response = await client.create(request)  # todo 取代
 
     elif request.model.startswith(("gemini",)):
-        client = chat_gemini.Completions(base_url=base_url, api_key=api_key)
-        response = await client.create(request)  # 映射
+        if request.model.endswith(("image-generation",)):
+            response = google.Completions().create_for_images(request)
+        elif request.model.endswith(("search",)):
+            response = google.Completions().create_for_search(request)
+        else:
+            response = google.Completions().create_for_files(request)  # 多模态问答
+
 
 
     elif api_key.startswith(("yuanbao",)):  ############ apikey判别

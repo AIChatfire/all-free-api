@@ -7,22 +7,23 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
+import typing
 
 from meutils.pipe import *
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
+from meutils.decorators.contextmanagers import try_catch, atry_catch
+
+from meutils.llm.openai_polling.chat import Completions
 from meutils.llm.openai_utils import create_chat_completion_chunk
-from meutils.schemas.openai_types import ChatCompletionRequest, TOOLS
-from meutils.schemas.oneapi import REDIRECT_MODEL
+from meutils.schemas.openai_types import CompletionRequest
+from meutils.serving.fastapi.dependencies import get_headers, get_bearer_token
 
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
-from free_api.resources.completions.polling_openai import Completions
-
 router = APIRouter()
-TAGS = ["文本生成", "轮询"]
+TAGS = ["轮询"]
 
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
@@ -35,42 +36,48 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 6. 支持流转非流、非流转流
 7. 计算tokens
 
-“{model}:{redirect_model}”
+“{model}::{redirect_model}”
 """
 
 
-@router.post("/{openai_path:path}")
+@router.post("/{path:path}")
 async def create_chat_completions(
-        request: ChatCompletionRequest,
-        base_url: Optional[str] = Query("https://api.siliconflow.cn/v1"),
-        feishu_url: Optional[str] = Query(None),
-        redis_key: Optional[str] = Query(None),
+        path: str,  # "chat/completions"
 
-        openai_path: Optional[str] = "chat/completions",
+        request: CompletionRequest,
 
+        headers: dict = Depends(get_headers),
         api_key: Optional[str] = Depends(get_bearer_token),
+
 ):
-    logger.debug(request.model_dump_json(indent=4))
-    # logger.debug(base_url)
-    # logger.debug(feishu_url)
+    logger.debug(request.model_dump_json(exclude_none=True, indent=4))
 
-    raw_model = request.model
-    if any(i in base_url for i in {"spark-api", "siliconflow", "together", "lingyiwanwu"}):  # 实际调用
-        if request.model.startswith("gemini-1.5"):
-            request.model = REDIRECT_MODEL.get("gemini-1.5")
-        else:  # https://spark-api-open.xf-yun.com/v1
-            request.model = REDIRECT_MODEL.get(request.model, request.model)
+    with try_catch(f"{__name__}: {path}", api_key=api_key, headers=headers, request=request):
 
-    client = Completions(api_key=api_key, base_url=base_url, feishu_url=feishu_url, redis_key=redis_key)
-    response = await client.acreate(request)
+        # https://all.chatfire.cc/g/openai
+        base_url = headers.get("base_url") or "https://api.siliconflow.cn/v1"
 
-    if request.stream:
-        return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
+        if path.endswith("images/generations"):
+            pass
 
-    if hasattr(response, "model"):
-        response.model = raw_model  # 以请求体为主
+        else:  # chat/completions 默认聊天
 
-    return response
+            # 重定向：deepseek-chat:deepseek-v3 展示key 调用value
+            model = request.model
+            if ":" in request.model:
+                model, redirect_model = request.model.split(":", maxsplit=1)
+                request.model = redirect_model
+
+            client = Completions(api_key=api_key, base_url=base_url)
+            response = await client.create(request)
+
+            if request.stream:
+                return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=model))
+
+            if hasattr(response, "model"):
+                response.model = model  # response_model
+
+            return response
 
 
 if __name__ == '__main__':
@@ -81,3 +88,25 @@ if __name__ == '__main__':
     app.include_router(router, '/v1')
 
     app.run()
+
+"""
+
+
+curl -X 'POST' \
+  'http://0.0.0.0:8000/v1/xx' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer redis:https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=rWMtht' \
+  -H 'base_url: https://all.chatfire.cc/g/openai' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "messages": [
+    {
+      "content": "讲个故事",
+      "role": "user"
+    }
+  ],
+  "model": "xxxxxxxx:gemini-2.0-flash",
+  "stream": true
+}'
+
+"""

@@ -12,6 +12,8 @@ from meutils.pipe import *
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from meutils.serving.fastapi.dependencies.headers import get_headers
 
+from meutils.decorators.contextmanagers import try_catch
+
 # from meutils.serving.fastapi.lifespans import nacos_lifespan
 
 from fastapi import APIRouter, Body, File, UploadFile, Header, Query, Form, Depends, Request, HTTPException, status, \
@@ -39,6 +41,9 @@ async def create_request(
 
 ):
     payload = (await request.body()).decode()
+
+    # with try_catch(__name__, payload=payload):
+    #     1 / 0
 
     # try:
     #     1/0

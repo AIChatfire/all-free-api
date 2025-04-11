@@ -10,11 +10,11 @@
 
 from meutils.serving.fastapi import App
 
-from free_api.routers import chat_suno
+from free_api.routers import openai_polling_plus
 from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
 from free_api.routers import openai_search, openai_reasoner
 from free_api.routers import openai_agent, openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
-from free_api.routers import chat_image, chat_to_audio, chat_video
+from free_api.routers import chat_image, chat_to_audio, chat_video, chat_suno
 
 from free_api.routers import test
 from free_api.routers import files, tasks
@@ -24,7 +24,7 @@ from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.cv import ocr
 from free_api.routers.async_tasks import replicateai, kling, kling_pro, cogvideox, hailuo, hailuo_pro, tripo3d, hunyuan
 from free_api.routers.async_tasks import seededit
-from free_api.routers.async_tasks import fal#, kling_apis
+from free_api.routers.async_tasks import fal  # , kling_apis
 
 from free_api.routers.audio import v1 as audio_v1, fish
 from free_api.routers.images import v1 as images_v1, virtual_try_on
@@ -59,6 +59,7 @@ app.include_router(openai_redirect.router, '/redirect', tags=openai_redirect.TAG
 app.include_router(openai_adapter.router, '/adapter', tags=openai_adapter.TAGS)
 app.include_router(openai_polling.router, '/polling/v1', tags=openai_polling.TAGS)
 app.include_router(vision_llm.router, '/vision/v1', tags=vision_llm.TAGS)
+app.include_router(openai_polling_plus.router, '/polling_plus/v1', tags=openai_polling_plus.TAGS)
 
 app.include_router(chat_image.router, '/chat_image/v1', tags=chat_image.TAGS)
 app.include_router(chat_to_audio.router, '/chat_to_audio/v1', tags=chat_to_audio.TAGS)
@@ -104,7 +105,6 @@ app.include_router(tripo3d.router, '/tripo3d/v1', tags=tripo3d.TAGS)
 
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
-
 
 # 小工具
 app.include_router(aitools_images.router, '/aitools', tags=aitools_images.TAGS)

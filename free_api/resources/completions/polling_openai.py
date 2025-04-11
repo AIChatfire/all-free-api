@@ -59,9 +59,8 @@ class Completions(object):
                 )
                 completion = await client.chat.completions.create(**data)
                 if completion:
-                    return self.calculate_tokens(request, completion)  ####### todo重构
-                else:
-                    send_message(f"{request}\n\ncompletion: {completion}", title=f"completion is str 很奇怪")
+                    return self.calculate_tokens(request, completion)  ####### todo重构 逆向才计算
+
 
             except APIStatusError as e:  # {'detail': 'Insufficient Balance'}
                 logger.error(e)

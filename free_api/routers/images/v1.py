@@ -131,6 +131,13 @@ async def generate(
 
         return await jimeng_images.generate(request)
 
+    elif model.startswith(("gemini",)):  # 即梦
+        from meutils.apis.google.chat import Completions
+
+        request = ImageRequest(**request)
+
+        return await Completions().generate(request)
+
     else:  # 其他
         request = FluxImageRequest(**request)
         request.model = "black-forest-labs/FLUX.1-schnell"
