@@ -53,7 +53,7 @@ async def create_chat_completions(
     logger.debug(request.model_dump_json(exclude_none=True, indent=4))
 
     # https://all.chatfire.cc/g/openai
-    base_url = headers.get("base_url") or "https://api.siliconflow.cn/v1"
+    base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"
 
     with try_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
 
@@ -62,10 +62,10 @@ async def create_chat_completions(
 
         else:  # chat/completions 默认聊天
 
-            # 重定向：deepseek-chat:deepseek-v3 展示key 调用value
+            # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
             model = request.model
-            if ":" in request.model:
-                model, redirect_model = request.model.split(":", maxsplit=1)
+            if "==" in request.model:
+                model, redirect_model = request.model.split("==", maxsplit=1)
                 request.model = redirect_model
 
             client = Completions(base_url=base_url, api_key=api_key)
@@ -184,7 +184,7 @@ curl -X 'POST' \
 curl -X 'POST' \
   'http://0.0.0.0:8000/v1/xx' \
   -H 'accept: application/json' \
-  -H 'base_url: https://all.chatfire.cc/g/openai' \
+  -H 'x-base-url: https://all.chatfire.cc/g/openai' \
   -H 'Authorization: Bearer AIzaSyAcVutR1bYxUq8M9hqw4870t2W9zFthKkY' \
   -H 'Content-Type: application/json' \
   -d '{
