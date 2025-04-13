@@ -106,7 +106,8 @@ async def create_chat_completions(
 
     # google
     elif request.model.startswith(("gemini-all",)):
-        client = chat_gemini.Completions(base_url=base_url, api_key=api_key)
+        request.model = "gemini-2.0-flash"
+        client = chat_gemini.Completions(api_key=api_key)
         response = await client.create(request)  # todo 取代
 
     elif request.model.startswith(("gemini",)):

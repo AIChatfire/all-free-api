@@ -62,11 +62,22 @@ async def create_chat_completions(
 
         else:  # chat/completions 默认聊天
 
+            ###########################################################################
             # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
             model = request.model
             if "==" in request.model:
                 model, redirect_model = request.model.split("==", maxsplit=1)
                 request.model = redirect_model
+
+            # 开启视觉模型
+            # if not any(i in request.model for i in ["vl", 'vision']):
+            #     vlm = ""
+
+            if request.last_urls.get("image_url"):
+                request.model = "glm-4v-flash"
+                base_url = api_key = None
+
+            ###########################################################################
 
             client = Completions(base_url=base_url, api_key=api_key)
             response = await client.create(request)
