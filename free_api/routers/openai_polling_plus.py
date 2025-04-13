@@ -117,7 +117,7 @@ curl -X 'POST' \
   'https://all.chatfire.cn/polling/v1/x' \
   -H 'accept: application/json' \
   -H 'Authorization: Bearer redis:https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=kfKGzt' \
-  -H 'base_url: https://all.chatfire.cc/g/openai' \
+  -H 'base-url: https://all.chatfire.cc/g/openai' \
   -H 'Content-Type: application/json' \
   -d '{
   "messages": [
