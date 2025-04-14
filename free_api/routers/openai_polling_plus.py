@@ -69,14 +69,6 @@ async def create_chat_completions(
                 model, redirect_model = request.model.split("==", maxsplit=1)
                 request.model = redirect_model
 
-            # 开启视觉模型
-            # if not any(i in request.model for i in ["vl", 'vision']):
-            #     vlm = ""
-
-            if request.last_urls.get("image_url"):
-                request.model = "glm-4v-flash"
-                base_url = api_key = None
-
             ###########################################################################
 
             client = Completions(base_url=base_url, api_key=api_key)

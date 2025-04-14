@@ -50,6 +50,7 @@ ENV BAICHUAN_BASE_URL=https://api.baichuan-ai.com/v1
 ENV DASHSCOPE_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 ENV DEEPINFRA_BASE_URL=https://api.deepinfra.com/v1/openai
 ENV MODELSCOPE_BASE_URL=https://api-inference.modelscope.cn/v1
+ENV OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 
 # 暴露端口
 EXPOSE 8000
