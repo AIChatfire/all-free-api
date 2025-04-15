@@ -50,11 +50,16 @@ async def create_chat_completions(
         api_key: Optional[str] = Depends(get_bearer_token),
 
 ):
-    logger.debug(request.model_dump_json(exclude_none=True, indent=4))
+    # 代理
+    http_client = None
+    if proxy := headers.get("x-proxy"):
+        proxy = random.choice(proxy.split(","))
+        http_client = httpx.AsyncClient(proxy=proxy, timeout=100)
+
+    # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
 
     # https://all.chatfire.cc/g/openai
     base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"
-
     with try_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
 
         if path.endswith("images/generations"):
@@ -71,7 +76,7 @@ async def create_chat_completions(
 
             ###########################################################################
 
-            client = Completions(base_url=base_url, api_key=api_key)
+            client = Completions(base_url=base_url, api_key=api_key, http_client=http_client)
             response = await client.create(request)
 
             if request.stream:
