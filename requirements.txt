@@ -35,6 +35,7 @@ zhipuai
 fish_audio_sdk
 oss2
 google-auth
+volcengine
 
 
 
