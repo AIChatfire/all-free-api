@@ -36,7 +36,7 @@ router = APIRouter()
 TAGS = ["图片生成"]
 
 
-@router.post("/images/edits")  # todo: sd3 兜底
+@router.post("/images/edits")  # todo: 放到 aitools下
 async def generate(
         request: ImageProcess,
         api_key: Optional[str] = Depends(get_bearer_token),
@@ -116,7 +116,7 @@ async def generate(
     #         response = await kolors_virtual_try_on.generate(request)
     #         return response
 
-    elif model.startswith(("recraftv3",)):
+    elif model.startswith(("recraft",)):
         request = RecraftImageRequest(**request)
 
         n *= request.n or 1

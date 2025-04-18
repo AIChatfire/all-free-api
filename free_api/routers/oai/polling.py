@@ -7,14 +7,18 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import typing
+
 
 from meutils.pipe import *
-from meutils.decorators.contextmanagers import try_catch, atry_catch
+from meutils.decorators.contextmanagers import atry_catch
 
-from meutils.llm.openai_polling.chat import Completions
 from meutils.llm.openai_utils import create_chat_completion_chunk
+from meutils.llm.openai_polling.chat import Completions
+from meutils.llm.openai_polling.images import Images
+
 from meutils.schemas.openai_types import CompletionRequest
+from meutils.schemas.image_types import ImageRequest, ImagesResponse
+
 from meutils.serving.fastapi.dependencies import get_headers, get_bearer_token
 
 from openai.types.chat import ChatCompletion, ChatCompletionChunk
@@ -40,7 +44,7 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 """
 
 
-@router.post("/{path:path}")
+@router.post("/chat/{path:path}")
 async def create_chat_completions(
         path: str,  # "chat/completions"
 
@@ -48,6 +52,8 @@ async def create_chat_completions(
 
         headers: dict = Depends(get_headers),
         api_key: Optional[str] = Depends(get_bearer_token),
+
+        response_model: Optional[str] = Query(None),  # 兼容newapi自定义接口 ?response_model=""
 
 ):
     # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
@@ -59,17 +65,16 @@ async def create_chat_completions(
         http_client = httpx.AsyncClient(proxy=proxy, timeout=100)
 
     # https://all.chatfire.cc/g/openai
-    base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"
+    base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"  # newapi里需反代
 
-    response_model = request.model
+    response_model = response_model or request.model
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
-
         ###########################################################################
         # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
 
         if "==" in request.model:
-            response_model, redirect_model = request.model.split("==", maxsplit=1)
-            request.model = redirect_model
+            response_model, request_model = request.model.split("==", maxsplit=1)
+            request.model = request_model
 
         ###########################################################################
 
@@ -78,6 +83,45 @@ async def create_chat_completions(
 
         if request.stream:
             return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=response_model))
+
+        if hasattr(response, "model"):
+            response.model = response_model
+
+        return response
+
+
+@router.post("/images/{path:path}")
+async def create_images_generations(
+        path: str,  # "images/generations" ############ todo 兼容 chat
+        request: ImageRequest,
+
+        headers: dict = Depends(get_headers),
+        api_key: Optional[str] = Depends(get_bearer_token),
+
+        response_model: Optional[str] = Query(None),  # 兼容newapi自定义接口 ?model=""
+
+):
+    # headers 代理
+    http_client = None
+    if proxy := headers.get("x-proxy"):
+        proxy = random.choice(proxy.split(",") + [None])
+        http_client = httpx.AsyncClient(proxy=proxy, timeout=100)
+
+    base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"
+
+    response_model = response_model or request.model
+    async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
+        ###########################################################################
+        # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
+
+        if "==" in request.model:
+            response_model, request_model = request.model.split("==", maxsplit=1)
+            request.model = request_model
+
+        ###########################################################################
+
+        images = Images(base_url=base_url, api_key=api_key, http_client=http_client)
+        response = await images.generate(request)
 
         if hasattr(response, "model"):
             response.model = response_model

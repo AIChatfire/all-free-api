@@ -11,6 +11,8 @@
 from meutils.serving.fastapi import App
 
 from free_api.routers import openai_polling_plus
+from free_api.routers.oai import polling as oai_polling
+
 from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
 from free_api.routers import openai_search, openai_reasoner
 from free_api.routers import openai_agent, openai_adapter, openai_polling, openai_redirect, chatfire_all, vision_llm
@@ -27,8 +29,10 @@ from free_api.routers.async_tasks import seededit
 from free_api.routers.async_tasks import fal  # , kling_apis
 
 from free_api.routers.audio import v1 as audio_v1, fish
+
+from free_api.routers.images import biz
 from free_api.routers.images import v1 as images_v1, virtual_try_on
-from free_api.routers.images import fal as fal_images
+
 from free_api.routers.crawler import reader
 from free_api.routers.search import web_search
 
@@ -58,8 +62,11 @@ app.include_router(openai_deep2x.router, '/deep2x', tags=openai_deep2x.TAGS)
 app.include_router(openai_redirect.router, '/redirect', tags=openai_redirect.TAGS)
 app.include_router(openai_adapter.router, '/adapter', tags=openai_adapter.TAGS)
 app.include_router(openai_polling.router, '/polling/v1', tags=openai_polling.TAGS)
-app.include_router(vision_llm.router, '/vision/v1', tags=vision_llm.TAGS)
 app.include_router(openai_polling_plus.router, '/polling_plus/v1', tags=openai_polling_plus.TAGS)
+
+# polling/chat
+# polling/images
+app.include_router(oai_polling.router, '/openai/polling/v1', tags=oai_polling.TAGS)
 
 app.include_router(chat_image.router, '/chat_image/v1', tags=chat_image.TAGS)
 app.include_router(chat_to_audio.router, '/chat_to_audio/v1', tags=chat_to_audio.TAGS)
@@ -71,16 +78,20 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 app.include_router(chatfire_all.router, '/all/v1', tags=chatfire_all.TAGS)
 
 # Audio
-app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)  # 反代
+app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)  ########## 废弃
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
+app.include_router(audio_v1.router, '/openai/v1', tags=audio_v1.TAGS)
 
 # Images
-app.include_router(fal_images.router, '/fal/v1', tags=fal_images.TAGS)  # 反代
-app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)  # 反代
+app.include_router(biz.router, '/biz', tags=biz.TAGS)
+
 app.include_router(virtual_try_on.router, '/v1', tags=virtual_try_on.TAGS)
+app.include_router(images_v1.router, '/openai/v1', tags=images_v1.TAGS)
+app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)  ########## 废弃
 
 # files
-app.include_router(files.router, '/v1', tags=files.TAGS)
+app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
+app.include_router(files.router, '/openai/v1', tags=files.TAGS)
 
 # CV
 app.include_router(ocr.router, '/ocr/v1', tags=ocr.TAGS)

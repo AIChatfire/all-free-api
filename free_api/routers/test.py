@@ -27,7 +27,7 @@ class H(BaseModel):
     reasoning_stream: bool
 
 
-@router.api_route("{path:path}", methods=["GET", "POST"])
+@router.api_route("/{path:path}", methods=["GET", "POST"])
 async def create_request(
         path: str,
         request: Request,
