@@ -60,7 +60,7 @@ EXPOSE 8000
 COPY requirements.txt .
 RUN python -m pip install --no-cache-dir -U -r requirements.txt
 
-RUN python -m pip install --no-cache-dir -U --no-deps zhipuai google-genai
+RUN python -m pip install --no-cache-dir -U --no-deps zhipuai google-genai volcengine
 
 # RUN python -m pip install --no-cache-dir playwright && python -m playwright install-deps && python -m playwright install
 
