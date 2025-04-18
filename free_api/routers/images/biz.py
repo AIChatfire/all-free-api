@@ -45,15 +45,13 @@ async def generate(
         elif biz == 'recraft':
             n = n and request.n or 0
             async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
-                request = RecraftImageRequest(**request.model_dump())
+                request = RecraftImageRequest(**request.model_dump(exclude_none=True))
                 response = await recraft_generate(request)
                 return response
 
         elif biz == 'volcengine':
-            n = request.n
-            async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
-                response = await volcengine_generate(request, token=api_key)
-                return response
+            response = await volcengine_generate(request, token=api_key)
+            return response
 
 
 if __name__ == '__main__':
