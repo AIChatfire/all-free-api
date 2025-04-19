@@ -62,11 +62,7 @@ async def create_chat_completions(
     base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"
 
     response_model = request.model
-    async with atry_catch(f"{base_url}/{path}", api_key=api_key,
-                   headers=headers,
-                   request=request,
-                   # callback=logger.debug
-                   ):
+    async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request, ):
 
         ###########################################################################
         # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
