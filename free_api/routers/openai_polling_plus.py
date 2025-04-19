@@ -52,7 +52,7 @@ async def create_chat_completions(
 ):
     # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
 
-    # headers 代理
+    # headers 代理R
     http_client = None
     if proxy := headers.get("x-proxy"):
         proxy = random.choice(proxy.split(",") + [None])
@@ -62,7 +62,11 @@ async def create_chat_completions(
     base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"
 
     response_model = request.model
-    async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
+    async with atry_catch(f"{base_url}/{path}", api_key=api_key,
+                   headers=headers,
+                   request=request,
+                   # callback=logger.debug
+                   ):
 
         ###########################################################################
         # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
