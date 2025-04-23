@@ -11,6 +11,8 @@
 from aiostream import stream
 
 from meutils.pipe import *
+from meutils.decorators.contextmanagers import atry_catch
+
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
 from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm, yuanbao, chat_gemini
