@@ -33,7 +33,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi import File, UploadFile, Query, Form, Body, Request, HTTPException, status
 
 router = APIRouter()
-TAGS = ["图片生成"]
+TAGS = ["Images"]
 
 
 @router.post("/images/edits")  # todo: 放到 aitools下

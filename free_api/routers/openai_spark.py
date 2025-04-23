@@ -11,12 +11,13 @@
 from aiostream import stream
 
 from meutils.pipe import *
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token
+from meutils.decorators.contextmanagers import atry_catch
 
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
 from meutils.llm.completions import chat_spark
 
 from meutils.schemas.openai_types import CompletionRequest
+from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
@@ -33,14 +34,13 @@ async def create_chat_completions(
 
         api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    logger.debug(request.model_dump_json(indent=4))
+    async with atry_catch(f"{path}", api_key=api_key, request=request):
+        response = await chat_spark.Completions(api_key=api_key).create(request)
 
-    response = await chat_spark.Completions(api_key=api_key).create(request)
+        if request.stream:
+            return EventSourceResponse(create_chat_completion_chunk(response))
 
-    if request.stream:
-        return EventSourceResponse(create_chat_completion_chunk(response))
-
-    return response
+        return response
 
 
 if __name__ == '__main__':

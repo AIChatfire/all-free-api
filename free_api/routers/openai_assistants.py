@@ -14,7 +14,7 @@ from aiostream import stream
 from meutils.pipe import *
 from meutils.caches import cache
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
-from meutils.llm.completions.assistants import ppt
+from meutils.llm.completions.assistants import ppt, zhipu
 from meutils.llm.clients import zhipuai_sdk_client
 from meutils.schemas.openai_types import CompletionRequest
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
@@ -51,7 +51,9 @@ async def create_chat_completions(
 
     # response = web_search.Completions(api_key=api_key).create(request)
 
-    response = await ppt.Completions(api_key=api_key).create(request)
+    # response = await ppt.Completions(api_key=api_key).create(request)
+
+    response = zhipu.Completions().create(request)
 
     #########################################################################################################
     if request.stream:
@@ -90,7 +92,7 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '')
+    app.include_router(router, '/v1')
 
     app.run()
 

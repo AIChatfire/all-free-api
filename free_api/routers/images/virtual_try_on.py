@@ -17,7 +17,7 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
-TAGS = ["虚拟换衣"]
+TAGS = ["Images"]
 
 
 @router.post("/images/virtual-try-on")  # todo: sd3 兜底

@@ -25,7 +25,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi import File, UploadFile, Query, Form, Body, Request, HTTPException, status
 
 router = APIRouter()
-TAGS = ["图片生成"]
+TAGS = ["Images"]
 
 
 @router.post("/{biz}/v1/images/generations")
