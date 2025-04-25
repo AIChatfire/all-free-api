@@ -13,22 +13,21 @@ from meutils.serving.fastapi import App
 from free_api.routers.oai import polling as oai_polling
 
 from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
-from free_api.routers import openai_agent, openai_adapter, openai_redirect, chatfire_all
+from free_api.routers import openai_agent, openai_adapter, openai_redirect
 from free_api.routers import chat_image, chat_to_audio, chat_video, chat_suno
 
 from free_api.routers import test
 from free_api.routers import files, tasks
 
-from free_api.routers.goamz import suno
 from free_api.routers.oneapi import extra_api as oneapi
-from free_api.routers.async_tasks import replicateai, kling, kling_pro, cogvideox, hailuo, hailuo_pro, hunyuan
+from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, hunyuan
 from free_api.routers.async_tasks import seededit
 from free_api.routers.async_tasks import fal  # , kling_apis
 
 from free_api.routers.audio import v1 as audio_v1, fish
 
 from free_api.routers.images import biz as images_biz
-from free_api.routers.images import v1 as images_v1, virtual_try_on
+from free_api.routers.images import v1 as images_v1
 
 from free_api.routers.crawler import reader
 from free_api.routers.search import web_search
@@ -54,8 +53,6 @@ app.include_router(openai_deep2x.router, '/deep2x', tags=openai_deep2x.TAGS)
 
 app.include_router(openai_redirect.router, '/redirect', tags=openai_redirect.TAGS)  # todo: 更通用
 app.include_router(openai_adapter.router, '/adapter', tags=openai_adapter.TAGS)  # todo: 更通用
-# app.include_router(openai_polling.router, '/polling/v1', tags=openai_polling.TAGS)  # 废弃
-# app.include_router(openai_polling_plus.router, '/polling_plus/v1', tags=openai_polling_plus.TAGS)  # 废弃
 
 # polling/chat
 # polling/images
@@ -68,8 +65,6 @@ app.include_router(chat_suno.router, '/suno/v1', tags=chat_suno.TAGS)
 
 app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 
-app.include_router(chatfire_all.router, '/all/v1', tags=chatfire_all.TAGS)
-
 # Audio
 app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
@@ -77,17 +72,13 @@ app.include_router(fish.router, '/fish', tags=fish.TAGS)
 # Images
 app.include_router(images_biz.router, '', tags=images_biz.TAGS)  # 适配其他渠道
 app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
-app.include_router(virtual_try_on.router, '/v1', tags=virtual_try_on.TAGS)
 
 # files
 app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
 
 # 异步任务 async_tasks
 app.include_router(fal.router, '/lipsync/v1', tags=fal.TAGS)
-
 app.include_router(seededit.router, '/seededit/v1', tags=seededit.TAGS)
-
-app.include_router(replicateai.router, '/replicate/v1', tags=replicateai.TAGS)
 
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
@@ -104,7 +95,7 @@ app.include_router(hunyuan.router, '/hunyuan/v1', tags=hunyuan.TAGS)
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 
 # 小工具
-app.include_router(aitools_images.router, '/aitools', tags=aitools_images.TAGS)
+app.include_router(aitools_images.router, '/aitools/v1', tags=aitools_images.TAGS)
 app.include_router(document_intelligence.router, '/aitools', tags=document_intelligence.TAGS)  # 文档智能： todo: 标准化
 
 app.include_router(templates.router, tags=templates.TAGS)
@@ -119,10 +110,6 @@ app.include_router(text_to_url.router, '/tools/v1', tags=text_to_url.TAGS)
 # 搜索与爬虫
 app.include_router(reader.router, '/crawler/reader', tags=reader.TAGS)
 app.include_router(web_search.router, '/search/v1', tags=web_search.TAGS)
-
-# GOAMZ
-app.include_router(suno.router, '/goamz/v1', tags=suno.TAGS)
-app.include_router(suno.router, '/suno/v1', tags=suno.TAGS)
 
 # Hook
 

@@ -12,7 +12,6 @@ from meutils.io.files_utils import to_base64
 from meutils.llm.openai_utils import ppu_flow
 from meutils.schemas.image_types import ImageRequest, FluxImageRequest, SDImageRequest, TogetherImageRequest, \
     RecraftImageRequest
-from meutils.schemas.image_types import ImageProcess
 
 from meutils.schemas.image_types import KlingImageRequest, CogviewImageRequest, HunyuanImageRequest
 
@@ -21,9 +20,7 @@ from meutils.apis.siliconflow import images as siliconflow_images
 
 from meutils.apis.chatglm import images as cogview_images
 from meutils.apis.kling import images as kling_images
-from meutils.apis.kling import kolors_virtual_try_on
 from meutils.apis.gitee.images import kolors
-from meutils.apis.images.edits import edit_image
 
 from meutils.llm.completions.yuanbao import Completions as hunyuan_images
 
@@ -34,19 +31,6 @@ from fastapi import File, UploadFile, Query, Form, Body, Request, HTTPException,
 
 router = APIRouter()
 TAGS = ["Images"]
-
-
-@router.post("/images/edits")  # todo: 放到 aitools下
-async def generate(
-        request: ImageProcess,
-        api_key: Optional[str] = Depends(get_bearer_token),
-
-        n: Optional[int] = Query(1),  # 默认收费
-):
-    logger.debug(request)
-    async with ppu_flow(api_key, post=f"api-images-edits-{request.model}", n=n):
-        response = await edit_image(request)
-        return response
 
 
 @router.post("/images/generations")  # todo: sd3 兜底

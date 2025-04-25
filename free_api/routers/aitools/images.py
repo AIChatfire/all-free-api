@@ -14,7 +14,10 @@ from meutils.llm.openai_utils import ppu_flow
 from meutils.apis.textin import document_process as textin_process
 from meutils.apis.baidu.bdaitpzs import image_process as baidu_process
 from meutils.apis.hunyuan.image_tools import image_process as hunyuan_process
+from meutils.apis.images.edits import edit_image
+from meutils.apis.hf import kolors_virtual_try_on
 
+from meutils.schemas.image_types import ImageProcess
 from meutils.schemas.image_types import HUNYUAN_TASKS, HunyuanImageProcessRequest
 from meutils.schemas.image_types import TEXTIN_TASKS, TextinImageProcessRequest
 from meutils.schemas.image_types import BAIDU_TASKS, BaiduImageProcessRequest
@@ -24,10 +27,37 @@ from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuth
 from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header, Body
 
 router = APIRouter()
-TAGS = ["图片处理工具"]
+TAGS = ["AITOOLS_IMAGES"]
 
 
-@router.post("/v1/images")
+@router.post("/images/edits")
+async def generate(
+        request: ImageProcess,
+        api_key: Optional[str] = Depends(get_bearer_token),
+
+        n: Optional[int] = Query(1),  # 默认收费
+):
+    logger.debug(request)
+    async with ppu_flow(api_key, post=f"api-images-edits-{request.model}", n=n):
+        response = await edit_image(request)
+        return response
+
+
+@router.post("/images/virtual-try-on")
+async def generate(
+        request: kolors_virtual_try_on.KolorsTryOnRequest,
+        api_key: Optional[str] = Depends(get_bearer_token),
+):
+    logger.debug(request.model_dump_json(indent=4))
+    # return await text_to_image.create(request)
+
+    logger.debug(request)
+    async with ppu_flow(api_key, post="api-kolors-virtual-try-on"):
+        data = await kolors_virtual_try_on.create(request)
+        return data
+
+
+@router.post("/images")
 async def image_process(
         request: dict = Body(...),
         response_format: str = Query("url"),
