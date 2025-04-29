@@ -143,18 +143,14 @@ async def create_chat_completions(
             response = create_chat_completion(chunks)
 
             # logger.debug(response)
-
-            prompt_tokens = int(len(str(request.messages)) // 2)
-            completion_tokens = int(len(''.join(chunks)) // 2)
-
-            if hasattr(response.usage, "prompt_tokens"):
-                response.usage.prompt_tokens = prompt_tokens
-                response.usage.completion_tokens = completion_tokens
-                response.usage.total_tokens = prompt_tokens + completion_tokens
-            else:
-                response.usage['prompt_tokens'] = prompt_tokens
-                response.usage['completion_tokens'] = completion_tokens
-                response.usage['total_tokens'] = prompt_tokens + completion_tokens
+            if not (response.usage and hasattr(response.usage, "prompt_tokens") and response.usage.prompt_tokens):
+                prompt_tokens = int(len(str(request.messages)) // 2)
+                completion_tokens = int(len(''.join(chunks)) // 2)
+                response.usage = dict(
+                    prompt_tokens=prompt_tokens,
+                    completion_tokens=completion_tokens,
+                    total_tokens=prompt_tokens + completion_tokens
+                )
 
         if hasattr(response, "model"):
             response.model = raw_model  # 以请求体为主
