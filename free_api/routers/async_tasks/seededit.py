@@ -46,14 +46,14 @@ async def create_task(
         request: images.ImageRequest,
         api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    user_data = await get_user_from_api_key(api_key)
-    token = None
-    if FEISHU_URL := FEISHU_URL_MAPPER.get(str(user_data.get("user_id"))):
-        token = await get_next_token_for_polling(FEISHU_URL)
+    # user_data = await get_user_from_api_key(api_key)
+    # token = None
+    # if FEISHU_URL := FEISHU_URL_MAPPER.get(str(user_data.get("user_id"))):
+    #     token = await get_next_token_for_polling(FEISHU_URL)
 
     N = 1
     async with ppu_flow(api_key, post="api-images-seededit", n=N):
-        task_response = await images.create_task(request, token)
+        task_response = await images.create_task(request)
 
         await redis_aclient.set(task_response.task_id, task_response.system_fingerprint, ex=7 * 24 * 3600)
         return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
