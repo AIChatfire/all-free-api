@@ -140,7 +140,11 @@ async def create_chat_completions(
             logger.debug("IS_ASYNC_GEN")
 
             chunks = await stream.list(response)
-            response = create_chat_completion(chunks)
+
+            if chunks and isinstance(chunks[0], ChatCompletion):
+                response = chunks[0]
+            else:
+                response = create_chat_completion(chunks)
 
             # logger.debug(response)
             if not (response.usage and hasattr(response.usage, "prompt_tokens") and response.usage.prompt_tokens):
