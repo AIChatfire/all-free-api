@@ -37,6 +37,8 @@ async def get_task(
     if not token:
         raise HTTPException(status_code=404, detail="TaskID not found")
 
+    logger.debug(token)
+
     task_response = await images.get_task(task_id, token)
     return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
@@ -54,6 +56,8 @@ async def create_task(
     N = 1
     async with ppu_flow(api_key, post="api-images-seededit", n=N):
         task_response = await images.create_task(request)
+
+        logger.debug(task_response)
 
         await redis_aclient.set(task_response.task_id, task_response.system_fingerprint, ex=7 * 24 * 3600)
         return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})

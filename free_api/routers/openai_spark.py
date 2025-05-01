@@ -30,7 +30,7 @@ TAGS = ["SparkAI"]
 async def create_chat_completions(
         request: CompletionRequest,
 
-        path: str = "/v1/chat/completions",  # 兼容性
+        path: str = "v1/chat/completions",  # 兼容性
 
         api_key: Optional[str] = Depends(get_bearer_token),
 ):
