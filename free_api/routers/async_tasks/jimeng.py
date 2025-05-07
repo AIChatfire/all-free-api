@@ -34,7 +34,7 @@ async def get_task(
 
     logger.debug(token)
 
-    task_response = await images.get_task(task_id, token)
+    task_response = await videos.get_task(task_id, token)
     return task_response.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 
 

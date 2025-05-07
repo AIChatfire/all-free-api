@@ -21,7 +21,7 @@ router = APIRouter()
 TAGS = ["Video"]
 
 
-@router.get("/tasks/{task_id:path}")
+@router.get("/tasks")  # {task_id:path} 反代有问题
 @alru_cache(ttl=30)
 async def get_task(
         task_id: str,
