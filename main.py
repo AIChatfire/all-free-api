@@ -21,8 +21,8 @@ from free_api.routers import files, tasks
 
 from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, hunyuan
-from free_api.routers.async_tasks import seededit
-from free_api.routers.async_tasks import fal  # , kling_apis
+from free_api.routers.async_tasks import seededit, jimeng
+from free_api.routers.async_tasks import fal, fal_kling  # , kling_apis
 
 from free_api.routers.audio import v1 as audio_v1, fish
 
@@ -77,11 +77,14 @@ app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
 app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
 
 # 异步任务 async_tasks
-app.include_router(fal.router, '/lipsync/v1', tags=fal.TAGS)
 app.include_router(seededit.router, '/seededit/v1', tags=seededit.TAGS)
 
+app.include_router(fal.router, '/lipsync/v1', tags=fal.TAGS)
+app.include_router(fal_kling.router, '/kling-video/v1', tags=fal_kling.TAGS)
+app.include_router(jimeng.router, '/jimeng-video/v1', tags=jimeng.TAGS)
+
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
-app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
+# app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
 # app.include_router(kling_apis.router, '/kling_apis', tags=kling_apis.TAGS)
 
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
