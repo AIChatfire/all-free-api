@@ -9,6 +9,9 @@
 # @Description  : 
 
 from meutils.pipe import *
+from meutils.decorators.contextmanagers import try_catch, atry_catch
+from meutils.notice.feishu import send_message_for_images
+
 from meutils.io.files_utils import to_bytes
 from meutils.llm.openai_utils import ppu_flow
 from meutils.apis.textin import document_process as textin_process
@@ -16,15 +19,16 @@ from meutils.apis.baidu.bdaitpzs import image_process as baidu_process
 from meutils.apis.hunyuan.image_tools import image_process as hunyuan_process
 from meutils.apis.images.edits import edit_image
 from meutils.apis.hf import kolors_virtual_try_on
+from meutils.apis.images.recraft import edit_image as recraft_edit_image
 
-from meutils.schemas.image_types import ImageProcess
+from meutils.schemas.image_types import ImageProcess, ImageRequest
 from meutils.schemas.image_types import HUNYUAN_TASKS, HunyuanImageProcessRequest
 from meutils.schemas.image_types import TEXTIN_TASKS, TextinImageProcessRequest
 from meutils.schemas.image_types import BAIDU_TASKS, BaiduImageProcessRequest
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
 
-from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header, Body
+from fastapi import APIRouter, File, UploadFile, Query, Form, Body, Depends, HTTPException, Request, status
 
 router = APIRouter()
 TAGS = ["AITOOLS_IMAGES"]
@@ -87,6 +91,30 @@ async def image_process(
 
     else:
         raise Exception(f"请填写正确的 Task：{task}")
+
+
+@router.post("/recraft/v1/images/generativeUpscale")  # form data
+async def _recraft_edit_image(
+        file: UploadFile = File(...),
+        response_format: str = Form("url"),
+
+):
+    image = await file.read()
+    async with atry_catch("/recraft/v1/images/generativeUpscale", callback=send_message_for_images):
+        try:
+            response = await recraft_edit_image(image)
+            return response
+        except Exception as e:
+            try:
+                request = ImageProcess(
+                    model="clarity",
+                    image=image,
+                )
+                response = await edit_image(request)
+                return {"image": {"url": response.data[0].url}}
+
+            except Exception as e:
+                raise
 
 
 if __name__ == '__main__':

@@ -21,6 +21,7 @@ from meutils.apis.siliconflow import images as siliconflow_images
 from meutils.apis.chatglm import images as cogview_images
 from meutils.apis.kling import images as kling_images
 from meutils.apis.gitee.images import kolors
+from meutils.apis.hailuoai import images as hailuo_images
 
 from meutils.llm.completions.yuanbao import Completions as hunyuan_images
 
@@ -84,6 +85,13 @@ async def generate(
             response = await hunyuan_images.generate(request)
             return response
 
+    elif model.startswith(("hailuo", "minimax")):
+        request = ImageRequest(**request)
+
+        async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
+            response = await hailuo_images.generate(request)
+            return response
+
     elif model.startswith(("kling",)):  # 默认4张
         request = KlingImageRequest(**request)
 
@@ -91,6 +99,9 @@ async def generate(
         async with ppu_flow(api_key, post=f"api-images-{request.model}", n=n):
             response = await kling_images.generate(request)
             return response
+
+
+
 
     # elif model.startswith(("kolors-virtual-try-on",)):
     #     request = ImageRequest(**request)

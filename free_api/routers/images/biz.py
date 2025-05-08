@@ -54,6 +54,7 @@ async def generate(
             return response
 
 
+
 if __name__ == '__main__':
     from meutils.serving.fastapi import App
 
