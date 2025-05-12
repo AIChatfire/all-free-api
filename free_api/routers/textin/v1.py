@@ -11,32 +11,76 @@
 from meutils.pipe import *
 from meutils.llm.openai_utils import ppu_flow
 from meutils.apis.textin_apis import Textin
-from meutils.schemas.textin_types import WatermarkRemove
+from meutils.schemas.textin_types import WatermarkRemove, PdfToMarkdown, CropEnhanceImage
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 
-from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header, Body
+from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header, Body, Request
 
 router = APIRouter()
 TAGS = ["textin"]
 
+textin = Textin()
+
 
 @router.post("/{service:path}")
 async def create_textin_service(
-        request: dict = Body(...),
+        request: Request,
+
         service: str = "image/watermark_remove",
 
         api_key: Optional[str] = Depends(get_bearer_token),
 ):
+    logger.debug(service)
+
     logger.debug(bjson(request))
 
-    if service == "image/watermark_remove":
-        logger.debug(service)
+    params = request.query_params._dict
+    request = await request.json()
 
+    if service == "image/watermark_remove":
         request = WatermarkRemove(**request)
         async with ppu_flow(api_key, post=f"api-textin-{service}"):
-            data = await Textin().image_watermark_remove(request)
+            data = await textin.image_watermark_remove(request)
             return data
+
+    elif service == "pdf_to_markdown":
+        request = PdfToMarkdown(**request)
+        async with ppu_flow(api_key, post=f"api-textin-{service}"):
+            data = await textin.__getattribute__(service.replace("/", "_"))(request, params)
+            return data
+
+    elif service == "crop_enhance_image":
+        request = CropEnhanceImage(**request)
+        async with ppu_flow(api_key, post=f"api-textin-{service}"):
+            data = await textin.__getattribute__(service.replace("/", "_"))(request, params)
+            return data
+
+
+"""
+
+curl -X 'POST' \
+  'http://0.0.0.0:8000/v1/image%2Fwatermark_remove' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519' \
+  -d '{"image": "https://oss.ffire.cc/files/sese1.jpg","response_format": "url"}'
+  
+
+curl -X 'POST' \
+  'http://0.0.0.0:8000/v1/pdf_to_markdown' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519' \
+  -d '{"data": "https://s3.ffire.cc/files/pdf_to_markdown.jpg","response_format": "url"}'
+  
+  
+curl -X 'POST' \
+  'http://0.0.0.0:8000/v1/crop_enhance_image' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519' \
+  -d '{"data": "https://s3.ffire.cc/files/pdf_to_markdown.jpg","response_format": "url"}'
+                      
+                    
+"""
 
 
 if __name__ == '__main__':
