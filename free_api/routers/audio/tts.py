@@ -11,7 +11,7 @@
 from meutils.pipe import *
 from meutils.llm.openai_utils import ppu_flow
 
-from meutils.apis.jimeng.audio import create
+from meutils.apis.jimeng.audio import create_tts
 from meutils.schemas.openai_types import TTSRequest, STTRequest
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
@@ -35,12 +35,12 @@ async def create_speech(
 
     n = n and np.ceil(len(request.input) / 1000)
     async with ppu_flow(api_key, post='api-tts', n=n):
-        stream = await create(request)
+        stream = await create_tts(request)
 
         if request.response_format == "url":
             return {"url": stream}
 
-        return StreamingResponse(stream, media_type="application/octet-stream")
+        return StreamingResponse([stream], media_type="application/octet-stream")
 
 
 if __name__ == '__main__':

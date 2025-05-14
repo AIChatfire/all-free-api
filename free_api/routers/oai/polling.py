@@ -81,6 +81,8 @@ async def create_chat_completions(
         client = Completions(base_url=base_url, api_key=api_key, http_client=http_client)
         response = await client.create(request)
 
+        # exceeds the maximum
+
         if request.stream:
             return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=response_model))
 

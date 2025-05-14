@@ -68,7 +68,7 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 # Audio
 app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
-app.include_router(tts.router, '/tts/v1', tags=tts.TAGS)
+app.include_router(tts.router, '/audio/v1', tags=tts.TAGS) #######
 
 # Images
 app.include_router(images_biz.router, '', tags=images_biz.TAGS)  # 适配其他渠道
