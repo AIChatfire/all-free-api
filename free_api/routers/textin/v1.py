@@ -20,8 +20,6 @@ from fastapi import APIRouter, Depends, BackgroundTasks, Query, Header, Body, Re
 router = APIRouter()
 TAGS = ["textin"]
 
-textin = Textin()
-
 
 @router.post("/{service:path}")
 async def create_textin_service(
@@ -38,6 +36,7 @@ async def create_textin_service(
     params = request.query_params._dict
     request = await request.json()
 
+    textin = Textin()
     if service == "image/watermark_remove":
         request = WatermarkRemove(**request)
         async with ppu_flow(api_key, post=f"api-textin-{service}"):
@@ -81,7 +80,6 @@ curl -X 'POST' \
                       
                     
 """
-
 
 if __name__ == '__main__':
     from meutils.serving.fastapi import App

@@ -30,12 +30,10 @@ TAGS = ["Audio"]
 async def create_speech(
         request: TTSRequest,
 
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 
         n: Optional[int] = Query(1),  # 默认收费
 ):
-    api_key = auth
-
     logger.debug(request.model_dump_json(indent=4))
 
     # media_types = {
@@ -51,6 +49,7 @@ async def create_speech(
 
     data = request.model_dump()
 
+    n = n and np.ceil(len(request.input) / 1000)
     async with ppu_flow(api_key, post='api-tts', n=n):
         stream = await EdgeTTS().acreate_for_openai(**data)  # todo 优化
 

@@ -24,7 +24,7 @@ from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, ha
 from free_api.routers.async_tasks import seededit, jimeng
 from free_api.routers.async_tasks import fal, fal_kling  # , kling_apis
 
-from free_api.routers.audio import v1 as audio_v1, fish
+from free_api.routers.audio import v1 as audio_v1, fish, tts
 
 from free_api.routers.images import biz as images_biz
 from free_api.routers.images import v1 as images_v1
@@ -68,6 +68,7 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 # Audio
 app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
+app.include_router(tts.router, '/tts/v1', tags=tts.TAGS)
 
 # Images
 app.include_router(images_biz.router, '', tags=images_biz.TAGS)  # 适配其他渠道

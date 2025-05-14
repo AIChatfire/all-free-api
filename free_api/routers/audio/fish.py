@@ -28,11 +28,9 @@ async def _create_tts(
 
         response_format: Optional[str] = Query(None),
 
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 
 ):
-    api_key = auth
-
     async with ppu_flow(api_key, post="official-api-fish-tts"):
         data = await create_tts(request, response_format=response_format)
 
