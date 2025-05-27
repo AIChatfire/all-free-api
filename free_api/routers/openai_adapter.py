@@ -13,7 +13,7 @@ from aiostream import stream
 from meutils.pipe import *
 from meutils.decorators.contextmanagers import atry_catch
 
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token
+from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
 from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm, yuanbao, chat_gemini
 from meutils.apis.search import metaso
@@ -47,13 +47,15 @@ async def create_chat_completions(
 
         api_key: Optional[str] = Depends(get_bearer_token),
         base_url: Optional[str] = None,
+
+        headers: dict = Depends(get_headers),
 ):
     logger.debug(request.model_dump_json(indent=4))
-    logger.debug(redirect_model)
+    logger.debug(response_model)
 
-    async with atry_catch(f"{base_url}/{redirect_model}", api_key=api_key, request=request):
+    async with atry_catch(f"{base_url}/{response_model}", api_key=api_key, request=request):
 
-        raw_model = request.model
+        response_model = response_model or request.model
         if not redirect_model.startswith("v1"):  # 重定向
             request.model = redirect_model  # qwen-plus-latest
 
@@ -108,7 +110,7 @@ async def create_chat_completions(
         #     response = client.create(request)  # List[str]
 
         elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
-            response = qwenllm.create(request)
+            response = qwenllm.create(request, cookie=headers.get("cookie"))
 
         # google
         elif request.model.startswith(("gemini",)):
@@ -134,7 +136,7 @@ async def create_chat_completions(
 
         #########################################################################################################
         if request.stream:
-            return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=raw_model))
+            return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=response_model))
 
         if inspect.isasyncgen(response):  # 非流：将流转换为非流 tdoo 計算tokens
             logger.debug("IS_ASYNC_GEN")
@@ -147,9 +149,10 @@ async def create_chat_completions(
                 response = create_chat_completion(chunks)
 
             # logger.debug(response)
+            # logger.debug(chunks)
             if not (response.usage and hasattr(response.usage, "prompt_tokens") and response.usage.prompt_tokens):
                 prompt_tokens = int(len(str(request.messages)) // 2)
-                completion_tokens = int(len(''.join(chunks)) // 2)
+                completion_tokens = int(len(str(chunks)) // 2)
                 response.usage = dict(
                     prompt_tokens=prompt_tokens,
                     completion_tokens=completion_tokens,
@@ -157,7 +160,7 @@ async def create_chat_completions(
                 )
 
         if hasattr(response, "model"):
-            response.model = raw_model  # 以请求体为主
+            response.model = response_model  # 以请求体为主
         return response  # chat_completion
 
 

@@ -20,7 +20,7 @@ from free_api.routers import test
 from free_api.routers import files, tasks
 
 from free_api.routers.oneapi import extra_api as oneapi
-from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, hunyuan
+from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
 from free_api.routers.async_tasks import seededit, jimeng
 from free_api.routers.async_tasks import fal, fal_kling  # , kling_apis
 
@@ -68,7 +68,7 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 # Audio
 app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
-app.include_router(tts.router, '/audio/v1', tags=tts.TAGS) #######
+app.include_router(tts.router, '/audio/v1', tags=tts.TAGS)  #######
 
 # Images
 app.include_router(images_biz.router, '', tags=images_biz.TAGS)  # 适配其他渠道
@@ -91,7 +91,7 @@ app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
 # app.include_router(hailuo_pro.router, '/hailuo-pro/v1', tags=hailuo.TAGS)
 
-app.include_router(hunyuan.router, '/hunyuan/v1', tags=hunyuan.TAGS)
+app.include_router(siliconflow_videos.router, '/atask/v1', tags=siliconflow_videos.TAGS)
 
 # app.include_router(tripo3d.router, '/tripo3d/v1', tags=tripo3d.TAGS)
 
