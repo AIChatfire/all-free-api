@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # @Project      : AI.  @by PyCharm
-# @File         : __init__.py
-# @Time         : 2024/10/18 16:34
+# @File         : minimax_audio
+# @Time         : 2025/5/29 18:22
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
+# @Description  : todo: 原生接口
 
 from meutils.pipe import *

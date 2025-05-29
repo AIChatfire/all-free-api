@@ -50,9 +50,8 @@ async def generate(
                 return response
 
         elif biz == 'volcengine':
-            response = await volcengine_generate(request, token=api_key)
+            response = await volcengine_generate(request, token=api_key)  # 支持轮询
             return response
-
 
 
 if __name__ == '__main__':

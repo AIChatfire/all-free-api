@@ -22,7 +22,7 @@ router = APIRouter()
 TAGS = ["视频生成"]
 
 
-@router.get("/videos/{task_id}")
+@router.get("/{task_id}")
 @alru_cache(ttl=15)
 async def get_task(
         task_id: str,
@@ -38,14 +38,14 @@ async def get_task(
     return task_reponse
 
 
-@router.post("/videos")
+@router.post("")
 async def generate(
         request: siliconflow_videos.VideoRequest,
         api_key: Optional[str] = Depends(get_bearer_token),
 ):
     logger.debug(request.model_dump_json(indent=4))
 
-    async with ppu_flow(api_key, post=f"api-videos-{request.model}"):
+    async with ppu_flow(api_key, post=f"api-videos-{request.model.lower()}"):
         task_reponse = await siliconflow_videos.create_task(request)
 
         await redis_aclient.set(task_reponse.task_id, task_reponse.system_fingerprint, ex=7 * 24 * 3600)

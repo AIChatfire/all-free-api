@@ -53,6 +53,7 @@ async def create_chat_completions(
         headers: dict = Depends(get_headers),
         api_key: Optional[str] = Depends(get_bearer_token),
 
+        request_model: Optional[str] = Query(None),  # 优先级最高
         response_model: Optional[str] = Query(None),  # 兼容newapi自定义接口 ?response_model=""
 
 ):
@@ -71,6 +72,9 @@ async def create_chat_completions(
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
         ###########################################################################
         # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
+
+        if request_model:
+            request.model = request_model
 
         if "==" in request.model:
             response_model, request_model = request.model.split("==", maxsplit=1)
