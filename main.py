@@ -28,6 +28,7 @@ from free_api.routers.audio import v1 as audio_v1, fish, tts
 
 from free_api.routers.images import biz as images_biz
 from free_api.routers.images import v1 as images_v1
+from free_api.routers.images import dynamic_routers as images
 
 from free_api.routers.crawler import reader
 from free_api.routers.search import web_search
@@ -71,6 +72,8 @@ app.include_router(fish.router, '/fish', tags=fish.TAGS)
 app.include_router(tts.router, '/audio/v1', tags=tts.TAGS)  #######
 
 # Images
+app.include_router(images.router, '/images/v1', tags=images.TAGS)  # todo：未来以这个为准
+
 app.include_router(images_biz.router, '', tags=images_biz.TAGS)  # 适配其他渠道
 app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
 
@@ -83,9 +86,7 @@ app.include_router(seededit.router, '/seededit/v1', tags=seededit.TAGS)
 app.include_router(fal.router, '/lipsync/v1', tags=fal.TAGS)
 app.include_router(fal_kling.router, '/kling-video/v1', tags=fal_kling.TAGS)
 app.include_router(jimeng.router, '/jimeng-video/v1', tags=jimeng.TAGS)
-app.include_router(volcengine_apis.router, '/volcengine_apis', tags=volcengine_apis.TAGS)
-
-
+app.include_router(volcengine_apis.router, '/volcengine', tags=volcengine_apis.TAGS)
 
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 # app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
@@ -94,7 +95,7 @@ app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
 # app.include_router(hailuo_pro.router, '/hailuo-pro/v1', tags=hailuo.TAGS)
 
-app.include_router(siliconflow_videos.router, '/videos', tags=siliconflow_videos.TAGS)
+app.include_router(siliconflow_videos.router, '/v1/videos', tags=siliconflow_videos.TAGS)
 
 # app.include_router(tripo3d.router, '/tripo3d/v1', tags=tripo3d.TAGS)
 

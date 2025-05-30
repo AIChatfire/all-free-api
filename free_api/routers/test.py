@@ -40,8 +40,6 @@ async def create_request(
         reasoning_stream: bool = Header(True),
 
 ):
-    payload = (await request.body()).decode()
-
     # with try_catch(__name__, payload=payload):
     #     1 / 0
 
@@ -69,7 +67,8 @@ async def create_request(
     try:
         payload = await request.json()
     except Exception as e:
-        payload = (await request.body()).decode()
+        payload = (await request.form())._dict
+        payload = payload or (await request.body()).decode()
 
     form = (await request.form())._dict
 
