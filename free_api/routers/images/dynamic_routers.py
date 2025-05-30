@@ -9,6 +9,8 @@
 # @Description  : 
 
 from meutils.pipe import *
+from meutils.io.files_utils import to_url
+
 from meutils.llm.openai_utils import ppu_flow
 from meutils.llm.openai_utils.adapters import chat_for_image
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
@@ -17,14 +19,13 @@ from meutils.schemas.image_types import ImageRequest, ImageEditRequest
 from meutils.schemas.openai_types import CompletionRequest
 
 from meutils.apis.fal.images import generate as fal_generate
-from meutils.apis.images.recraft import generate as recraft_generate
-from meutils.apis.volcengine_apis.images import generate as volcengine_generate
 
 from meutils.decorators.contextmanagers import try_catch, atry_catch
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 
 from sse_starlette import EventSourceResponse
+from starlette.datastructures import UploadFile
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi import File, UploadFile, Query, Form, Body, Request, HTTPException, status
@@ -52,15 +53,6 @@ async def generate(
             response = await fal_generate(request)
             return response
 
-        elif "images/edits" in dynamic_router:
-            """
-            {'prompt': 'A cute baby sea otter wearing a beret', 'model': 'dall-e-3', 'n': '1', 'size': '1024x1024', 'image': UploadFile(filename='test.png', size=24809, headers=Headers({'content-disposition': 'form-data; name="image"; filename="test.png"', 'content-type': 'image/png'})), 'mask': UploadFile(filename='test.png', size=24809, headers=Headers({'content-disposition': 'form-data; name="mask"; filename="test.png"', 'content-type': 'image/png'}))}
-            """
-            request = (await request.form())._dict
-            logger.debug(request)
-
-            return request
-
         elif "chat/completions" in dynamic_router:
             request = await request.json()
             request = CompletionRequest(**request)
@@ -70,6 +62,40 @@ async def generate(
             return EventSourceResponse(chunks)
 
 
+        elif "images/edits" in dynamic_router:
+            """
+            {'prompt': 'A cute baby sea otter wearing a beret', 'model': 'dall-e-3', 'n': '1', 'size': '1024x1024', 'image': UploadFile(filename='test.png', size=24809, headers=Headers({'content-disposition': 'form-data; name="image"; filename="test.png"', 'content-type': 'image/png'})), 'mask': UploadFile(filename='test.png', size=24809, headers=Headers({'content-disposition': 'form-data; name="mask"; filename="test.png"', 'content-type': 'image/png'}))}
+            """
+            form_data = await request.form()
+
+            request = form_data._dict
+            if images := form_data.getlist("image[]"):
+                request["image"] = images
+            request = ImageEditRequest(**request)  # todo: 优化
+
+            # logger.debug(form_data)
+            #
+            # logger.debug(form_data.multi_items())
+            # logger.debug(form_data._list)
+            #
+            # logger.debug(form_data.getlist("image[]"))
+
+            file_object: UploadFile
+            for file_object in request.image:
+                image_url = await to_url(file_object.file.read(), content_type=file_object.content_type)
+                request.prompt = f"{request.prompt}\n{image_url}"
+
+            request = ImageRequest(
+                model=request.model,
+                prompt=request.prompt,
+                n=request.n,
+                size=request.size,  # aspect_ratio
+                response_format=request.response_format
+            )
+            if ':' in request.size:
+                request.aspect_ratio = request.size
+
+            return await fal_generate(request)
 
 
 if __name__ == '__main__':
