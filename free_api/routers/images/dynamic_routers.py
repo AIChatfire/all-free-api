@@ -9,9 +9,8 @@
 # @Description  : 
 
 from meutils.pipe import *
-from meutils.io.files_utils import to_url
+from meutils.io.files_utils import to_url, to_url_fal
 
-from meutils.llm.openai_utils import ppu_flow
 from meutils.llm.openai_utils.adapters import chat_for_image
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
 
@@ -50,14 +49,16 @@ async def generate(
             request = await request.json()
             request = ImageRequest(**request)
 
-            response = await fal_generate(request)
+            response = await fal_generate(request, api_key)
             return response
 
         elif "chat/completions" in dynamic_router:
             request = await request.json()
             request = CompletionRequest(**request)
 
-            chunks = await chat_for_image(fal_generate, request)
+            _fal_generate = partial(fal_generate, token=api_key)
+
+            chunks = await chat_for_image(_fal_generate, request)
 
             return EventSourceResponse(chunks)
 
@@ -68,21 +69,22 @@ async def generate(
             """
             form_data = await request.form()
 
-            request = form_data._dict
-            if images := form_data.getlist("image[]"):
-                request["image"] = images
-            request = ImageEditRequest(**request)  # todo: 优化
-
             # logger.debug(form_data)
+            # logger.debug(form_data._dict)
             #
             # logger.debug(form_data.multi_items())
             # logger.debug(form_data._list)
             #
             # logger.debug(form_data.getlist("image[]"))
 
+            request = form_data._dict
+            if images := form_data.getlist("image[]"):
+                request["image"] = images
+            request = ImageEditRequest(**request)  # todo: 优化
+
             file_object: UploadFile
             for file_object in request.image:
-                image_url = await to_url(file_object.file.read(), content_type=file_object.content_type)
+                image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)
                 request.prompt = f"{request.prompt}\n{image_url}"
 
             request = ImageRequest(
@@ -95,7 +97,7 @@ async def generate(
             if ':' in request.size:
                 request.aspect_ratio = request.size
 
-            return await fal_generate(request)
+            return await fal_generate(request, api_key)  # token
 
 
 if __name__ == '__main__':
