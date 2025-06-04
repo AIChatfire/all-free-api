@@ -130,7 +130,6 @@ async def create_chat_completions(
                     response = await client.create(request)  # 果果兜底：最终弃用
 
 
-
         ############ apikey判别
         elif api_key.startswith(("yuanbao",)):
             client = yuanbao.Completions()
@@ -138,13 +137,11 @@ async def create_chat_completions(
             response = client.create(request)
 
         elif api_key.startswith("fal-"):  ############ fal
-            response = fal_chat.create(request, api_key=api_key)
+            response = await fal_chat.create(request, api_key=api_key)
 
         elif api_key.startswith(("sophnet", "sop")):
             response = await sophnet.create(request)
-            logger.debug(request.stream)
 
-        logger.debug(request.stream)
 
         #########################################################################################################
         if request.stream:
