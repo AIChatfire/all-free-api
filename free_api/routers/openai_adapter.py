@@ -15,9 +15,10 @@ from meutils.decorators.contextmanagers import atry_catch
 
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
-from meutils.llm.completions import dify, tryblend, tune, delilegal, rag, qwenllm, yuanbao, chat_gemini
+from meutils.llm.completions import dify, sophnet, qwenllm, yuanbao, chat_gemini
 from meutils.apis.search import metaso
 from meutils.apis.google import chat as google_chat
+from meutils.apis.fal import chat as fal_chat
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -35,11 +36,11 @@ TAGS = ["文本生成"]
 ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 
 
-@router.post("/{redirect_model:path}")  # todo: 映射函数
+@router.post("/{request_model:path}")  # todo: 映射函数
 async def create_chat_completions(
         request: CompletionRequest,
 
-        redirect_model: str = '目标值模型',  # 源模型
+        request_model: str = '目标值模型',  # 源模型
         response_model: str = Query(None),  # 响应模型
 
         threshold: Optional[int] = Query(None),
@@ -56,8 +57,8 @@ async def create_chat_completions(
     async with atry_catch(f"{base_url}/{response_model}", api_key=api_key, request=request):
 
         response_model = response_model or request.model
-        if not redirect_model.startswith("v1"):  # 重定向
-            request.model = redirect_model  # qwen-plus-latest
+        if not request_model.startswith("v1"):  # 重定向
+            request.model = request_model  # qwen-plus-latest
 
         if max_turns:  # 限制对话轮次
             request.messages = request.messages[-(2 * max_turns - 1):]
@@ -129,10 +130,21 @@ async def create_chat_completions(
                     response = await client.create(request)  # 果果兜底：最终弃用
 
 
-        elif api_key.startswith(("yuanbao",)):  ############ apikey判别
+
+        ############ apikey判别
+        elif api_key.startswith(("yuanbao",)):
             client = yuanbao.Completions()
             logger.debug(request)
             response = client.create(request)
+
+        elif api_key.startswith("fal-"):  ############ fal
+            response = fal_chat.create(request, api_key=api_key)
+
+        elif api_key.startswith(("sophnet", "sop")):
+            response = await sophnet.create(request)
+            logger.debug(request.stream)
+
+        logger.debug(request.stream)
 
         #########################################################################################################
         if request.stream:
