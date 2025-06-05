@@ -137,7 +137,7 @@ async def create_chat_completions(
             response = client.create(request)
 
         elif api_key.startswith("fal-"):  ############ fal
-            response = await fal_chat.create(request, api_key=api_key)
+            response = fal_chat.create(request, api_key=api_key)
 
         elif api_key.startswith(("sophnet", "sop")):
             response = await sophnet.create(request)
