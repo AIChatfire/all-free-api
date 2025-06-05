@@ -6,12 +6,4 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
-
-from meutils.pipe import *
-
-"""
-动态路由
-# 模型路径
-
-"""
+# @Description  :
