@@ -60,7 +60,10 @@ async def generate(
 
             chunks = await chat_for_image(_fal_generate, request)
 
-            return EventSourceResponse(chunks)
+            if request.stream:
+                return EventSourceResponse(chunks)
+
+            return chunks
 
 
         elif "images/edits" in dynamic_router:
