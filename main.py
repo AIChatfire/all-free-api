@@ -23,6 +23,7 @@ from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
 from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis
 from free_api.routers.async_tasks import fal, fal_kling  # , kling_apis
+from free_api.routers.async_tasks import fal, fal_kling, fal_ai
 
 from free_api.routers.audio import v1 as audio_v1, fish, tts
 
@@ -82,6 +83,8 @@ app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
 
 # 异步任务 async_tasks
 app.include_router(seededit.router, '/seededit/v1', tags=seededit.TAGS)
+
+app.include_router(fal_ai.router, '/fal-ai/v1', tags=fal_ai.TAGS)
 
 app.include_router(fal.router, '/lipsync/v1', tags=fal.TAGS)
 app.include_router(fal_kling.router, '/kling-video/v1', tags=fal_kling.TAGS)

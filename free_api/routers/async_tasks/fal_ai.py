@@ -59,7 +59,7 @@ async def create_task(
         dynamic_model += f"-{resolution}"
 
     async with atry_catch(f"{dynamic_model}", api_key=api_key, callback=send_message, request=request):
-        async with ppu_flow(api_key, post=dynamic_model, n=N):  # kling-video/v2/master/image-to-video
+        async with ppu_flow(api_key, post=dynamic_model, n=N, dynamic=True):  # kling-video/v2/master/image-to-video
             return await fal_tasks.create_task(model, request)
 
 
