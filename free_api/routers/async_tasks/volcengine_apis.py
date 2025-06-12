@@ -11,8 +11,10 @@
 
 from meutils.pipe import *
 from meutils.llm.openai_utils import ppu_flow
+from meutils.schemas.openai_types import CompletionRequest
 
 from meutils.apis.volcengine_apis import tasks as volcengine_tasks
+from meutils.apis.volcengine_apis import videos
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from fastapi import APIRouter, File, UploadFile, Query, Form, Body, Depends, Request, HTTPException, status, \
@@ -46,6 +48,24 @@ async def generate(
             task_reponse = await volcengine_tasks.create_task(request)
 
             return task_reponse
+
+
+@router.post("/contents/generations/tasks/{task_id}")  # 通用类
+async def create_video_task(
+        task_id: str,
+):
+    return await videos.get_task(task_id)
+
+
+@router.get("/contents/generations/tasks")  # 通用类
+async def create_video_task(
+        request: CompletionRequest,
+
+        api_key: Optional[str] = Depends(get_bearer_token),
+):
+    async with ppu_flow(api_key, post=request.model):
+        response = await videos.create_task(request)
+        return response
 
 
 if __name__ == '__main__':

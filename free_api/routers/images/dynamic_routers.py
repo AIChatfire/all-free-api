@@ -18,10 +18,11 @@ from meutils.schemas.image_types import ImageRequest, ImageEditRequest
 from meutils.schemas.openai_types import CompletionRequest
 
 from meutils.apis.fal.images import generate as fal_generate
+from meutils.apis.images.generations import generate
 
 from meutils.decorators.contextmanagers import try_catch, atry_catch
 
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token
+from meutils.serving.fastapi.dependencies import get_headers, get_bearer_token
 
 from sse_starlette import EventSourceResponse
 from starlette.datastructures import UploadFile
@@ -34,31 +35,39 @@ TAGS = ["Images"]
 
 
 @router.post("/{dynamic_router:path}")
-async def generate(
+async def create_generations(
         dynamic_router: str,
         request: Request,
 
         api_key: Optional[str] = Depends(get_bearer_token),
 
-        # n: Optional[int] = Query(1),  # 不计费
+        headers: dict = Depends(get_headers),
+
+        base_url: Optional[str] = Query(None),
 ):
     logger.debug(dynamic_router)
 
-    async with atry_catch(f"{dynamic_router}", api_key=api_key, callback=send_message, request=request):
+    base_url = base_url or headers.get("x-base-url")
+
+    overide = headers.get("x-overide") or {}
+
+    async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
+                          request=request):
+
         if "images/generations" in dynamic_router:  # "v1/images/generations"
             request = await request.json()
+            request = {**request, **overide}
+
             request = ImageRequest(**request)
 
-            response = await fal_generate(request, api_key)
+            response = await generate(request, api_key)
             return response
 
         elif "chat/completions" in dynamic_router:
             request = await request.json()
             request = CompletionRequest(**request)
 
-            _fal_generate = partial(fal_generate, token=api_key)
-
-            chunks = await chat_for_image(_fal_generate, request)
+            chunks = await chat_for_image(generate, request, api_key=api_key)
 
             if request.stream:
                 return EventSourceResponse(chunks)
@@ -87,7 +96,7 @@ async def generate(
 
             file_object: UploadFile
             for file_object in request.image:
-                image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)
+                image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)  # 国外
                 request.prompt = f"{request.prompt}\n{image_url}"
 
             request = ImageRequest(
@@ -97,10 +106,8 @@ async def generate(
                 size=request.size,  # aspect_ratio
                 response_format=request.response_format
             )
-            if ':' in request.size:
-                request.aspect_ratio = request.size
 
-            return await fal_generate(request, api_key)  # token
+            return await generate(request, api_key)  # token
 
 
 if __name__ == '__main__':

@@ -117,12 +117,12 @@ async def create_chat_completions(
         elif request.model.startswith(("gemini",)):
             logger.debug(request.model)
             if request.model.endswith(("image-generation",)):
-                response = google_chat.Completions().create_for_images(request)
+                response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_images(request)
             elif request.model.endswith(("search",)):
-                response = google_chat.Completions().create_for_search(request)
+                response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_search(request)
             else:  # 多模态问答
                 try:
-                    response = google_chat.Completions().create_for_files(request)
+                    response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_files(request)
                 except Exception as e:
                     logger.error(e)
                     request.model = "gemini-2.0-flash"
@@ -141,7 +141,6 @@ async def create_chat_completions(
 
         elif api_key.startswith(("sophnet", "sop")):
             response = await sophnet.create(request)
-
 
         #########################################################################################################
         if request.stream:

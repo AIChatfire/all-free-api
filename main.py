@@ -89,7 +89,9 @@ app.include_router(fal_ai.router, '/fal-ai/v1', tags=fal_ai.TAGS)
 app.include_router(fal.router, '/lipsync/v1', tags=fal.TAGS)
 app.include_router(fal_kling.router, '/kling-video/v1', tags=fal_kling.TAGS)
 app.include_router(jimeng.router, '/jimeng-video/v1', tags=jimeng.TAGS)
-app.include_router(volcengine_apis.router, '/volcengine', tags=volcengine_apis.TAGS)
+
+# 火山
+app.include_router(volcengine_apis.router, '/volc', tags=volcengine_apis.TAGS)
 
 app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
 # app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
