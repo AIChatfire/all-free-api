@@ -38,7 +38,7 @@ TAGS = ["火山"]
 """
 
 
-@router.post("")
+@router.post("/v1")
 async def generate(
         request: dict = Body(...),
         Action: str = Query(None, description="接口名称"),
