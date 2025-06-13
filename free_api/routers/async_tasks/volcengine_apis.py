@@ -63,7 +63,7 @@ async def create_video_task(
 
         api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    async with ppu_flow(api_key, post=request.model):
+    async with ppu_flow(api_key, post=f"api-{request.model}", dynamic=True):
         response = await videos.create_task(request)
         return response
 
