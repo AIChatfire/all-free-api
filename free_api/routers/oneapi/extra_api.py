@@ -51,6 +51,10 @@ async def create_channel(
     upstream_base_url = headers.get('upstream-base-url')
     upstream_api_key = headers.get('upstream-api-key')
 
+    tokens = api_key.split()
+
+    # 渠道选择
+
     if "volc" in request.base_url:  # 火山渠道
         from meutils.apis.volcengine_apis.videos import get_valid_token
 
@@ -100,22 +104,46 @@ UPSTREAM_API_KEY=
 
 
 curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
-    --header 'Authorization: Bearer xx' \
-    --header "UPSTREAM-BASE-URL: https://api.ffire.cc" \
-    --header "UPSTREAM-API-KEY: " \
+    -H 'Authorization: Bearer xx' \
+    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
       -d '{
+        "name": "火山",
+        "tag": "火山",
+        "key": "$KEY",
         "type": 8,
         "base_url": "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
-        "key": "$KEY",
-        "tag": "火山",
+        
         "models": "doubao-seed-1-6-250615,doubao-seed-1-6-flash-250615,doubao-seed-1-6-thinking-250615,doubao-1-5-ui-tars-250428,deepseek-r1-250528,doubao-1-5-thinking-pro-m-250428,doubao-1-5-thinking-vision-pro-250428,doubao-1.5-vision-pro-250328,deepseek-v3,deepseek-v3-0324,deepseek-v3-250324,deepseek-v3-8k,deepseek-v3-128k,deepseek-chat,deepseek-chat-8k,deepseek-chat-64k,deepseek-chat-164k,deepseek-chat:function,deepseek-vl2,deepseek-ai/deepseek-vl2,deepseek-r1,deepseek-r1-8k,deepseek-reasoner,deepseek-reasoner-8k,deepseek-r1-250120,deepseek-search,deepseek-r1-search,deepseek-reasoner-search,deepseek-r1-think,deepseek-reasoner-think,deepseek-r1-plus,deepseek-r1:1.5b,deepseek-r1-lite,deepseek-r1-distill-qwen-1.5b,deepseek-r1:7b,deepseek-r1-distill-qwen-7b,deepseek-r1:8b,deepseek-r1-distill-llama-8b,deepseek-r1:14b,deepseek-r1-distill-qwen-14b,deepseek-r1:32b,deepseek-r1-distill-qwen-32b,deepseek-r1:70b,deepseek-r1-distill-llama-70b,deepseek-r1-metasearch,doubao-1-5-pro-32k,doubao-1-5-pro-32k-250115,doubao-1-5-pro-256k,doubao-1-5-pro-256k-250115,doubao-1-5-vision-pro-32k,doubao-1-5-vision-pro-32k-250115,doubao-lite-128k,doubao-lite-32k,doubao-lite-32k-character,doubao-lite-4k,doubao-1.5-lite-32k,doubao-pro-4k,doubao-pro-32k,doubao-pro-32k-character,doubao-pro-128k,doubao-pro-256k,doubao-1.5-pro-32k,doubao-1.5-pro-256k,doubao-1.5-vision-pro-32k,doubao-vision-lite-32k,doubao-vision-pro-32k,doubao-1-5-pro-thinking,doubao-1-5-vision-thinking,doubao-1-5-thinking-pro-250415,doubao-1-5-thinking-pro-vision,doubao-1-5-thinking-pro-vision-250415,doubao-1-5-thinking-pro-m-250415,moonshot-v1-8k,moonshot-v1-32k,moonshot-v1-128k",
         "group": "default,deepseek,volcengine",
         "model_mapping": "{\n  \"deepseek-r1\": \"deepseek-r1-250120\",\n  \"deepseek-reasoner\": \"deepseek-r1-250120\",\n  \"deepseek-v3-0324\": \"deepseek-v3-250324\",\n  \"deepseek-v3\": \"deepseek-v3-250324\",\n  \"deepseek-chat\": \"deepseek-v3-250324\",\n  \"doubao-1-5-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-1.5-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-pro-32k\": \"doubao-1-5-pro-32k-250115\",\n  \"doubao-pro-256k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1.5-lite-32k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-4k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-32k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-128k\": \"doubao-lite-128k-240828\",\n  \"doubao-pro-128k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1.5-lite\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-vision-lite-32k\": \"doubao-vision-lite-32k-241015\",\n  \"doubao-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-1.5-pro-32k\": \"doubao-1-5-pro-32k-250115\",\n  \"doubao-1.5-pro-256k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1-5-thinking-pro\": \"doubao-1-5-thinking-pro-250415\",\n  \"doubao-1-5-thinking-pro-vision\": \"doubao-1-5-thinking-pro-vision-250415\"\n}"
-    
     }'
 
+
+UPSTREAM_BASE_URL=http://38.147.104.170:3007
+UPSTREAM_API_KEY=LtxK4J6YOjdHOpXqwfiHE7BoWyeWNpXH
+
+
+curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
+    -H 'Authorization: Bearer xx' \
+    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -d '{
+        "id":2,
+        "name": "火山",
+        "tag": "火山",
+        "key": "$KEY",
+        "type": 8,
+        "base_url": "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
+        
+        "models": "doubao-seed-1-6-250615,doubao-seed-1-6-flash-250615,doubao-seed-1-6-thinking-250615,doubao-1-5-ui-tars-250428,deepseek-r1-250528,doubao-1-5-thinking-pro-m-250428,doubao-1-5-thinking-vision-pro-250428,doubao-1.5-vision-pro-250328,deepseek-v3,deepseek-v3-0324,deepseek-v3-250324,deepseek-v3-8k,deepseek-v3-128k,deepseek-chat,deepseek-chat-8k,deepseek-chat-64k,deepseek-chat-164k,deepseek-chat:function,deepseek-vl2,deepseek-ai/deepseek-vl2,deepseek-r1,deepseek-r1-8k,deepseek-reasoner,deepseek-reasoner-8k,deepseek-r1-250120,deepseek-search,deepseek-r1-search,deepseek-reasoner-search,deepseek-r1-think,deepseek-reasoner-think,deepseek-r1-plus,deepseek-r1:1.5b,deepseek-r1-lite,deepseek-r1-distill-qwen-1.5b,deepseek-r1:7b,deepseek-r1-distill-qwen-7b,deepseek-r1:8b,deepseek-r1-distill-llama-8b,deepseek-r1:14b,deepseek-r1-distill-qwen-14b,deepseek-r1:32b,deepseek-r1-distill-qwen-32b,deepseek-r1:70b,deepseek-r1-distill-llama-70b,deepseek-r1-metasearch,doubao-1-5-pro-32k,doubao-1-5-pro-32k-250115,doubao-1-5-pro-256k,doubao-1-5-pro-256k-250115,doubao-1-5-vision-pro-32k,doubao-1-5-vision-pro-32k-250115,doubao-lite-128k,doubao-lite-32k,doubao-lite-32k-character,doubao-lite-4k,doubao-1.5-lite-32k,doubao-pro-4k,doubao-pro-32k,doubao-pro-32k-character,doubao-pro-128k,doubao-pro-256k,doubao-1.5-pro-32k,doubao-1.5-pro-256k,doubao-1.5-vision-pro-32k,doubao-vision-lite-32k,doubao-vision-pro-32k,doubao-1-5-pro-thinking,doubao-1-5-vision-thinking,doubao-1-5-thinking-pro-250415,doubao-1-5-thinking-pro-vision,doubao-1-5-thinking-pro-vision-250415,doubao-1-5-thinking-pro-m-250415,moonshot-v1-8k,moonshot-v1-32k,moonshot-v1-128k",
+        "group": "default,deepseek,volcengine",
+        "model_mapping": "{\n  \"deepseek-r1\": \"deepseek-r1-250120\",\n  \"deepseek-reasoner\": \"deepseek-r1-250120\",\n  \"deepseek-v3-0324\": \"deepseek-v3-250324\",\n  \"deepseek-v3\": \"deepseek-v3-250324\",\n  \"deepseek-chat\": \"deepseek-v3-250324\",\n  \"doubao-1-5-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-1.5-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-pro-32k\": \"doubao-1-5-pro-32k-250115\",\n  \"doubao-pro-256k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1.5-lite-32k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-4k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-32k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-128k\": \"doubao-lite-128k-240828\",\n  \"doubao-pro-128k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1.5-lite\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-vision-lite-32k\": \"doubao-vision-lite-32k-241015\",\n  \"doubao-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-1.5-pro-32k\": \"doubao-1-5-pro-32k-250115\",\n  \"doubao-1.5-pro-256k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1-5-thinking-pro\": \"doubao-1-5-thinking-pro-250415\",\n  \"doubao-1-5-thinking-pro-vision\": \"doubao-1-5-thinking-pro-vision-250415\"\n}"
+    }'
 """
 
 if __name__ == '__main__':
