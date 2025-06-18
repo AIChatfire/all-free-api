@@ -51,9 +51,8 @@ async def create_channel(
     upstream_base_url = headers.get('upstream-base-url')
     upstream_api_key = headers.get('upstream-api-key')
 
-    tokens = api_key.split()
-
     # 渠道选择
+    request.key = api_key  # 1000以内
 
     if "volc" in request.base_url:  # 火山渠道
         from meutils.apis.volcengine_apis.videos import get_valid_token
