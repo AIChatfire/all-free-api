@@ -15,7 +15,7 @@ from meutils.llm.openai_utils import ppu_flow
 from meutils.apis.hailuoai import videos
 from meutils.schemas.hailuo_types import VideoRequest
 
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
+from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
 
 router = APIRouter()
@@ -31,6 +31,7 @@ async def get_task(
     token = token and token.decode()
     if not token:
         raise HTTPException(status_code=404, detail="TaskID not found")
+    logger.debug(f"token: {token}")
 
     data = await videos.get_task(task_id, token)
     return data.model_dump(exclude_none=True, exclude={"system_fingerprint"})
@@ -40,16 +41,23 @@ async def get_task(
 async def create_task(
         request: VideoRequest,
         api_key: Optional[str] = Depends(get_bearer_token),
+        headers: dict = Depends(get_headers),
 ):
+    upstream_api_key = headers.get("upstream-api-key")
+
+    model = "api-minimax-hailuo-01-6s"
+    if request.model.lower() == "minimax-hailuo-02":
+        model = f"api-minimax-hailuo-02-{request.duration}s-{request.resolution.lower()}"
+
     N = 1
-    async with ppu_flow(api_key, post="official-api-hailuo-video", n=N):
+    async with ppu_flow(api_key, post=model, n=N):
         videos.send_message(request)
         #############################################
-        task = await videos.create_task(request) # core
+        task = await videos.create_task(request, upstream_api_key)
         #############################################
         videos.send_message(task)
 
-        await redis_aclient.set(task.task_id, task.system_fingerprint, ex=30 * 24 * 3600)
+        task.system_fingerprint and await redis_aclient.set(task.task_id, task.system_fingerprint, ex=30 * 24 * 3600)
 
         return task.model_dump(exclude_none=True, exclude={"system_fingerprint"})
 

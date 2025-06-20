@@ -24,7 +24,9 @@ from fastapi import File, UploadFile, Header, Query, Form, Body, Request
 router = APIRouter()
 TAGS = ["视频生成"]
 
-
+"""
+https://api.ppinfra.com/v3/async/minimax-hailuo-02
+"""
 @router.get("/tasks/{path:path}")
 @router.get("/tasks")
 @alru_cache(ttl=15)

@@ -34,6 +34,8 @@ ENV OPENAI_BASE_URL=https://api.chatfire.cn/v1
 ENV DIFY_BASE_URL=http://dify.chatfire.cn/v1
 ENV SEARXNG_BASE_URL=https://search.chatfire.cn
 
+# 代理
+ENV KDLAPI_SECRET_ID=o0xwup2fyhkd5qelqvoo
 
 # 第三方
 ENV GOD_BASE_URL=https://api.gptgod.online/v1
@@ -52,6 +54,7 @@ ENV DEEPINFRA_BASE_URL=https://api.deepinfra.com/v1/openai
 ENV MODELSCOPE_BASE_URL=https://api-inference.modelscope.cn/v1
 ENV OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ENV VOLC_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+ENV PPIO_BASE_URL=https://api.ppinfra.com/v3/openai
 
 # 暴露端口
 EXPOSE 8000

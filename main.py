@@ -21,7 +21,7 @@ from free_api.routers import files, tasks
 
 from free_api.routers.oneapi import extra_api as oneapi
 from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
-from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis
+from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, veo
 from free_api.routers.async_tasks import fal, fal_kling  # , kling_apis
 from free_api.routers.async_tasks import fal, fal_kling, fal_ai
 
@@ -82,6 +82,9 @@ app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
 app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
 
 # 异步任务 async_tasks
+# 通用异步接口
+# app.include_router(seededit.router, '/async/v1', tags=seededit.TAGS)
+
 app.include_router(seededit.router, '/seededit/v1', tags=seededit.TAGS)
 
 app.include_router(fal_ai.router, '/fal-ai/v1', tags=fal_ai.TAGS)
@@ -89,6 +92,8 @@ app.include_router(fal_ai.router, '/fal-ai/v1', tags=fal_ai.TAGS)
 app.include_router(fal.router, '/lipsync/v1', tags=fal.TAGS)
 app.include_router(fal_kling.router, '/kling-video/v1', tags=fal_kling.TAGS)
 app.include_router(jimeng.router, '/jimeng-video/v1', tags=jimeng.TAGS)
+
+app.include_router(veo.router, '/veo/v1', tags=veo.TAGS)
 
 # 火山
 app.include_router(volcengine_apis.router, '/volc', tags=volcengine_apis.TAGS)
@@ -105,6 +110,7 @@ app.include_router(siliconflow_videos.router, '/v1/videos', tags=siliconflow_vid
 # app.include_router(tripo3d.router, '/tripo3d/v1', tags=tripo3d.TAGS)
 
 # 反代
+app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 
 # 小工具
