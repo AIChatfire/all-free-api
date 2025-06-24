@@ -84,7 +84,36 @@ async def create_chat_completions(
     return ImagesResponse(usage=request.extra_fields)
 
 
-@router.api_route("/async/flux/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传
+@router.get("/async/flux/v1/get_result")  # todo: 缓存，选择性缓存（成功 失败）
+async def get_async_task(id: str):
+    """传递状态 https://docs.bfl.ai/api-reference/utility/get-result
+            TaskStatusNotStart              = "NOT_START"
+            TaskStatusSubmitted             = "SUBMITTED"
+            TaskStatusQueued                = "QUEUED"
+            TaskStatusInProgress            = "IN_PROGRESS"
+            TaskStatusFailure               = "FAILURE"  # todo: 补偿积分+状态记录
+            TaskStatusSuccess               = "SUCCESS"
+            TaskStatusUnknown               = "UNKNOWN
+    """
+
+    # ["Ready", "Error", "Failed", "Pending"]
+    # Task not found, Pending, Request Moderated, Content Moderated, Ready, Error
+
+    data = {}
+    if flux := await redis_aclient.get("flux"):
+        data = json.loads(flux)
+
+    return {
+        "id": id,
+        # "status": status,
+        # "result": {"sample": "xxx"},
+        # "progress": int(progress),
+        # "details": {}
+        **data
+    }
+
+
+@router.post("/async/flux/v1/{model:path}")  # 走bfl接口透传
 async def create_async_task(
         request: Request,
         model: str,  # response_model 计费模型
@@ -93,20 +122,6 @@ async def create_async_task(
         # api_key: Optional[str] = Depends(get_bearer_token),
 ):
     logger.debug(bjson(headers))
-
-    if request.method == "GET":  ####### 难道因为这个？model==get_result
-        data = {}
-        if flux := await redis_aclient.get("flux"):
-            data = json.loads(flux)
-
-        return {
-            "id": id,
-            # "status": status,
-            # "result": {"sample": "xxx"},
-            # "progress": int(progress),
-            # "details": {}
-            **data
-        }
 
     try:
         payload = await request.json()
