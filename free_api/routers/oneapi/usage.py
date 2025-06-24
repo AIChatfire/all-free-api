@@ -113,7 +113,7 @@ async def get_async_task(id: str):
     }
 
 
-@router.api_route("/async/flux/v1/{model:path}")  # 走bfl接口透传
+@router.post("/async/flux/v1/{model:path}")  # 走bfl接口透传
 async def create_async_task(
         request: Request,
         model: str,  # response_model 计费模型
