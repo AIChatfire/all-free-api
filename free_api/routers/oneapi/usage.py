@@ -89,6 +89,8 @@ async def create_async_task(
         request: Request,
         model: str,  # response_model 计费模型
 
+        id: str = Query(None, description="The ID of the task."),
+
         headers: dict = Depends(get_headers),
         # api_key: Optional[str] = Depends(get_bearer_token),
 ):
