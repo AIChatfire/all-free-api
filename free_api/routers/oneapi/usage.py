@@ -82,15 +82,9 @@ async def create_chat_completions(
     return ImagesResponse(usage=request.extra_fields)
 
 
-@router.api_route("/async/flux/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传
-async def create_async_task(
-        request: Request,
-        model: str,  # response_model
-
-        headers: dict = Depends(get_headers),
-        # api_key: Optional[str] = Depends(get_bearer_token),
-):
-    """
+@router.get("/async/flux/v1/get_result")  # todo: 缓存，选择性缓存（成功 失败）
+async def get_async_task(id: str):
+    """传递状态 https://docs.bfl.ai/api-reference/utility/get-result
             TaskStatusNotStart              = "NOT_START"
             TaskStatusSubmitted             = "SUBMITTED"
             TaskStatusQueued                = "QUEUED"
@@ -99,27 +93,33 @@ async def create_async_task(
             TaskStatusSuccess               = "SUCCESS"
             TaskStatusUnknown               = "UNKNOWN
     """
-    logger.debug(bjson(headers))
 
     # ["Ready", "Error", "Failed", "Pending"]
+    # Task not found, Pending, Request Moderated, Content Moderated, Ready, Error
+    task_id = id
+    status = "Pending"
+    progress = 0
+    if 'chatfire-' in task_id:  # 仅仅测试使用
+        task_id, status, progress = task_id.removeprefix("chatfire-").split('-')
 
-    params = request.query_params._dict  # 进不去内部的 只有id可以进
-    task_id = params.get('id') or params.get('task_id') or params.get('request_id')
-    if request.method == 'GET':
-        status = "Pending"
-        for i in {"Ready", "Error", "Failed", "Pending"}:
-            if i in task_id:
-                status = i
-                break
+    return {
+        "id": task_id,
+        "status": status,
+        "result": {},
+        "progress": int(progress),
+        "details": {}
+    }
 
-        return {
-            "id": task_id,
-            "result": {},  # 兜底方案展示错误
-            "status": status,
 
-            "response_model": model,  # 计费模型
-            "error": "展示错误"
-        }
+@router.post("/async/flux/v1/{model:path}")  # 走bfl接口透传
+async def create_async_task(
+        request: Request,
+        model: str,  # response_model 计费模型
+
+        headers: dict = Depends(get_headers),
+        # api_key: Optional[str] = Depends(get_bearer_token),
+):
+    logger.debug(bjson(headers))
 
     try:
         payload = await request.json()
@@ -127,8 +127,7 @@ async def create_async_task(
         payload = (await request.form())._dict
         payload = payload or (await request.body()).decode()
 
-    payload['response_model'] = model  # 计费模型
-    payload['polling_url'] = "TODO"
+    # payload['polling_url'] = "TODO"
     return payload
 
 
