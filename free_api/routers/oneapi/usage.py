@@ -100,10 +100,10 @@ async def get_async_task(id: str):
     status = "Pending"
     progress = 0
     if 'chatfire-' in task_id:  # 仅仅测试使用
-        task_id, status, progress = task_id.removeprefix("chatfire-").split('-')
+        _, status, progress = task_id.removeprefix("chatfire-").split('-')
 
     return {
-        "id": task_id,
+        "id": id,
         "status": status,
         "result": {},
         "progress": int(progress),
