@@ -60,7 +60,7 @@ async def create_channel(
     if "volc" in request.base_url:  # 火山渠道
         from meutils.apis.volcengine_apis.videos import get_valid_token
 
-        tokens = api_key and api_key.split()
+        tokens = api_key and api_key.split()  # null
 
         request.key = await get_valid_token(tokens)
 
@@ -238,7 +238,7 @@ UPSTREAM_API_KEY=
 
 
 curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
-    -H 'Authorization: Bearer xx' \
+    -H 'Authorization: Bearer null' \
     -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
     -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
     -H 'accept: application/json' \
