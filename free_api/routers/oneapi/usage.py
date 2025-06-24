@@ -28,7 +28,7 @@ router = APIRouter()
 TAGS = ["usage"]
 
 
-@router.post("/v1/{dynamic_router: path}")  # 按量计费
+@router.post("/v1/{dynamic_router:path}")  # 按量计费
 async def create_chat_completions(
         dynamic_router: str,
         request: dict,  # 有些参数传不进 oneapi 用替代方案
@@ -86,7 +86,7 @@ async def create_async_task(
             "status": np.random.choice(["IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"]),
 
             "response_model": model,  # 计费模型
-            **params
+            "error": "展示错误"
         }
 
     try:
