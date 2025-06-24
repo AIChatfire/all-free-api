@@ -31,13 +31,13 @@ TAGS = ["usage"]
 @router.post("/v1/{dynamic_router: path}")  # 按量计费
 async def create_chat_completions(
         dynamic_router: str,
-        request: CompletionRequest,  # 有些参数传不进 oneapi 用替代方案
+        request: dict,  # 有些参数传不进 oneapi 用替代方案
 ):
+    usage = request.get('metadata') or request.get('extra_fields')
     if "images/generations" in dynamic_router:  # image 模式计费
+        return ImagesResponse(usage=usage)
 
-        return ImagesResponse(usage=request.metadata)
-
-    chat_completion.usage = request.metadata
+    chat_completion.usage = usage
     return chat_completion
 
     # if "chat/completions" in dynamic_router:  # chat 模式计费
