@@ -83,7 +83,7 @@ async def create_async_task(
         return {
             "id": task_id,
             "result": {},
-            "status": np.random.choice({"IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"}),
+            "status": np.random.choice(["IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"]),
 
             "response_model": model,  # 计费模型
             **params
