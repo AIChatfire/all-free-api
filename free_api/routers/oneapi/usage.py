@@ -35,7 +35,7 @@ async def create_chat_completions(
 ):
     logger.debug(bjson(request))
 
-    usage = request.get('metadata') or request.get('extra_fields') # 没传进去有点奇怪
+    usage = request.get('metadata') or request.get('extra_fields')  # 没传进去有点奇怪
     if "images/generations" in dynamic_router:  # image 模式计费
         return ImagesResponse(usage=usage)
 
@@ -62,6 +62,33 @@ async def create_chat_completions(
     #
 
 
+@router.post("/oai/v1/chat/completions")  # 按量计费
+async def create_chat_completions(
+        request: CompletionRequest,  # 有些参数传不进 oneapi 用替代方案
+):
+    logger.debug(bjson(request))
+
+    # usage = request.get('metadata') or request.get('extra_fields') # 没传进去有点奇怪
+    # if "images/generations" in dynamic_router:  # image 模式计费
+    #     return ImagesResponse(usage=usage)
+    #
+    # chat_completion.usage = usage
+    # return chat_completion
+
+    chat_completion.usage = request.metadata
+
+    return chat_completion
+
+
+@router.post("/oai/v1/images/generations")  # 按量计费
+async def create_chat_completions(
+        request: ImageRequest,  # 有些参数传不进 oneapi 用替代方案
+):
+    logger.debug(bjson(request))
+
+    return ImagesResponse(usage=request.extra_fields)
+
+
 @router.api_route("/async/flux/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传
 async def create_async_task(
         request: Request,
@@ -84,7 +111,7 @@ async def create_async_task(
     if request.method == 'GET':
         return {
             "id": task_id,
-            "result": {}, # 替代方案：错误放置 result 里
+            "result": {},  # 替代方案：错误放置 result 里
             "status": np.random.choice(["IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"]),
 
             "response_model": model,  # 计费模型
