@@ -28,35 +28,37 @@ router = APIRouter()
 TAGS = ["usage"]
 
 
-@router.post("/v1/{dynamic_router:path}")  # 动态计费
-async def chat_completions(
-        dynamic_router: str,  # chat/completions
-
-        request: dict,
+@router.post("/v1/chat/completions")  # 按量计费
+async def create_chat_completions(
+        request: dict,  # usage
 ):
-    if "chat/completions" in dynamic_router:  # chat 模式计费
-        request = CompletionRequest(**request)
+    chat_completion.usage = request
 
-        if request.stream:
-            chat_completion_chunk.usage = request.usage
+    return chat_completion
 
-            def gen():
-
-                yield chat_completion_chunk
-                yield chat_completion_chunk_stop.model_dump_json()
-                yield "[DONE]"  # 兼容标准格式
-
-            return EventSourceResponse(gen())
-        else:
-            chat_completion.usage = request.usage
-
-            return chat_completion
-
-
-    elif "images/generations" in dynamic_router:  # image 模式计费
-        request = ImageRequest(**request)
-
-        return ImagesResponse(usage=request.usage)
+    # if "chat/completions" in dynamic_router:  # chat 模式计费
+    #     request = CompletionRequest(**request)
+    #
+    #     if request.stream:
+    #         chat_completion_chunk.usage = request.usage
+    #
+    #         def gen():
+    #
+    #             yield chat_completion_chunk
+    #             yield chat_completion_chunk_stop.model_dump_json()
+    #             yield "[DONE]"  # 兼容标准格式
+    #
+    #         return EventSourceResponse(gen())
+    #     else:
+    #         chat_completion.usage = request.usage
+    #
+    #         return chat_completion
+    #
+    #
+    # elif "images/generations" in dynamic_router:  # image 模式计费
+    #     request = ImageRequest(**request)
+    #
+    #     return ImagesResponse(usage=request.usage)
 
 
 @router.api_route("/async/flux/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传
