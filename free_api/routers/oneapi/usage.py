@@ -68,13 +68,6 @@ async def create_chat_completions(
 ):
     logger.debug(bjson(request))
 
-    # usage = request.get('metadata') or request.get('extra_fields') # 没传进去有点奇怪
-    # if "images/generations" in dynamic_router:  # image 模式计费
-    #     return ImagesResponse(usage=usage)
-    #
-    # chat_completion.usage = usage
-    # return chat_completion
-
     chat_completion.usage = request.extra_body
 
     return chat_completion
@@ -94,7 +87,7 @@ async def create_async_task(
         request: Request,
         model: str,  # response_model
 
-        # headers: dict = Depends(get_headers),
+        headers: dict = Depends(get_headers),
         # api_key: Optional[str] = Depends(get_bearer_token),
 ):
     """
@@ -106,13 +99,15 @@ async def create_async_task(
             TaskStatusSuccess               = "SUCCESS"
             TaskStatusUnknown               = "UNKNOWN
     """
+    status = headers.get("x-status", "IN_PROGRESS")  # ["IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"]
+
     params = request.query_params._dict  # 进不去内部的 只有id可以进
     task_id = params.get('id') or params.get('task_id') or params.get('request_id')
     if request.method == 'GET':
         return {
             "id": task_id,
-            "result": {},  # 替代方案：错误放置 result 里
-            "status": np.random.choice(["IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"]),
+            "result": {},
+            "status": status,
 
             "response_model": model,  # 计费模型
             "error": "展示错误"
