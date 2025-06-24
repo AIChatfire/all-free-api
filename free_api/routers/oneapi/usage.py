@@ -35,7 +35,7 @@ async def create_chat_completions(
 ):
     logger.debug(bjson(request))
 
-    usage = request.get('metadata') or request.get('extra_fields')  # 没传进去有点奇怪
+    usage = request.get('extra_body') or request.get('extra_fields')  # 没传进去有点奇怪
     if "images/generations" in dynamic_router:  # image 模式计费
         return ImagesResponse(usage=usage)
 
@@ -75,7 +75,7 @@ async def create_chat_completions(
     # chat_completion.usage = usage
     # return chat_completion
 
-    chat_completion.usage = request.metadata
+    chat_completion.usage = request.extra_body
 
     return chat_completion
 
