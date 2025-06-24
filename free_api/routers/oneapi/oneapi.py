@@ -244,6 +244,7 @@ curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
       -d '{
+        "id":2,
         "name": "火山",
         "tag": "火山",
         "key": "$KEY",

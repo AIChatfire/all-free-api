@@ -28,7 +28,7 @@ router = APIRouter()
 TAGS = ["usage"]
 
 
-@router.post("/v1/{dynamic_router:path}")  # 按量计费
+@router.post("/v1/{dynamic_router:path}")  # 这个动态计费有点问题
 async def create_chat_completions(
         dynamic_router: str,
         request: dict,  # 有些参数传不进 oneapi 用替代方案
@@ -99,14 +99,22 @@ async def create_async_task(
             TaskStatusSuccess               = "SUCCESS"
             TaskStatusUnknown               = "UNKNOWN
     """
-    status = headers.get("x-status", "IN_PROGRESS")  # ["IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"]
+    logger.debug(bjson(headers))
+
+    # ["Ready", "Error", "Failed", "Pending"]
 
     params = request.query_params._dict  # 进不去内部的 只有id可以进
     task_id = params.get('id') or params.get('task_id') or params.get('request_id')
     if request.method == 'GET':
+        status = "Pending"
+        for i in {"Ready", "Error", "Failed", "Pending"}:
+            if i in task_id:
+                status = i
+                break
+
         return {
             "id": task_id,
-            "result": {},
+            "result": {},  # 兜底方案展示错误
             "status": status,
 
             "response_model": model,  # 计费模型
@@ -120,6 +128,7 @@ async def create_async_task(
         payload = payload or (await request.body()).decode()
 
     payload['response_model'] = model  # 计费模型
+    payload['polling_url'] = "TODO"
     return payload
 
 
