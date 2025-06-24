@@ -27,9 +27,7 @@ TAGS = ["视频生成"]
 """
 https://api.ppinfra.com/v3/async/minimax-hailuo-02
 """
-@router.get("/tasks/{path:path}")
-@router.get("/tasks")
-@alru_cache(ttl=15)
+@router.get("/async/{path:path}")
 async def get_task(
         request: Request,
         path: str = "task_id",

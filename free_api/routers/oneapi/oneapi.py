@@ -9,21 +9,12 @@
 # @Description  : 
 
 from meutils.pipe import *
-from meutils.notice.feishu import send_message
-
-from meutils.llm.openai_utils import create_chat_completion_chunk
-
-from meutils.schemas.openai_types import CompletionRequest, chat_completion, chat_completion_chunk, \
-    chat_completion_chunk_stop
-
-from meutils.schemas.image_types import ImageRequest, ImagesResponse
 
 from meutils.apis.oneapi.user import get_user, get_api_key_log
 from meutils.apis.oneapi.channel import ChannelInfo, create_or_update_channel as _create_or_update_channel
 
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 
-from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks, \
     Body
 
@@ -81,37 +72,6 @@ async def create_channel(
 
     response['request'] = request
     return response
-
-
-@router.post("/billing/v1/{dynamic_router:path}")  # 动态计费
-async def chat_completions(
-        dynamic_router: str,  # chat/completions
-
-        request: dict,
-):
-    if "chat/completions" in dynamic_router:
-        request = CompletionRequest(**request)
-
-        if request.stream:
-            chat_completion_chunk.usage = request.usage
-
-            def gen():
-
-                yield chat_completion_chunk
-                yield chat_completion_chunk_stop.model_dump_json()
-                yield "[DONE]"  # 兼容标准格式
-
-            return EventSourceResponse(gen())
-        else:
-            chat_completion.usage = request.usage
-
-            return chat_completion
-
-
-    elif "images/generations" in dynamic_router:
-        request = ImageRequest(**request)
-
-        return ImagesResponse(usage=request.usage)
 
 
 if __name__ == '__main__':
