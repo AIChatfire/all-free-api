@@ -28,12 +28,16 @@ router = APIRouter()
 TAGS = ["usage"]
 
 
-@router.post("/v1/chat/completions")  # 按量计费
+@router.post("/v1/{dynamic_router: path}")  # 按量计费
 async def create_chat_completions(
+        dynamic_router: str,
         request: CompletionRequest,  # 有些参数传不进 oneapi 用替代方案
 ):
-    chat_completion.usage = request.metadata
+    if "images/generations" in dynamic_router:  # image 模式计费
 
+        return ImagesResponse(usage=request.metadata)
+
+    chat_completion.usage = request.metadata
     return chat_completion
 
     # if "chat/completions" in dynamic_router:  # chat 模式计费
@@ -54,11 +58,6 @@ async def create_chat_completions(
     #
     #         return chat_completion
     #
-    #
-    # elif "images/generations" in dynamic_router:  # image 模式计费
-    #     request = ImageRequest(**request)
-    #
-    #     return ImagesResponse(usage=request.usage)
 
 
 @router.api_route("/async/flux/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传
@@ -70,19 +69,21 @@ async def create_async_task(
         # api_key: Optional[str] = Depends(get_bearer_token),
 ):
     """
-        TaskStatusNotStart              = "NOT_START"
-        TaskStatusSubmitted             = "SUBMITTED"
-        TaskStatusQueued                = "QUEUED"
-        TaskStatusInProgress            = "IN_PROGRESS"
-        TaskStatusFailure               = "FAILURE"  # todo: 补偿积分+状态记录
+            TaskStatusNotStart              = "NOT_START"
+            TaskStatusSubmitted             = "SUBMITTED"
+            TaskStatusQueued                = "QUEUED"
+            TaskStatusInProgress            = "IN_PROGRESS"
+            TaskStatusFailure               = "FAILURE"  # todo: 补偿积分+状态记录
+            TaskStatusSuccess               = "SUCCESS"
+            TaskStatusUnknown               = "UNKNOWN
     """
-    params = request.query_params._dict
+    params = request.query_params._dict  # 进不去内部的 只有id可以进
     task_id = params.get('id') or params.get('task_id') or params.get('request_id')
     if request.method == 'GET':
         return {
             "id": task_id,
             "result": {},
-            "status": "IN_PROGRESS",
+            "status": np.random.choice({"IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"}),
 
             "response_model": model,  # 计费模型
             **params
