@@ -30,9 +30,9 @@ TAGS = ["usage"]
 
 @router.post("/v1/chat/completions")  # 按量计费
 async def create_chat_completions(
-        request: dict,  # usage
+        request: CompletionRequest,  # 有些参数传不进 oneapi 用替代方案
 ):
-    chat_completion.usage = request
+    chat_completion.usage = request.metadata
 
     return chat_completion
 
