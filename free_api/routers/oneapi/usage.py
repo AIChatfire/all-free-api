@@ -6,11 +6,13 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
+# @Description  :
+import json
 
 from meutils.pipe import *
 from meutils.notice.feishu import send_message
 from meutils.apis.utils import make_request
+from meutils.db.redis_db import redis_aclient
 
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -96,22 +98,22 @@ async def get_async_task(id: str):
 
     # ["Ready", "Error", "Failed", "Pending"]
     # Task not found, Pending, Request Moderated, Content Moderated, Ready, Error
-    task_id = id
-    status = "Pending"
-    progress = 0
-    if 'chatfire-' in task_id:  # 仅仅测试使用
-        _, status, progress = task_id.removeprefix("chatfire-").split('-')
+
+    data = {}
+    if flux := await redis_aclient.get("flux"):
+        data = json.loads(flux)
 
     return {
         "id": id,
-        "status": status,
-        "result": {},
-        "progress": int(progress),
-        "details": {}
+        # "status": status,
+        # "result": {"sample": "xxx"},
+        # "progress": int(progress),
+        # "details": {}
+        **data
     }
 
 
-@router.post("/async/flux/v1/{model:path}")  # 走bfl接口透传
+@router.api_route("/async/flux/v1/{model:path}")  # 走bfl接口透传
 async def create_async_task(
         request: Request,
         model: str,  # response_model 计费模型
