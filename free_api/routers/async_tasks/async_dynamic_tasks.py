@@ -15,7 +15,7 @@ from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.decorators.contextmanagers import atry_catch
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
-from meutils.llm.openai_utils.bling_utils import get_billing_n, bling_for_async_task
+from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task
 from meutils.schemas.task_types import FluxTaskResponse
 
 from meutils.apis.utils import make_request
@@ -137,9 +137,11 @@ async def create_task(
 
         task_id = response.get("id") or response.get("task_id") or response.get("request_id")
 
-        await bling_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
+        await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
 
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
+
+        return response
 
 
 if __name__ == '__main__':

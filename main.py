@@ -19,7 +19,7 @@ from free_api.routers import chat_image, chat_to_audio, chat_video, chat_suno
 from free_api.routers import test
 from free_api.routers import files, tasks
 
-from free_api.routers.oneapi import oneapi, bling
+from free_api.routers.oneapi import oneapi, billing
 from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
 from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, veo
 from free_api.routers.async_tasks import fal, fal_kling  # , kling_apis
@@ -135,7 +135,7 @@ app.include_router(web_search.router, '/search/v1', tags=web_search.TAGS)
 
 # ONEAPI: extra-api
 app.include_router(oneapi.router, '/oneapi', tags=oneapi.TAGS)
-app.include_router(bling.router, '/bling', tags=bling.TAGS)  # 计费系统
+app.include_router(billing.router, '/billing', tags=billing.TAGS)  # 计费系统
 
 # 采购项
 app.include_router(textin_v1.router, '/textin/v1', tags=textin_v1.TAGS)
