@@ -83,51 +83,34 @@ async def create_chat_completions(
 
     return ImagesResponse(usage=request.extra_fields)
 
-
-# 渠道错乱会导致失败，可删除重建
 @router.api_route("/async/flux/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传
 async def create_async_task(
         request: Request,
-        model: str,  # response_model 计费模型
+        model: str,  # response_model
 
-        id: str = Query(None, description="The ID of the task."),
-
-        headers: dict = Depends(get_headers),
+        # headers: dict = Depends(get_headers),
         # api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    """传递状态 https://docs.bfl.ai/api-reference/utility/get-result
-
     """
-    logger.debug(bjson(headers))
-
-    if request.method == "GET":  #######
-        if (task_id := await redis_aclient.get(id)) and (response := await redis_aclient.get(f"response:{task_id}")):
-            response = json.loads(response)
-            return response
-
-        # 测试
-        data = {}
-        if flux := await redis_aclient.get("flux"):
-            data = json.loads(flux)
-
+            TaskStatusNotStart              = "NOT_START"
+            TaskStatusSubmitted             = "SUBMITTED"
+            TaskStatusQueued                = "QUEUED"
+            TaskStatusInProgress            = "IN_PROGRESS"
+            TaskStatusFailure               = "FAILURE"  # todo: 补偿积分+状态记录
+            TaskStatusSuccess               = "SUCCESS"
+            TaskStatusUnknown               = "UNKNOWN
+    """
+    params = request.query_params._dict  # 进不去内部的 只有id可以进
+    task_id = params.get('id') or params.get('task_id') or params.get('request_id')
+    if request.method == 'GET':
         return {
-            "id": id,
-            "result": {},
-            # "status": status,
-            # "result": {"sample": "xxx"},
-            # "progress": int(progress),
-            # "details": {}
-            **data
+            "id": task_id,
+            "result": {},  # 替代方案：错误放置 result 里
+            "status": np.random.choice(["IN_PROGRESS", "FAILURE", "SUCCESS", "Ready"]),
+
+            "response_model": model,  # 计费模型
+            "error": "展示错误"
         }
-    """
-    {
-        "id": "fddbade0-a2f7-4082-981a-961616870906",
-        "status": "Task not found",
-        "result": null,
-        "progress": null,
-        "details": null
-        }
-    """
 
     try:
         payload = await request.json()
@@ -135,7 +118,7 @@ async def create_async_task(
         payload = (await request.form())._dict
         payload = payload or (await request.body()).decode()
 
-    # payload['polling_url'] = "TODO"
+    payload['response_model'] = model  # 计费模型
     return payload
 
 
