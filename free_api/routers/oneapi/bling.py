@@ -27,7 +27,7 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, 
     Body
 
 router = APIRouter()
-TAGS = ["usage"]
+TAGS = ["bling"]
 
 
 @router.post("/v1/{dynamic_router:path}")  # 这个动态计费有点问题
@@ -90,7 +90,7 @@ async def create_async_task(
         request: Request,
         model: str,  # response_model 计费模型
 
-        id: str = Query(None, description="The ID of the task."),
+        id: str = Query(None, description="The ID of the task."),  # local task id
 
         headers: dict = Depends(get_headers),
         # api_key: Optional[str] = Depends(get_bearer_token),
@@ -100,25 +100,27 @@ async def create_async_task(
     """
     logger.debug(bjson(headers))
 
-    if request.method == "GET":  #######
-        if (task_id := await redis_aclient.get(id)) and (response := await redis_aclient.get(f"response:{task_id}")):
+    if request.method == "GET":
+
+        if response := await redis_aclient.get(f"response:{id}"):
             response = json.loads(response)
             return response
 
         # 测试
-        data = {}
         if flux := await redis_aclient.get("flux"):
             data = json.loads(flux)
+            return {
+                "id": id,
+                "result": {},
+                **data
+            }
 
         return {
             "id": id,
             "result": {},
-            # "status": status,
-            # "result": {"sample": "xxx"},
-            # "progress": int(progress),
-            # "details": {}
-            **data
+            "status": "Processing",
         }
+
     """
     {
         "id": "fddbade0-a2f7-4082-981a-961616870906",

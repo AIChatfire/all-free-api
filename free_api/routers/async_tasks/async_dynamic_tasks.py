@@ -15,8 +15,7 @@ from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.decorators.contextmanagers import atry_catch
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
-from meutils.llm.openai_utils import billing_flow_for_async_task
-from meutils.llm.openai_utils.usage_utils import get_billing_n
+from meutils.llm.openai_utils.bling_utils import get_billing_n, bling_for_async_task
 from meutils.schemas.task_types import FluxTaskResponse
 
 from meutils.apis.utils import make_request
@@ -53,11 +52,11 @@ async def get_task(
 
     # 上游信息
     upstream_base_url = headers.get('upstream_base_url')
-    upstream_get_path = headers.get('upstream_get_path')
+    upstream_path = headers.get('upstream_get_path') or path
     # https://open.bigmodel.cn/api/paas/v4/async-result/{id}
-    if "{" in upstream_get_path:  # task_id 从路径上去
+    if "{" in upstream_path:  # task_id 从路径上去
         task_id = Path(path).name
-        upstream_get_path = upstream_get_path.format(id=task_id)
+        upstream_path = upstream_path.format(id=task_id)
 
     upstream_api_key = await redis_aclient.get(task_id)
     upstream_api_key = upstream_api_key and upstream_api_key.decode()
@@ -65,21 +64,25 @@ async def get_task(
     if not upstream_api_key:
         raise HTTPException(status_code=404, detail="TaskID not found")
 
-    response = await make_request(
-        base_url=upstream_base_url,
-        path=upstream_get_path,
-        api_key=upstream_api_key,
+    async with atry_catch(f"{biz}/{path}", callback=send_message,
+                          upstream_base_url=upstream_base_url, upstream_path=upstream_path):
 
-        params=params,
-        method=request.method
-    )
+        response = await make_request(
+            base_url=upstream_base_url,
+            path=upstream_path,
+            api_key=upstream_api_key,
 
-    # 异步任务信号
-    flux_task_response = FluxTaskResponse(id=task_id, result=response, details=response)
-    if flux_task_response.status in {"Ready", "Error"}:
-        await redis_aclient.set(f"response:{task_id}", flux_task_response.model_dump_json(exclude_none=True))
+            params=params,
+            method=request.method
+        )
 
-    return response
+        # 异步任务信号
+        flux_task_response = FluxTaskResponse(id=task_id, result=response, details=response)
+        logger.debug(flux_task_response.model_dump_json(exclude_none=True, indent=4))
+        if flux_task_response.status in {"Ready", "Error"}:
+            await redis_aclient.set(f"response:{task_id}", flux_task_response.model_dump_json(exclude_none=True))
+
+        return response
 
 
 @router.post("/{biz}/v1/{path:path}")
@@ -98,10 +101,10 @@ async def create_task(
 
     # 上游信息
     upstream_base_url = headers.get('upstream_base_url')
-    upstream_api_key = headers.get('upstream_api_key')  # 上游号池管理:
+    upstream_api_key = headers.get('upstream_api_key')  # 上游号池管理
     upstream_api_key = await parse_token(upstream_api_key)
 
-    upstream_post_path = headers.get('upstream_post_path')
+    upstream_path = headers.get('upstream_post_path') or path
     # https://open.bigmodel.cn/api/paas/v4/videos/generations
 
     # 获取请求体
@@ -115,26 +118,28 @@ async def create_task(
     # 获取计费次数
     billing_n = get_billing_n(payload)
 
-    local_task_id = str(shortuuid.random())
+    async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
+                          upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
+        """todo
+        1. 判断余额 
+        2. 执行任务
+        3. 计费
+        """
 
-    async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message, request=payload):
-        async with billing_flow_for_async_task(model, task_id=local_task_id, api_key=api_key, n=billing_n):
-            response = await make_request(
-                base_url=upstream_base_url,
-                path=upstream_post_path,
-                payload=payload,
+        response = await make_request(
+            base_url=upstream_base_url,
+            path=upstream_path,
+            payload=payload,
 
-                api_key=upstream_api_key,
-                method=request.method
-            )
+            api_key=upstream_api_key,
+            method=request.method
+        )
 
-            # local_task_id => task_id => response
-            task_id = response.get("id") or response.get("task_id") or response.get("request_id")
+        task_id = response.get("id") or response.get("task_id") or response.get("request_id")
 
-            await redis_aclient.set(local_task_id, task_id, ex=7 * 24 * 3600)
-            await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)
+        await bling_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
 
-            return response
+        await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
 
 
 if __name__ == '__main__':
