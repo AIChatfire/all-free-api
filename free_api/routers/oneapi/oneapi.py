@@ -87,7 +87,7 @@ if __name__ == '__main__':
 UPSTREAM_BASE_URL=https://api.chatfire.cn
 UPSTREAM_API_KEY=
 
-API_KEY=https://xchatllm.feishu.cn/sheets/GYCHsvI4qhnDPNtI4VPcdw2knEd?sheet=Gvm9dt[:10]
+API_KEY=https://xchatllm.feishu.cn/sheets/GYCHsvI4qhnDPNtI4VPcdw2knEd?sheet=Gvm9dt[:30]
 BASE_URL=https://openai.chatfire.cn/images
 
 

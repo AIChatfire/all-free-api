@@ -43,12 +43,10 @@ async def create_async_task(
 
     if request.method == "GET":  # 同步成功了，异步任务也成功了
         if response := await redis_aclient.get(f"response:{id}"):
+            # logger.debug(f"response type: {type(response)}")
+            # logger.debug(f"response: {response}")
 
-            logger.debug(f"response type: {type(response)}")
-            logger.debug(f"response: {response}")
             response = json.loads(response)
-            logger.debug(f"response: {response}")
-
             return response
 
     # 上游信息
@@ -73,7 +71,7 @@ async def create_async_task(
 
         # 异步任务信号
         flux_task_response = FluxTaskResponse(id=task_id, result=response, status="Ready")
-        await redis_aclient.set(f"response:{task_id}", flux_task_response.model_dump_json(exclude_none=True))
+        await redis_aclient.set(f"response:{task_id}", flux_task_response.model_dump_json(exclude_none=True), ex=3600)
 
         logger.debug(flux_task_response.model_dump_json(exclude_none=True, indent=4))
 

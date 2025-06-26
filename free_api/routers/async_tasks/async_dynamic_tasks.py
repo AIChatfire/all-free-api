@@ -104,6 +104,7 @@ async def create_task(
     logger.debug(bjson(headers))
 
     # 上游信息
+    upstream_model = headers.get('upstream_model')
     upstream_base_url = headers.get('upstream_base_url')
     upstream_api_key = headers.get('upstream_api_key')  # 上游号池管理
     upstream_api_key = await parse_token(upstream_api_key)
@@ -115,9 +116,10 @@ async def create_task(
     payload = await request.json()
 
     # 获取模型名称
-    model = payload.get("model") or payload.get("model_name") or "UNKNOWN"
+    model = payload.get("model") or payload.get("model_name") or upstream_model or "UNKNOWN"
     if biz == "fal-ai":
         model = f"{biz}/{path}".replace("/", "-")
+        headers = {"Authorization": f"key {upstream_api_key}"}
 
     # 获取计费次数
     billing_n = get_billing_n(payload)
@@ -136,7 +138,8 @@ async def create_task(
             payload=payload,
 
             api_key=upstream_api_key,
-            method=request.method
+            method=request.method,
+            headers=headers
         )
 
         task_id = response.get("id") or response.get("task_id") or response.get("request_id")
