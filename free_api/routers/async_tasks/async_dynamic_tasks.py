@@ -8,7 +8,6 @@
 # @Software     : PyCharm
 # @Description  : 适合适配于第三方接口
 # 动态路由
-import shortuuid
 
 from meutils.pipe import *
 
@@ -55,8 +54,13 @@ async def get_task(
     upstream_path = headers.get('upstream_get_path') or path
     # https://open.bigmodel.cn/api/paas/v4/async-result/{id}
     if "{" in upstream_path:  # task_id 从路径上去
-        task_id = Path(path).name
-        upstream_path = upstream_path.format(id=task_id)
+        if biz == "fal-ai":
+            model, request_id = path.split('/requests/')
+            upstream_path = path.format(model=model, request_id=task_id)
+
+        else:
+            task_id = Path(path).name
+            upstream_path = upstream_path.format(id=task_id)
 
     upstream_api_key = await redis_aclient.get(task_id)
     upstream_api_key = upstream_api_key and upstream_api_key.decode()
@@ -149,6 +153,6 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '/v1')
+    app.include_router(router, '/async')
 
     app.run()
