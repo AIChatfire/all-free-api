@@ -50,15 +50,22 @@ async def get_task(
     upstream_path = headers.get('upstream_get_path') or path
     # https://open.bigmodel.cn/api/paas/v4/async-result/{id}
 
-    if "{" in upstream_path:  # task_id 从路径上去
+    if "{" in upstream_path:  # 解析出task_id 从路径上去
         if biz == "fal-ai":  # {model}/requests/{id}: "kling-video/requests/$REQUEST_ID"
-            model, task_id = path.split('/requests/')
-            upstream_path = upstream_path.format(model=model, id=task_id)
+            # {model}/requests/{id} => kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e
+            # {model}/requests/{id}/status => kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e/status
+            # model, task_id = path.split('/requests/')
+            # task_id = task_id.split('/')[0]
+            # upstream_path = upstream_path.format(model=model, id=task_id)
+            # path
+            task_id = path.removesuffix('/').removesuffix("/status").split('/requests/')[-1]
+            upstream_path = path
 
         else:
             task_id = Path(path).name
             upstream_path = upstream_path.format(id=task_id)
 
+    assert task_id, "task_id is required"
     upstream_api_key = await redis_aclient.get(task_id)
     upstream_api_key = upstream_api_key and upstream_api_key.decode()
     logger.debug(f"upstream_api_key: {upstream_api_key}")
@@ -167,6 +174,7 @@ if __name__ == '__main__':
 UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
 API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+
 curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/lipsync/audio-to-video' \
     -H "Authorization: Bearer $API_KEY" \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
@@ -178,13 +186,11 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/lipsync/audio-to
      "audio_url": "https://storage.googleapis.com/falserverless/kling/kling-audio.mp3"
    }'
 
-
-UPSTREAM_GET_PATH="{model}/requests/{id}"
 UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
 API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
 
-curl -X 'GET' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/71a4aa6f-7219-460d-bdfa-9b793151bfee' \
+curl -X 'GET' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e' \
     -H "Authorization: Bearer $API_KEY" \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
     -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
@@ -192,4 +198,15 @@ curl -X 'GET' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/71a4aa6f
     -H 'accept: application/json' \
     -H 'Content-Type: application/json'
 
+UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
+UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
+API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+
+curl -X 'GET' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e/status' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H "UPSTREAM_GET_PATH: $UPSTREAM_GET_PATH" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json'
 """
