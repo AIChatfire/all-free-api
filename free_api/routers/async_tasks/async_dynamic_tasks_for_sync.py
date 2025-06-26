@@ -44,7 +44,7 @@ async def create_async_task(
     # 上游信息
     upstream_base_url, api_key = api_key.split('|')  # 必须配置
 
-    # 获取请求体
+    # 获取请求体 todo: formdata
     payload = await request.json()
 
     if request.method == "GET":  # 同步成功了，异步任务也成功了
@@ -64,7 +64,7 @@ async def create_async_task(
         )
 
         task_id = shortuuid.random()
-        response['task_id'] = task_id
+        response['id'] = task_id
 
         # 异步任务信号
         flux_task_response = FluxTaskResponse(id=task_id, result=response, status="Ready")
