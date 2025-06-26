@@ -38,17 +38,11 @@ async def create_async_task(
         headers: dict = Depends(get_headers),
         api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    """传递状态 https://docs.bfl.ai/api-reference/utility/get-result
-
-    """
-    logger.debug(f"model: {model}")
+    logger.debug(f"model: {model}; api_key: {api_key}")
     logger.debug(bjson(headers))
 
-    # 上游信息: todo 内部是透传不过去的 替代方案 反代之后 再配置渠道
-    upstream_base_url = headers.get('upstream_base_url')
-
-    upstream_path = headers.get('upstream_post_path')
-    # https://open.bigmodel.cn/api/paas/v4/videos/generations
+    # 上游信息
+    upstream_base_url, api_key = api_key.split('|')  # 必须配置
 
     # 获取请求体
     payload = await request.json()
@@ -59,11 +53,10 @@ async def create_async_task(
             return response
 
     async with atry_catch(f"{model}", api_key=api_key, callback=send_message,
-                          upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
+                          upstream_base_url=upstream_base_url, request=payload):
 
         response = await make_request(
             base_url=upstream_base_url,
-            path=upstream_path,
             payload=payload,
 
             api_key=api_key,
@@ -92,13 +85,10 @@ if __name__ == '__main__':
     app.run()
 
 """
-UPSTREAM_BASE_URL=https://ai.gitee.com/v1/rerank
-API_KEY=5PJFN89RSDN8CCR7CRGMKAOWTPTZO6PN4XVZV2FQ
+API_KEY="https://ai.gitee.com/v1/rerank|5PJFN89RSDN8CCR7CRGMKAOWTPTZO6PN4XVZV2FQ"
 
 curl -X 'POST' 'http://0.0.0.0:8000/async2sync/flux/v1/Qwen3-Reranker-8B' \
-    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
     -H "Authorization: Bearer $API_KEY" \
-
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{
@@ -110,5 +100,21 @@ curl -X 'POST' 'http://0.0.0.0:8000/async2sync/flux/v1/Qwen3-Reranker-8B' \
         ],
         "model": "Qwen3-Reranker-8B"
     }'
+    
+API_KEY="https://ai.gitee.com/v1/rerank|5PJFN89RSDN8CCR7CRGMKAOWTPTZO6PN4XVZV2FQ"
 
+curl -X 'POST' 'https://openai-dev.chatfire.cn/async2sync/flux/v1/Qwen3-Reranker-8B' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+        "query": "How to read a CSV file in Python?",
+        "documents": [
+            "You can read CSV files with numpy.loadtxt()",
+            "To write JSON files, use json.dump() in Python",
+            "CSV means Comma Separated Values. Python files can be opened using read() method."
+        ],
+        "model": "Qwen3-Reranker-8B"
+    }'
+    
 """
