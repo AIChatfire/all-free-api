@@ -27,10 +27,6 @@ from fastapi import File, UploadFile, Header, Query, Form, Body, Request
 router = APIRouter()
 TAGS = ["通用异步任务"]
 
-"""
-https://api.ppinfra.com/v3/async/minimax-hailuo-02
-"""
-
 
 @router.get("/{biz}/v1/{path:path}")
 async def get_task(
@@ -53,10 +49,11 @@ async def get_task(
     upstream_base_url = headers.get('upstream_base_url')
     upstream_path = headers.get('upstream_get_path') or path
     # https://open.bigmodel.cn/api/paas/v4/async-result/{id}
+
     if "{" in upstream_path:  # task_id 从路径上去
-        if biz == "fal-ai":
-            model, request_id = path.split('/requests/')
-            upstream_path = path.format(model=model, request_id=task_id)
+        if biz == "fal-ai":  # {model}/requests/{id}: "kling-video/requests/$REQUEST_ID"
+            model, task_id = path.split('/requests/')
+            upstream_path = upstream_path.format(model=model, id=task_id)
 
         else:
             task_id = Path(path).name
@@ -64,9 +61,12 @@ async def get_task(
 
     upstream_api_key = await redis_aclient.get(task_id)
     upstream_api_key = upstream_api_key and upstream_api_key.decode()
-    logger.debug(upstream_api_key)
+    logger.debug(f"upstream_api_key: {upstream_api_key}")
     if not upstream_api_key:
         raise HTTPException(status_code=404, detail="TaskID not found")
+
+    if biz == "fal-ai":
+        headers = {"Authorization": f"key {upstream_api_key}"}
 
     async with atry_catch(f"{biz}/{path}", callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path):
@@ -77,7 +77,8 @@ async def get_task(
             api_key=upstream_api_key,
 
             params=params,
-            method=request.method
+            method=request.method,
+            headers=headers,
         )
 
         # 异步任务信号
@@ -118,7 +119,9 @@ async def create_task(
     # 获取模型名称
     model = payload.get("model") or payload.get("model_name") or upstream_model or "UNKNOWN"
     if biz == "fal-ai":
-        model = f"{biz}/{path}".replace("/", "-")
+        # model = f"{biz}/{path}".replace("/", "-")
+        model = f"{path}".replace("/", "-")
+
         headers = {"Authorization": f"key {upstream_api_key}"}
 
     # 获取计费次数
@@ -159,3 +162,34 @@ if __name__ == '__main__':
     app.include_router(router, '/async')
 
     app.run()
+
+"""
+UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
+UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
+API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/lipsync/audio-to-video' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+     "video_url": "https://fal.media/files/koala/8teUPbRRMtAUTORDvqy0l.mp4",
+     "audio_url": "https://storage.googleapis.com/falserverless/kling/kling-audio.mp3"
+   }'
+
+
+UPSTREAM_GET_PATH="{model}/requests/{id}"
+UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
+UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
+API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+
+curl -X 'GET' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/71a4aa6f-7219-460d-bdfa-9b793151bfee' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H "UPSTREAM_GET_PATH: $UPSTREAM_GET_PATH" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json'
+
+"""
