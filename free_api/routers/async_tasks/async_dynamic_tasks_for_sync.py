@@ -41,16 +41,21 @@ async def create_async_task(
     logger.debug(f"model: {model}; api_key: {api_key}")
     logger.debug(bjson(headers))
 
+    if request.method == "GET":  # 同步成功了，异步任务也成功了
+        if response := await redis_aclient.get(f"response:{id}"):
+
+            logger.debug(f"response type: {type(response)}")
+            logger.debug(f"response: {response}")
+            response = json.loads(response)
+            logger.debug(f"response: {response}")
+
+            return response
+
     # 上游信息
     upstream_base_url, api_key = api_key.split('|')  # 必须配置
 
     # 获取请求体 todo: formdata
     payload = await request.json()
-
-    if request.method == "GET":  # 同步成功了，异步任务也成功了
-        if response := await redis_aclient.get(f"response:{id}"):
-            response = json.loads(response)
-            return response
 
     async with atry_catch(f"{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, request=payload):
@@ -116,5 +121,14 @@ curl -X 'POST' 'https://openai-dev.chatfire.cn/async2sync/flux/v1/Qwen3-Reranker
         ],
         "model": "Qwen3-Reranker-8B"
     }'
+    
+API_KEY="https://ai.gitee.com/v1/rerank|5PJFN89RSDN8CCR7CRGMKAOWTPTZO6PN4XVZV2FQ"
+
+curl -X 'GET' 'https://openai-dev.chatfire.cn/async2sync/flux/v1/get_result?id=8dYZLBnv9TG8k6JMHc6Kpp' \
+    -H "Authorization: Bearer $API_KEY"
+
+API_KEY="https://ai.gitee.com/v1/rerank|5PJFN89RSDN8CCR7CRGMKAOWTPTZO6PN4XVZV2FQ"
+curl -X 'GET' 'http://0.0.0.0:8000/async2sync/flux/v1/get_result?id=8dYZLBnv9TG8k6JMHc6Kpp' \
+    -H "Authorization: Bearer $API_KEY"
     
 """
