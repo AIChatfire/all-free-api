@@ -15,7 +15,6 @@ from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.decorators.contextmanagers import atry_catch
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
-from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task
 
 from meutils.apis.utils import make_request
 from meutils.schemas.task_types import FluxTaskResponse
@@ -58,9 +57,6 @@ async def create_async_task(
         if response := await redis_aclient.get(f"response:{id}"):
             response = json.loads(response)
             return response
-
-    # 获取计费次数
-    billing_n = get_billing_n(payload)
 
     async with atry_catch(f"{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
