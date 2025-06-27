@@ -43,7 +43,6 @@ async def create_task(
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: dict = Depends(get_headers),
 ):
-    upstream_api_key = headers.get("upstream-api-key")
 
     model = "api-minimax-hailuo-01-6s"
     if request.model.lower() == "minimax-hailuo-02":
@@ -53,7 +52,7 @@ async def create_task(
     async with ppu_flow(api_key, post=model, n=N):
         videos.send_message(request)
         #############################################
-        task = await videos.create_task(request, upstream_api_key)
+        task = await videos.create_task(request)
         #############################################
         videos.send_message(task)
 
