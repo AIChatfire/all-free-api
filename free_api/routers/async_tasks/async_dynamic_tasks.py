@@ -113,7 +113,7 @@ async def create_task(
     upstream_api_key = headers.get('upstream_api_key')  # 上游号池管理
     upstream_api_key = await parse_token(upstream_api_key)
 
-    upstream_path = headers.get('upstream_post_path') or path
+    upstream_path = headers.get('upstream_post_path') or path # 路径不一致的时候要传 upstream_post_path
     # https://open.bigmodel.cn/api/paas/v4/videos/generations
 
     # 获取请求体
@@ -122,9 +122,7 @@ async def create_task(
     # 获取模型名称
     model = payload.get("model") or payload.get("model_name") or upstream_model or "UNKNOWN"
     if biz == "fal-ai":
-        # model = f"{biz}/{path}".replace("/", "-")
         model = f"{path}".replace("/", "-")
-
         headers = {"Authorization": f"key {upstream_api_key}"}
 
     # 获取计费次数
