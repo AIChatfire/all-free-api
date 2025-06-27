@@ -43,27 +43,23 @@ async def get_task(
 
     # 获取所有查询参数
     params = dict(request.query_params)
-    task_id = params.get("id") or params.get("task_id") or params.get("request_id")
+    task_id = params.get("id") or params.get("task_id") or params.get("request_id") or Path(path).name  # 路径参数
 
     # 上游信息
     upstream_base_url = headers.get('upstream_base_url')
-    upstream_path = headers.get('upstream_get_path') or path
+    upstream_path = headers.get('upstream_get_path') or path  # 推荐 path
     # https://open.bigmodel.cn/api/paas/v4/async-result/{id}
 
-    if "{" in upstream_path:  # 解析出task_id 从路径上去
-        if biz == "fal-ai":  # {model}/requests/{id}: "kling-video/requests/$REQUEST_ID"
-            # {model}/requests/{id} => kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e
-            # {model}/requests/{id}/status => kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e/status
-            # model, task_id = path.split('/requests/')
-            # task_id = task_id.split('/')[0]
-            # upstream_path = upstream_path.format(model=model, id=task_id)
-            # path
-            task_id = path.removesuffix('/').removesuffix("/status").split('/requests/')[-1]
-            upstream_path = path
-
-        else:
-            task_id = Path(path).name
-            upstream_path = upstream_path.format(id=task_id)
+    if biz == "fal-ai":  # {model}/requests/{id}: "kling-video/requests/$REQUEST_ID"
+        # {model}/requests/{id} => kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e
+        # {model}/requests/{id}/status => kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e/status
+        # model, task_id = path.split('/requests/')
+        # task_id = task_id.split('/')[0]
+        # upstream_path = upstream_path.format(model=model, id=task_id)
+        # path
+        # "kling-video/requests/d953f062-abd8-4276-9ad4-98e1d926c456/status"
+        task_id = path.removesuffix('/').removesuffix("/status").split('/requests/')[-1]
+        upstream_path = path
 
     assert task_id, "task_id is required"
     upstream_api_key = await redis_aclient.get(task_id)
@@ -89,7 +85,7 @@ async def get_task(
         )
 
         # 异步任务信号
-        flux_task_response = FluxTaskResponse(id=task_id, result=response, details=response)
+        flux_task_response = FluxTaskResponse(id=task_id, result=response)
         logger.debug(flux_task_response.model_dump_json(exclude_none=True, indent=4))
         if flux_task_response.status in {"Ready", "Error"}:
             await redis_aclient.set(f"response:{task_id}", flux_task_response.model_dump_json(exclude_none=True))
@@ -189,8 +185,9 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/lipsync/audio-to
 UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
 API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+REQUEST_ID="12b84832-56dd-4bfb-b76d-df3569f37a8a"
 
-curl -X 'GET' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e' \
+curl -X 'GET' http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/$REQUEST_ID \
     -H "Authorization: Bearer $API_KEY" \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
     -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
@@ -202,6 +199,8 @@ UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
 API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
 
+
+
 curl -X 'GET' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e/status' \
     -H "Authorization: Bearer $API_KEY" \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
@@ -209,4 +208,22 @@ curl -X 'GET' 'http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/c7a92467
     -H "UPSTREAM_GET_PATH: $UPSTREAM_GET_PATH" \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json'
+
+FAL_KEY=56d8a95e-2fe6-44a6-8f7d-f7f9c83eec24:537f06b6044770071f5d86fc7fcd6d6f
+curl --request POST \
+  --url https://queue.fal.run/fal-ai/kling-video/lipsync/audio-to-video \
+  --header "Authorization: Key $FAL_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+     "video_url": "https://fal.media/files/koala/8teUPbRRMtAUTORDvqy0l.mp4",
+     "audio_url": "https://storage.googleapis.com/falserverless/kling/kling-audio.mp3"
+   }'
+   
+
+FAL_KEY=56d8a95e-2fe6-44a6-8f7d-f7f9c83eec24:537f06b6044770071f5d86fc7fcd6d6f
+REQUEST_ID="f05a3542-0e60-4ba3-aefb-e570f4078d14"
+
+curl --request GET \
+  --url https://queue.fal.run/fal-ai/kling-video/requests/$REQUEST_ID \
+  --header "Authorization: Key $FAL_KEY"
 """
