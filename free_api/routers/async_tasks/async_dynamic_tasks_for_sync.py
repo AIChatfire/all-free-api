@@ -6,9 +6,7 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 适合适配于第三方接口
-# 动态路由
-import shortuuid
+# @Description  : 内置接口: 不计费
 
 from meutils.pipe import *
 
@@ -24,11 +22,11 @@ from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi import File, UploadFile, Header, Query, Form, Body, Request
 
 router = APIRouter()
-TAGS = ["通用异步任务", "通用同步任务"]
+TAGS = ["通用异步任务"]
 
 
 # 渠道错乱会导致失败，可删除重建
-@router.api_route("/flux/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传
+@router.api_route("/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传 /flux/v1/{model}
 async def create_async_task(
         request: Request,
         model: str,  # response_model 计费模型
@@ -43,9 +41,6 @@ async def create_async_task(
 
     if request.method == "GET":  # 同步成功了，异步任务也成功了
         if response := await redis_aclient.get(f"response:{id}"):
-            # logger.debug(f"response type: {type(response)}")
-            # logger.debug(f"response: {response}")
-
             response = json.loads(response)
             return response
 
@@ -66,14 +61,13 @@ async def create_async_task(
             method=request.method
         )
 
+        # 创造异步任务 Ready 信号
         task_id = shortuuid.random()
         response['id'] = task_id
-
-        # 异步任务信号
         flux_task_response = FluxTaskResponse(id=task_id, result=response, status="Ready")
-        await redis_aclient.set(f"response:{task_id}", flux_task_response.model_dump_json(exclude_none=True), ex=3600)
-
-        logger.debug(flux_task_response.model_dump_json(exclude_none=True, indent=4))
+        data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
+        logger.debug(data)
+        await redis_aclient.set(f"response:{task_id}", data, ex=3600)
 
         return response
 
@@ -83,14 +77,14 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '/async2sync')
+    app.include_router(router, '/sync')
 
     app.run()
 
 """
 API_KEY="https://ai.gitee.com/v1/rerank|5PJFN89RSDN8CCR7CRGMKAOWTPTZO6PN4XVZV2FQ"
 
-curl -X 'POST' 'http://0.0.0.0:8000/async2sync/flux/v1/Qwen3-Reranker-8B' \
+curl -X 'POST' 'http://0.0.0.0:8000/sync/v1/Qwen3-Reranker-8B' \
     -H "Authorization: Bearer $API_KEY" \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
