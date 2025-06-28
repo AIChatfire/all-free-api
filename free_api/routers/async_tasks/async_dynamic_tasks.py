@@ -161,7 +161,7 @@ async def create_task(
         )
 
         # 计费
-        model = "async"  # 测试
+        # model = "async"  # 测试
         task_id = (
                 response.get("id")
                 or response.get("task_id")
@@ -171,7 +171,7 @@ async def create_task(
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
 
-        if "sync" in biz:  # 针对同步任务：创造异步任务 Ready 信号
+        if "sync" in biz:  # 针对同步任务：创造异步任务 Ready 信号 注意设置 upstream_model
             flux_task_response = FluxTaskResponse(id=task_id, result=response, status="Ready")
             data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
             # logger.debug(data)
