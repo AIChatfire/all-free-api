@@ -96,7 +96,7 @@ async def get_task(
         flux_task_response = FluxTaskResponse(id=task_id, result=response)
         data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
         logger.debug(data)
-        if flux_task_response.status in {"Ready", "Error"}:
+        if flux_task_response.status in {"Ready", "Error", "Content Moderated"}:
             await redis_aclient.set(f"response:{task_id}", data, ex=3600)
 
         return response
