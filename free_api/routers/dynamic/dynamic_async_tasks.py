@@ -82,8 +82,6 @@ async def get_task(
     async with atry_catch(f"{biz}/{path}", callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path):
 
-        headers = None
-
         response = await make_request(
             base_url=upstream_base_url,
             path=upstream_path,
@@ -143,7 +141,7 @@ async def create_task(
             or "UNKNOWN"
     )
     if biz == "fal-ai":
-        model = f"{path}".replace("/", "-")
+        model = f"fal-{path}".replace("/", "-")  # fal-
         headers = {"Authorization": f"key {upstream_api_key}"}
 
     # 获取计费次数

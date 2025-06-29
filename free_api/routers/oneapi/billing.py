@@ -86,7 +86,7 @@ async def create_chat_completions(
 
 # 渠道错乱会导致失败，可删除重建
 @router.api_route("/async/flux/v1/{model:path}", methods=["GET", "POST"])  # 走bfl接口透传
-async def create_async_task(
+async def create_async_task_for_billing(
         request: Request,
         model: str,  # response_model 计费模型
 
