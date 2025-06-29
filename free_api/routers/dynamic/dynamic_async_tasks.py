@@ -336,4 +336,29 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/zhipu-sync/v1/web_search' \
     -H 'Content-Type: application/json' \
     -d '{"search_query": "周杰伦",  "search_engine": "search_std", "search_intent": true}'
 
+
+UPSTREAM_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
+UPSTREAM_API_KEY="8a907822-58ed-4e2f-af25-b7b358e3164c"
+UPSTREAM_API_KEY="feishu:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=ydUVB1"
+UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=ydUVB1"
+UPSTREAM_API_KEY="8a907822-58ed-4e2f-af25-b7b358e3164c"
+
+API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519
+
+curl -X 'POST' 'http://0.0.0.0:8000/async/volc/v1/contents/generations/tasks' \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H "Authorization: Bearer $API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+        "model": "doubao-seedance-1-0-lite-t2v-250428",
+        "content": [
+            {
+                "type": "text",
+                "text": "多个镜头。一名侦探进入一间光线昏暗的房间。他检查桌上的线索，手里拿起桌上的某个物品。镜头转向他正在思索。 --ratio 16:9"
+            }
+        ]
+    }'
+
 """
