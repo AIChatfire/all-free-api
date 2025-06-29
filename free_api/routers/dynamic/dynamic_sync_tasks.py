@@ -70,7 +70,7 @@ async def create_async_task(
                           upstream_base_url=upstream_base_url,
                           upstream_api_key=upstream_api_key,
                           ):
-        async with ppu_flow(api_key, post=model, n=N, dynamic=True):
+        async with ppu_flow(api_key, post=f"api-{model}", n=N, dynamic=True):
             response = await make_request(
                 base_url=upstream_base_url,
                 api_key=upstream_api_key,
