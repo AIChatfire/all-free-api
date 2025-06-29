@@ -24,8 +24,7 @@ from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, ha
 from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, veo
 from free_api.routers.async_tasks import fal, fal_kling  # , kling_apis
 from free_api.routers.async_tasks import fal, fal_kling, fal_ai
-from free_api.routers.async_tasks import async_dynamic_tasks as async_dynamic_tasks
-from free_api.routers.async_tasks import async_dynamic_tasks_for_sync as sync_dynamic_tasks
+from free_api.routers.dynamic import dynamic_sync_tasks, dynamic_async_tasks, dynamic_async_tasks_for_sync
 
 from free_api.routers.audio import v1 as audio_v1, fish, tts
 
@@ -84,9 +83,10 @@ app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
 app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
 
 # 异步任务 async_tasks
-# 通用异步接口
-app.include_router(sync_dynamic_tasks.router, '/sync', tags=sync_dynamic_tasks.TAGS)
-app.include_router(async_dynamic_tasks.router, '/async', tags=async_dynamic_tasks.TAGS)
+# 通用任务
+app.include_router(dynamic_sync_tasks.router, '/sync', tags=dynamic_sync_tasks.TAGS)  # 外置
+app.include_router(dynamic_async_tasks.router, '/async', tags=dynamic_async_tasks.TAGS)  # 外置
+app.include_router(dynamic_async_tasks_for_sync.router, '/async4sync', tags=dynamic_async_tasks_for_sync.TAGS)  # 内置
 
 app.include_router(seededit.router, '/seededit/v1', tags=seededit.TAGS)
 

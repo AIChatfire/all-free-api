@@ -120,6 +120,8 @@ async def create_task(
 
     # 上游信息
     upstream_model = headers.get('upstream_model')
+    upstream_model_key = headers.get('upstream_model_key')  # 从payload中映射
+
     upstream_base_url = headers.get('upstream_base_url')
     upstream_api_key = headers.get('upstream_api_key')  # 上游号池管理
     upstream_api_key = await parse_token(upstream_api_key)
@@ -132,7 +134,14 @@ async def create_task(
     logger.debug(payload)
 
     # 获取模型名称
-    model = payload.get("model") or payload.get("model_name") or upstream_model or "UNKNOWN"
+    model = (
+            payload.get("model")
+            or payload.get("model_name")
+            or payload.get("search_engine")
+            or upstream_model
+            or (upstream_model_key and payload.get(upstream_model_key))
+            or "UNKNOWN"
+    )
     if biz == "fal-ai":
         model = f"{path}".replace("/", "-")
         headers = {"Authorization": f"key {upstream_api_key}"}
@@ -171,7 +180,7 @@ async def create_task(
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
 
-        if "sync" in biz:  # 针对同步任务：创造异步任务 Ready 信号 注意设置 upstream_model
+        if "sync" in biz:  # 针对同步任务：创造异步任务 Ready 信号 注意设置 多模型计费 （单模型用内置接口即可）
             flux_task_response = FluxTaskResponse(id=task_id, result=response, status="Ready")
             data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
             # logger.debug(data)
@@ -328,6 +337,5 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/zhipu-sync/v1/web_search' \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{"search_query": "周杰伦",  "search_engine": "search_std", "search_intent": true}'
-
 
 """
