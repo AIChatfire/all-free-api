@@ -233,7 +233,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/zhipuai/v1/videos/generations' \
           "duration": 10
         }'
 
-curl -X 'GET' 'http://0.0.0.0:8000/async/zhipuai/v1/async-result/85601750822972284-8573732943067032822' \
+curl -X 'GET' 'http://0.0.0.0:8000/async/zhipuai/v1/async-result/85601750822972284-8573738509345090732' \
     -H "Authorization: Bearer $API_KEY" \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
     -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY"
