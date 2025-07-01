@@ -148,7 +148,7 @@ async def create_task(
         headers = {"Authorization": f"key {upstream_api_key}"}
 
     # 获取计费次数
-    billing_n = get_billing_n(payload)
+    billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
 
     async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
