@@ -19,8 +19,8 @@ from meutils.decorators.contextmanagers import atry_catch
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
 from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task
 from meutils.schemas.task_types import FluxTaskResponse
-from meutils.apis.utils import make_request
 from meutils.apis.oneapi.user import get_user_money
+from meutils.apis.utils import make_request
 
 from meutils.serving.fastapi.dependencies.auth import parse_token
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -94,9 +94,11 @@ async def get_task(
 
         # 异步任务信号
         flux_task_response = FluxTaskResponse(id=task_id, result=response)
-        data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
-        logger.debug(data)
         if flux_task_response.status in {"Ready", "Error", "Content Moderated"}:
+            if request_data := await redis_aclient.get(f"request:{task_id}"):
+                flux_task_response.details['request'] = json.loads(request_data)
+
+            data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
             await redis_aclient.set(f"response:{task_id}", data, ex=3600)
 
         return response
@@ -112,8 +114,9 @@ async def create_task(
         headers: dict = Depends(get_headers),
         api_key: Optional[str] = Depends(get_bearer_token),
 
+        background_tasks: BackgroundTasks = BackgroundTasks,
 ):
-    logger.debug(f"biz: {biz} path: {path}")
+    logger.debug(f"biz: {biz} path: {path}")  # todo redis 存储信息 注册任务
     logger.debug(bjson(headers))
 
     # 上游信息
@@ -177,12 +180,28 @@ async def create_task(
         )
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
+        if len(str(payload)) < 10000:  # 存储 request 方便定位问题
+            await redis_aclient.set(f"request:{task_id}", json.dumps(payload), ex=7 * 24 * 3600)
 
         if "sync" in biz:  # 针对同步任务：创造异步任务 Ready 信号 注意设置 多模型计费 （单模型用内置接口即可）
             flux_task_response = FluxTaskResponse(id=task_id, result=response, status="Ready")
             data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
             # logger.debug(data)
             await redis_aclient.set(f"response:{task_id}", data, ex=3600)
+
+        # # todo 定时 get 任务 避免超时退款 30分钟后调度
+        # 异步任务：后台获取任务结果
+        # async def polling_task():
+        #     while True:
+        #         time.sleep(5)
+        #         logger.debug(f"polling_task: {task_id}")
+        #         await get_task(request, biz=biz, path=f"/async-result/{task_id}", headers=headers) # Depends(get_headers)
+        #
+        #         if _ := await redis_aclient.get(f"response:{task_id}"):
+        #             logger.debug(_)
+        #             break
+        #
+        # background_tasks.add_task(polling_task)
 
         return response
 
@@ -197,6 +216,28 @@ if __name__ == '__main__':
     app.run()
 
 """
+    
+UPSTREAM_BASE_URL="https://open.bigmodel.cn/api/paas/v4"
+UPSTREAM_API_KEY="e130b903ab684d4fad0d35e411162e99.PqyXq4QBjfTdhyCh"
+API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+
+curl -X 'POST' 'http://0.0.0.0:8000/async/zhipuai/v1/videos/generations' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+          "model": "cogvideox-flash",
+          "prompt": "比得兔开小汽车，游走在马路上，脸上的表情充满开心喜悦。",
+          "duration": 10
+        }'
+
+curl -X 'GET' 'http://0.0.0.0:8000/async/zhipuai/v1/async-result/85601750822972284-8573732943067032822' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY"
+
 UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
 API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
