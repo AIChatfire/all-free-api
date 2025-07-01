@@ -266,10 +266,10 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/sf/v1/video/submit' \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{
-  "model": "Wan-AI/Wan2.1-T2V-14B",
-  "prompt": "a dog",
-  "image_size": "1280x720"
-}
+          "model": "cogvideox-flash",
+          "prompt": "比得兔开小汽车，游走在马路上，脸上的表情充满开心喜悦。",
+          "resolution": "720p"
+        }'
 
 
 curl -X 'GET' 'http://0.0.0.0:8000/async/sf/v1/video/status?id=6b1ow1rsgq6a' \
