@@ -46,7 +46,13 @@ async def get_task(
 
     # 获取所有查询参数
     params = dict(request.query_params)
-    task_id = params.get("id") or params.get("task_id") or params.get("request_id") or Path(path).name  # 路径参数
+    task_id = (
+            params.get("id")
+            or params.get("task_id")
+            or params.get("request_id")
+            or params.get("requestId")
+            or Path(path).name
+    )
 
     # 缓存
     if response := await redis_aclient.get(f"response:{task_id}"):
@@ -82,13 +88,23 @@ async def get_task(
     async with atry_catch(f"{biz}/{path}", callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path):
 
+        method = "GET"
+        payload = None
+        if "siliconflow" in upstream_base_url:
+            method = "POST"
+            payload = {
+                "requestId": task_id
+            }
+
         response = await make_request(
             base_url=upstream_base_url,
-            path=upstream_path,
             api_key=upstream_api_key,
 
+            path=upstream_path,
+            payload=payload,
+
             params=params,
-            method=request.method,
+            method=method,
             headers=headers,
         )
 
@@ -176,6 +192,7 @@ async def create_task(
                 response.get("id")
                 or response.get("task_id")
                 or response.get("request_id")
+                or response.get("requestId")
                 or "undefined task_id"
         )
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
@@ -233,7 +250,29 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/zhipuai/v1/videos/generations' \
           "duration": 10
         }'
 
-curl -X 'GET' 'http://0.0.0.0:8000/async/zhipuai/v1/async-result/85601750822972284-8573738509345090732' \
+curl -X 'GET' 'http://0.0.0.0:8000/async/zhipuai/v1/async-result/85601750822972284-8573761014975509371' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY"
+    
+UPSTREAM_BASE_URL="https://api.siliconflow.cn/v1"
+UPSTREAM_API_KEY="sk-nffcpzxkdinwvkkmedfqzgsddlmjeyhfzcmkceakhgzvrzuf"
+API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+
+curl -X 'POST' 'http://0.0.0.0:8000/async/sf/v1/video/submit' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+  "model": "Wan-AI/Wan2.1-T2V-14B",
+  "prompt": "a dog",
+  "image_size": "1280x720"
+}
+
+
+curl -X 'GET' 'http://0.0.0.0:8000/async/sf/v1/video/status?id=6b1ow1rsgq6a' \
     -H "Authorization: Bearer $API_KEY" \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
     -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY"
