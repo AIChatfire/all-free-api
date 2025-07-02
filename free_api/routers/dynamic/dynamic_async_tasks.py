@@ -143,6 +143,11 @@ async def create_task(
     upstream_api_key = headers.get('upstream_api_key')  # 上游号池管理
     upstream_api_key = await parse_token(upstream_api_key)
 
+    # 火山
+    if "volc" in upstream_base_url:
+        from meutils.apis.volcengine_apis.videos import get_valid_token
+        upstream_api_key = await get_valid_token() or upstream_api_key
+
     upstream_path = headers.get('upstream_post_path') or path  # 路径不一致的时候要传 upstream_post_path
     # https://open.bigmodel.cn/api/paas/v4/videos/generations
 
@@ -266,7 +271,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/sf/v1/video/submit' \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{
-          "model": "cogvideox-flash",
+          "model": "tencent/HunyuanVideo-HD",
           "prompt": "比得兔开小汽车，游走在马路上，脸上的表情充满开心喜悦。",
           "resolution": "720p"
         }'
@@ -442,3 +447,5 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/volc/v1/contents/generations/tasks' \
     }'
 
 """
+
+"fal-pixverse-v4.5-image-to-video"
