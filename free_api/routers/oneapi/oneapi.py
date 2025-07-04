@@ -151,7 +151,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/oneapi/channel' \
 UPSTREAM_BASE_URL=https://api.ffire.cc
 UPSTREAM_API_KEY=
 
-API_KEY=https://xchatllm.feishu.cn/sheets/MekfsfVuohfUf1tsWV0cCvTmn3c?sheet=305f17[:1000]
+API_KEY=https://xchatllm.feishu.cn/sheets/MekfsfVuohfUf1tsWV0cCvTmn3c?sheet=305f17[2000:3000]
 BASE_URL=https://api-inference.modelscope.cn
 
 
@@ -162,17 +162,15 @@ curl -X 'POST' 'http://0.0.0.0:8000/oneapi/channel' \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
       -d '{
-        "id":"",
         "name": "modelscope",
         "tag": "modelscope",
         "key": "$KEY",
         "type": 0,
-        "priority": 666,
 
         "base_url": "'$BASE_URL'",
         "group": "default,deepseek",
 
-        "models": "deepseek-r1,deepseek-r1-0528,deepseek-r1-250528,deepseek-chat,deepseek-v3,deepseek-v3-0324,deepseek-v3-250324",
+        "models": "deepseek-r1,deepseek-r1-0528,deepseek-r1-250528,deepseek-chat,deepseek-v3,deepseek-v3-0324,deepseek-v3-250324,PaddlePaddle/ERNIE-4.5-21B-A3B-PT,PaddlePaddle/ERNIE-4.5-0.3B-PT,PaddlePaddle/ERNIE-4.5-VL-28B-A3B-PT,PaddlePaddle/ERNIE-4.5-300B-A47B-PT,qwen2.5-coder-32b-instruct,qwen2.5-coder-14b-instruct,qwen2.5-coder-7b-instruct,qwen2.5-72b-instruct,qwen2.5-32b-instruct,qwen2.5-14b-instruct,qwen2.5-7b-instruct,qwq-32b-preview,qvq-72b-preview,qwen2-vl-7b-instruct,qwen2.5-14b-instruct-1m,qwen2.5-7b-instruct-1m,qwen2.5-vl-3b-instruct,qwen2.5-vl-7b-instruct,qwen2.5-vl-72b-instruct,qwq-32b,qwen2.5-vl-32b-instruct,qwen3-0.6b,qwen3-1.7b,qwen3-4b,qwen3-8b,qwen3-14b,qwen3-30b-a3b,qwen3-32b,qwen3-235b-a22b",
         "model_mapping": {
             "deepseek-reasoner": "deepseek-ai/DeepSeek-R1-0528",
             "deepseek-r1": "deepseek-ai/DeepSeek-R1-0528",
@@ -184,7 +182,35 @@ curl -X 'POST' 'http://0.0.0.0:8000/oneapi/channel' \
             "deepseek-v3-0324": "deepseek-ai/DeepSeek-V3-0324",
             "deepseek-v3-250324": "deepseek-ai/DeepSeek-V3-0324",
         
-            "majicflus_v1": "MAILAND/majicflus_v1"
+            "majicflus_v1": "MAILAND/majicflus_v1",
+            
+            "qwen2.5-coder-32b-instruct": "Qwen/Qwen2.5-Coder-32B-Instruct",
+            "qwen2.5-coder-14b-instruct": "Qwen/Qwen2.5-Coder-14B-Instruct",
+            "qwen2.5-coder-7b-instruct": "Qwen/Qwen2.5-Coder-7B-Instruct",
+            "qwen2.5-72b-instruct": "Qwen/Qwen2.5-72B-Instruct",
+            "qwen2.5-32b-instruct": "Qwen/Qwen2.5-32B-Instruct",
+            "qwen2.5-14b-instruct": "Qwen/Qwen2.5-14B-Instruct",
+            "qwen2.5-7b-instruct": "Qwen/Qwen2.5-7B-Instruct",
+            "qwq-32b-preview": "Qwen/QwQ-32B-Preview",
+            "qvq-72b-preview": "Qwen/QVQ-72B-Preview",
+            "qwen2-vl-7b-instruct": "Qwen/Qwen2-VL-7B-Instruct",
+            "qwen2.5-14b-instruct-1m": "Qwen/Qwen2.5-14B-Instruct-1M",
+            "qwen2.5-7b-instruct-1m": "Qwen/Qwen2.5-7B-Instruct-1M",
+            "qwen2.5-vl-3b-instruct": "Qwen/Qwen2.5-VL-3B-Instruct",
+            "qwen2.5-vl-7b-instruct": "Qwen/Qwen2.5-VL-7B-Instruct",
+            "qwen2.5-vl-72b-instruct": "Qwen/Qwen2.5-VL-72B-Instruct",
+            "qwq-32b": "Qwen/QwQ-32B",
+            "qwen2.5-vl-32b-instruct": "Qwen/Qwen2.5-VL-32B-Instruct",
+            "qwen3-0.6b": "Qwen/Qwen3-0.6B",
+            "qwen3-1.7b": "Qwen/Qwen3-1.7B",
+            "qwen3-4b": "Qwen/Qwen3-4B",
+            "qwen3-8b": "Qwen/Qwen3-8B",
+            "qwen3-14b": "Qwen/Qwen3-14B",
+            "qwen3-30b-a3b": "Qwen/Qwen3-30B-A3B",
+            "qwen3-32b": "Qwen/Qwen3-32B",
+            "qwen3-235b-a22b": "Qwen/Qwen3-235B-A22B"
+            
+            
         } 
 
     }'
@@ -192,7 +218,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/oneapi/channel' \
 UPSTREAM_BASE_URL=https://api.ffire.cc
 UPSTREAM_API_KEY=
 
-API_KEY=https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=ICzCsC[:1000]
+API_KEY=https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=ICzCsC[:100]
 BASE_URL=https://all.chatfire.cn/ppinfra/v1/chat/completions
 
 curl -X 'POST' 'http://0.0.0.0:8000/oneapi/channel' \
@@ -279,4 +305,71 @@ curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
         "group": "default,deepseek,volcengine",
         "model_mapping": "{\n  \"deepseek-r1\": \"deepseek-r1-250120\",\n  \"deepseek-reasoner\": \"deepseek-r1-250120\",\n  \"deepseek-v3-0324\": \"deepseek-v3-250324\",\n  \"deepseek-v3\": \"deepseek-v3-250324\",\n  \"deepseek-chat\": \"deepseek-v3-250324\",\n  \"doubao-1-5-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-1.5-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-pro-32k\": \"doubao-1-5-pro-32k-250115\",\n  \"doubao-pro-256k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1.5-lite-32k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-4k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-32k\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-lite-128k\": \"doubao-lite-128k-240828\",\n  \"doubao-pro-128k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1.5-lite\": \"doubao-1-5-lite-32k-250115\",\n  \"doubao-vision-lite-32k\": \"doubao-vision-lite-32k-241015\",\n  \"doubao-vision-pro-32k\": \"doubao-1-5-vision-pro-32k-250115\",\n  \"doubao-1.5-pro-32k\": \"doubao-1-5-pro-32k-250115\",\n  \"doubao-1.5-pro-256k\": \"doubao-1-5-pro-256k-250115\",\n  \"doubao-1-5-thinking-pro\": \"doubao-1-5-thinking-pro-250415\",\n  \"doubao-1-5-thinking-pro-vision\": \"doubao-1-5-thinking-pro-vision-250415\"\n}"
     }'
+    
+API_KEY=https://xchatllm.feishu.cn/sheets/MekfsfVuohfUf1tsWV0cCvTmn3c?sheet=305f17
+BASE_URL=https://api-inference.modelscope.cn
+
+
+curl -X 'POST' http://openai-dev.chatfire.cn/oneapi/channel \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -d '{
+        "id": "10000:10010",
+        "name": "modelscope",
+        "tag": "modelscope",
+        "key": "$KEY",
+        "type": 0,
+
+        "base_url": "'$BASE_URL'",
+        "group": "default,deepseek",
+
+        "models": "deepseek-r1,deepseek-r1-0528,deepseek-r1-250528,deepseek-chat,deepseek-v3,deepseek-v3-0324,deepseek-v3-250324,PaddlePaddle/ERNIE-4.5-21B-A3B-PT,PaddlePaddle/ERNIE-4.5-0.3B-PT,PaddlePaddle/ERNIE-4.5-VL-28B-A3B-PT,PaddlePaddle/ERNIE-4.5-300B-A47B-PT,qwen2.5-coder-32b-instruct,qwen2.5-coder-14b-instruct,qwen2.5-coder-7b-instruct,qwen2.5-72b-instruct,qwen2.5-32b-instruct,qwen2.5-14b-instruct,qwen2.5-7b-instruct,qwq-32b-preview,qvq-72b-preview,qwen2-vl-7b-instruct,qwen2.5-14b-instruct-1m,qwen2.5-7b-instruct-1m,qwen2.5-vl-3b-instruct,qwen2.5-vl-7b-instruct,qwen2.5-vl-72b-instruct,qwq-32b,qwen2.5-vl-32b-instruct,qwen3-0.6b,qwen3-1.7b,qwen3-4b,qwen3-8b,qwen3-14b,qwen3-30b-a3b,qwen3-32b,qwen3-235b-a22b",
+        "model_mapping": {
+            "deepseek-reasoner": "deepseek-ai/DeepSeek-R1-0528",
+            "deepseek-r1": "deepseek-ai/DeepSeek-R1-0528",
+            "deepseek-r1-0528": "deepseek-ai/DeepSeek-R1-0528",
+            "deepseek-r1-250528": "deepseek-ai/DeepSeek-R1-0528",
+        
+            "deepseek-chat": "deepseek-ai/DeepSeek-V3",
+            "deepseek-v3": "deepseek-ai/DeepSeek-V3",
+            "deepseek-v3-0324": "deepseek-ai/DeepSeek-V3-0324",
+            "deepseek-v3-250324": "deepseek-ai/DeepSeek-V3-0324",
+        
+            "majicflus_v1": "MAILAND/majicflus_v1",
+            
+            "qwen2.5-coder-32b-instruct": "Qwen/Qwen2.5-Coder-32B-Instruct",
+            "qwen2.5-coder-14b-instruct": "Qwen/Qwen2.5-Coder-14B-Instruct",
+            "qwen2.5-coder-7b-instruct": "Qwen/Qwen2.5-Coder-7B-Instruct",
+            "qwen2.5-72b-instruct": "Qwen/Qwen2.5-72B-Instruct",
+            "qwen2.5-32b-instruct": "Qwen/Qwen2.5-32B-Instruct",
+            "qwen2.5-14b-instruct": "Qwen/Qwen2.5-14B-Instruct",
+            "qwen2.5-7b-instruct": "Qwen/Qwen2.5-7B-Instruct",
+            "qwq-32b-preview": "Qwen/QwQ-32B-Preview",
+            "qvq-72b-preview": "Qwen/QVQ-72B-Preview",
+            "qwen2-vl-7b-instruct": "Qwen/Qwen2-VL-7B-Instruct",
+            "qwen2.5-14b-instruct-1m": "Qwen/Qwen2.5-14B-Instruct-1M",
+            "qwen2.5-7b-instruct-1m": "Qwen/Qwen2.5-7B-Instruct-1M",
+            "qwen2.5-vl-3b-instruct": "Qwen/Qwen2.5-VL-3B-Instruct",
+            "qwen2.5-vl-7b-instruct": "Qwen/Qwen2.5-VL-7B-Instruct",
+            "qwen2.5-vl-72b-instruct": "Qwen/Qwen2.5-VL-72B-Instruct",
+            "qwq-32b": "Qwen/QwQ-32B",
+            "qwen2.5-vl-32b-instruct": "Qwen/Qwen2.5-VL-32B-Instruct",
+            "qwen3-0.6b": "Qwen/Qwen3-0.6B",
+            "qwen3-1.7b": "Qwen/Qwen3-1.7B",
+            "qwen3-4b": "Qwen/Qwen3-4B",
+            "qwen3-8b": "Qwen/Qwen3-8B",
+            "qwen3-14b": "Qwen/Qwen3-14B",
+            "qwen3-30b-a3b": "Qwen/Qwen3-30B-A3B",
+            "qwen3-32b": "Qwen/Qwen3-32B",
+            "qwen3-235b-a22b": "Qwen/Qwen3-235B-A22B"
+
+        } 
+
+    }'
+
 """
+
+

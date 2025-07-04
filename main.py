@@ -35,7 +35,7 @@ from free_api.routers.images import dynamic_routers as images
 from free_api.routers.crawler import reader
 from free_api.routers.search import web_search
 
-from free_api.routers.aitools import document_intelligence, images as aitools_images
+from free_api.routers.aitools import document_intelligence, images as aitools_images, image_process
 from free_api.routers.tools import prompter, translator, imager, news, textcard, templates, text_to_url
 
 # 采购
@@ -117,6 +117,8 @@ app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 
 # 小工具
+app.include_router(image_process.router, '/beta', tags=image_process.TAGS)
+
 app.include_router(aitools_images.router, '/aitools/v1', tags=aitools_images.TAGS)
 app.include_router(document_intelligence.router, '/aitools', tags=document_intelligence.TAGS)  # 文档智能： todo: 标准化
 

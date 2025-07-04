@@ -109,6 +109,10 @@ async def create_generations(
 
             return await generate(request, api_key)  # token
 
+        else:
+            raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED,
+                                detail=f"Not implemented: {dynamic_router}")
+
 
 if __name__ == '__main__':
     from meutils.serving.fastapi import App
