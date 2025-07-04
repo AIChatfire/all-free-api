@@ -9,6 +9,8 @@
 # @Description  :
 
 from meutils.pipe import *
+from meutils.caches import rcache
+
 from meutils.decorators.contextmanagers import try_catch, atry_catch
 
 from meutils.apis.baidu.image_enhance import image_enhance
@@ -21,10 +23,9 @@ router = APIRouter()
 TAGS = ["图片处理"]
 
 
-@router.get("/{url:path}")
-async def enhance(url: str):
-    # url = unquote(url)
-    # logger.debug(url)
+@router.get("/image")
+async def enhance(url: str= Query(..., description="图片链接")):
+    url = unquote(url)
     return await image_enhance(url)
 
 
