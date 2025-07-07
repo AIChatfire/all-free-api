@@ -35,7 +35,7 @@ async def create_request(
 
         api_key: Optional[str] = Depends(get_bearer_token),
 
-        headers: H = Depends(get_headers),
+        headers: dict = Depends(get_headers),
 
         reasoning_stream: bool = Header(True),
 
@@ -49,7 +49,7 @@ async def create_request(
     #     logger.exception(e)
     #     raise
 
-    logger.debug(headers)
+    logger.debug(bjson(headers))
     logger.debug(request.method)
     logger.debug(request.headers)
     logger.debug(request.url)
@@ -82,6 +82,10 @@ async def create_request(
         "payload": payload,
         "form": form,
         "params": params,
+
+        "x-headers": headers.get("x-headers"),
+
+
         **params
     }
     if isinstance(payload, dict):

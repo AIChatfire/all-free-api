@@ -115,19 +115,27 @@ async def create_chat_completions(
 
         # google
         elif request.model.startswith(("gemini",)):
-            logger.debug(request.model)
-            if request.model.endswith(("image-generation",)):
-                response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_images(request)
-            elif request.model.endswith(("search",)):
-                response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_search(request)
-            else:  # 多模态问答
-                try:
-                    response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_files(request)
-                except Exception as e:
-                    logger.error(e)
-                    request.model = "gemini-2.0-flash"
-                    client = chat_gemini.Completions(api_key=api_key)
-                    response = await client.create(request)  # 果果兜底：最终弃用
+            if "|" in api_key:
+                base_url, api_key = api_key.split("|")
+                client = chat_gemini.Completions(base_url=base_url, api_key=api_key)
+                response = await client.create(request)  # 果果兜底：最终弃用
+
+            else:
+
+                logger.debug(request.model)
+                if request.model.endswith(("image-generation",)):
+                    response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_images(request)
+
+                elif request.model.endswith(("search",)):
+                    response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_search(request)
+                else:  # 多模态问答
+                    try:
+                        response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_files(request)
+                    except Exception as e:
+                        logger.error(e)
+                        request.model = "gemini-2.0-flash"
+                        client = chat_gemini.Completions(api_key=api_key)
+                        response = await client.create(request)  # 果果兜底：最终弃用
 
 
         ############ apikey判别
