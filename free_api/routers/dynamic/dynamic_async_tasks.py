@@ -82,8 +82,10 @@ async def get_task(
     if not upstream_api_key:
         raise HTTPException(status_code=404, detail="TaskID not found")
 
-    if biz == "fal-ai":
+    if biz == "fal-ai": # todo
         headers = {"Authorization": f"key {upstream_api_key}"}
+
+        headers.get("x-headers")
 
     async with atry_catch(f"{biz}/{path}", callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path):
