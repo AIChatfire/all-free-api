@@ -40,7 +40,7 @@ async def text_to_speech(
     async with atry_catch(f"{model}", api_key=api_key, callback=send_message, request=request):
         response = await gitee.text_to_speech(request)
 
-        async with ppu_flow(api_key, post=model):
+        async with ppu_flow(api_key, post=model, dynamic=True):
             if isinstance(response, dict): return response
             return StreamingResponse([response.content], media_type="audio/mpeg")
 
@@ -53,5 +53,3 @@ if __name__ == '__main__':
     app.include_router(router, '/openai/v1/audio')
 
     app.run()
-
-
