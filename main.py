@@ -74,7 +74,7 @@ app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
 app.include_router(tts.router, '/audio/v1', tags=tts.TAGS)  #######
 app.include_router(elevenlabs.router, '/elevenlabs', tags=elevenlabs.TAGS)
-app.include_router(openai_audio.router, '/openai/audio/v1', tags=openai_audio.TAGS)  # 兼容任意参数
+app.include_router(openai_audio.router, '/openai/v1/audio', tags=openai_audio.TAGS)  # 兼容任意参数
 
 # Images
 app.include_router(images.router, '/images/v1', tags=images.TAGS)  # todo：未来以这个为准
