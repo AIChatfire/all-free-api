@@ -87,8 +87,6 @@ async def get_task(
     if biz == "fal-ai":  # todo
         headers = {"Authorization": f"key {upstream_api_key}"}
 
-        headers.get("x-headers")
-
     async with atry_catch(f"{biz}/{path}", callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path):
 
