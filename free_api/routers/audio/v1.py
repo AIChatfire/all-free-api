@@ -67,12 +67,10 @@ async def create_transcriptions(
         temperature: Optional[float] = Form(None),
         timestamp_granularities: Optional[List[Literal["word", "segment"]]] = Form(None),
 
-        auth: Optional[str] = Depends(get_bearer_token),
+        api_key: Optional[str] = Depends(get_bearer_token),
 
         n: Optional[int] = Query(1),
 ):
-    api_key = auth
-
     async with ppu_flow(api_key, post='api-stt', n=n):
         file = await to_bytes(file)
 

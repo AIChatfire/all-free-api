@@ -17,7 +17,7 @@ from meutils.db.redis_db import redis_aclient
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 
-from meutils.schemas.openai_types import CompletionRequest, chat_completion, chat_completion_chunk, \
+from meutils.schemas.openai_types import CompletionUsage, CompletionRequest, chat_completion, chat_completion_chunk, \
     chat_completion_chunk_stop
 
 from meutils.schemas.image_types import ImageRequest, ImagesResponse
@@ -70,7 +70,7 @@ async def create_chat_completions(
 ):
     logger.debug(bjson(request))
 
-    chat_completion.usage = request.extra_body
+    chat_completion.usage = request.extra_body and CompletionUsage(**request.extra_body)
 
     return chat_completion
 

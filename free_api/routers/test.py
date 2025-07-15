@@ -64,11 +64,20 @@ async def create_request(
 
     params = request.query_params._dict
 
+    payload = {}
     try:
         payload = await request.json()
     except Exception as e:
-        payload = (await request.form())._dict
-        payload = payload or (await request.body()).decode()
+        form_data = (await request.form())._dict
+        logger.debug(form_data)
+
+        logger.debug((await request.form()).multi_items())
+        # {'oss': UploadFile(filename='202507若悟-工资表.xlsx', size=17512, headers=Headers({
+        #                                                                                       'content-disposition': 'form-data; name="oss"; filename="202507è\x8b¥æ\x82\x9f-å·¥èµ\x84è¡¨.xlsx"; filename*=UTF-8\'\'202507%E8%8B%A5%E6%82%9F-%E5%B7%A5%E8%B5%84%E8%A1%A8.xlsx',
+        #                                                                                       'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),
+        #  'a': 'xxx'}
+
+
 
     form = (await request.form())._dict
 
@@ -84,7 +93,6 @@ async def create_request(
         "params": params,
 
         "x-headers": headers.get("x-headers"),
-
 
         **params
     }
@@ -107,3 +115,5 @@ if __name__ == '__main__':
     app.run()
 
     os.getenv("OPENAI_API_KEY_OPENAI")
+
+

@@ -22,11 +22,12 @@ from free_api.routers import files, tasks
 from free_api.routers.oneapi import oneapi, billing
 from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
 from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, veo
-from free_api.routers.async_tasks import fal, fal_kling  # , kling_apis
 from free_api.routers.async_tasks import fal, fal_kling, fal_ai
-from free_api.routers.dynamic import dynamic_sync_tasks, dynamic_async_tasks, dynamic_async_tasks_for_sync
+from free_api.routers.dynamic import dynamic_async_tasks, dynamic_async_tasks_for_sync
+from free_api.routers.dynamic import dynamic_sync_tasks, dynamic_sync_tasks_plus
 
-from free_api.routers.audio import v1 as audio_v1, fish, tts
+from free_api.routers.audio import v1 as audio_v1, fish, tts, elevenlabs
+from free_api.routers.audio import openai_audio
 
 from free_api.routers.images import biz as images_biz
 from free_api.routers.images import v1 as images_v1
@@ -72,6 +73,8 @@ app.include_router(chat_video.router, '/chat_video/v1', tags=chat_video.TAGS)
 app.include_router(audio_v1.router, '/v1', tags=audio_v1.TAGS)
 app.include_router(fish.router, '/fish', tags=fish.TAGS)
 app.include_router(tts.router, '/audio/v1', tags=tts.TAGS)  #######
+app.include_router(elevenlabs.router, '/elevenlabs', tags=elevenlabs.TAGS)
+app.include_router(openai_audio.router, '/openai/audio/v1', tags=openai_audio.TAGS)  # 兼容任意参数
 
 # Images
 app.include_router(images.router, '/images/v1', tags=images.TAGS)  # todo：未来以这个为准
@@ -84,7 +87,8 @@ app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
 
 # 异步任务 async_tasks
 # 通用任务
-app.include_router(dynamic_sync_tasks.router, '/sync', tags=dynamic_sync_tasks.TAGS)  # 外置
+app.include_router(dynamic_sync_tasks_plus.router, '/sync-plus', tags=dynamic_sync_tasks_plus.TAGS)  # 外置
+app.include_router(dynamic_sync_tasks.router, '/sync', tags=dynamic_sync_tasks.TAGS)  # 外置 todo 放弃
 app.include_router(dynamic_async_tasks.router, '/async', tags=dynamic_async_tasks.TAGS)  # 外置
 app.include_router(dynamic_async_tasks_for_sync.router, '/async4sync', tags=dynamic_async_tasks_for_sync.TAGS)  # 内置
 

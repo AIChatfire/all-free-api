@@ -10,6 +10,7 @@
 
 from meutils.pipe import *
 
+from meutils.apis.oneapi.tasks import polling_tasks
 from meutils.apis.oneapi.user import get_user, get_api_key_log
 from meutils.apis.oneapi.channel import ChannelInfo, create_or_update_channel as _create_or_update_channel
 
@@ -31,6 +32,13 @@ async def get_user_info(
         if data := await get_user(user_id):
             data['data']['access_token'] = '🔥chatfire'
             return data
+
+
+@router.get("/tasks")
+async def get_tasks(
+        # api_key: Optional[str] = Depends(get_bearer_token),
+):
+    return await polling_tasks()
 
 
 @router.post("/channel")
@@ -84,6 +92,38 @@ if __name__ == '__main__':
     app.run()
 
 """
+UPSTREAM_BASE_URL=https://api.ffire.cc
+UPSTREAM_API_KEY=
+
+API_KEY=https://xchatllm.feishu.cn/sheets/Bmjtst2f6hfMqFttbhLcdfRJnNf?sheet=ICzCsC[:100]
+BASE_URL=https://api.ppinfra.com/v3/openai/chat/completions
+
+
+curl -X 'POST' http://0.0.0.0:8000/oneapi/channel \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -d '{
+        "id": "1:100",
+
+        "name": "ppio",
+        "tag": "ppio",
+        "key": "$KEY",
+        "type": 8,
+
+        "base_url": "'$BASE_URL'",
+        "group": "default,china",
+
+        "models": "kimi-k2-0711-preview,moonshotai/kimi-k2-instruct",
+        "model_mapping": {
+            "kimi-k2-0711-preview": "moonshotai/kimi-k2-instruct"
+        } 
+
+    }'
+
+
 UPSTREAM_BASE_URL=https://api.chatfire.cn
 UPSTREAM_API_KEY=
 
@@ -371,5 +411,3 @@ curl -X 'POST' http://openai-dev.chatfire.cn/oneapi/channel \
     }'
 
 """
-
-

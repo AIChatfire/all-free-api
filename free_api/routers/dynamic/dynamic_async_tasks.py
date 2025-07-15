@@ -17,9 +17,11 @@ from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
 from meutils.decorators.contextmanagers import atry_catch
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
-from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task
-from meutils.schemas.task_types import FluxTaskResponse
+from meutils.io.files_utils import to_url, get_file_duration, to_bytes
+
 from meutils.apis.oneapi.user import get_user_money
+from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task, billing_for_tokens
+from meutils.schemas.task_types import FluxTaskResponse
 from meutils.apis.utils import make_request
 
 from meutils.serving.fastapi.dependencies.auth import parse_token
@@ -82,7 +84,7 @@ async def get_task(
     if not upstream_api_key:
         raise HTTPException(status_code=404, detail="TaskID not found")
 
-    if biz == "fal-ai": # todo
+    if biz == "fal-ai":  # todo
         headers = {"Authorization": f"key {upstream_api_key}"}
 
         headers.get("x-headers")
@@ -117,7 +119,10 @@ async def get_task(
                 flux_task_response.details['request'] = json.loads(request_data)
 
             data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
-            await redis_aclient.set(f"response:{task_id}", data, ex=3600)
+            await redis_aclient.set(f"response:{task_id}", data, ex=7 * 24 * 3600)
+
+        # 是否需要 按量计费 todo: request model
+        # await billing_for_tokens(model, api_key=api_key, n=billing_n)
 
         return response
 
@@ -170,7 +175,7 @@ async def create_task(
         model = f"fal-{path}".replace("/", "-")  # fal-
         headers = {"Authorization": f"key {upstream_api_key}"}
 
-    # 获取计费次数
+    # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
 
     async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
@@ -202,30 +207,27 @@ async def create_task(
                 or response.get("requestId")
                 or "undefined task_id"
         )
+        # 部分按量计费
+        # https://fal.ai/models/fal-ai/topaz/upscale/video
+        # https://fal.ai/models/fal-ai/luma-dream-machine/ray-2/reframe
+        if biz in {"fal-ai"}:
+            url = payload.get("video_url") or payload.get("audio_url") or payload.get("file")
+            duration = await get_file_duration(Path(url).name, url)
+
+            prompt_tokens = duration * 1000
+            usage = {
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": 0,
+                "total_tokens": prompt_tokens
+            }
+            await billing_for_tokens(model, usage, api_key)
+            model = "async-task"  # 监听任务用
+
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
+
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
         if len(str(payload)) < 10000:  # 存储 request 方便定位问题
             await redis_aclient.set(f"request:{task_id}", json.dumps(payload), ex=7 * 24 * 3600)
-
-        if "sync" in biz:  # 针对同步任务：创造异步任务 Ready 信号 注意设置 多模型计费 （单模型用内置接口即可）
-            flux_task_response = FluxTaskResponse(id=task_id, result=response, status="Ready")
-            data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
-            # logger.debug(data)
-            await redis_aclient.set(f"response:{task_id}", data, ex=3600)
-
-        # # todo 定时 get 任务 避免超时退款 30分钟后调度
-        # 异步任务：后台获取任务结果
-        # async def polling_task():
-        #     while True:
-        #         time.sleep(5)
-        #         logger.debug(f"polling_task: {task_id}")
-        #         await get_task(request, biz=biz, path=f"/async-result/{task_id}", headers=headers) # Depends(get_headers)
-        #
-        #         if _ := await redis_aclient.get(f"response:{task_id}"):
-        #             logger.debug(_)
-        #             break
-        #
-        # background_tasks.add_task(polling_task)
 
         return response
 

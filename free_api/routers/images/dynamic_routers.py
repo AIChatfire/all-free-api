@@ -49,14 +49,11 @@ async def create_generations(
 
     base_url = base_url or headers.get("x-base-url")
 
-    overide = headers.get("x-overide") or {}
-
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
 
         if "images/generations" in dynamic_router:  # "v1/images/generations"
             request = await request.json()
-            request = {**request, **overide}
 
             request = ImageRequest(**request)
 
