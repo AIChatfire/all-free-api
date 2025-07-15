@@ -36,7 +36,7 @@ async def text_to_speech(
 
 ):
     model = request.model
-    model = "api-oss"
+    # model = "api-oss"
     async with atry_catch(f"{model}", api_key=api_key, callback=send_message, request=request):
         response = await gitee.text_to_speech(request)
 
