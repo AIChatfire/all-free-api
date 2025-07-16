@@ -212,7 +212,7 @@ async def create_task(
         # https://fal.ai/models/fal-ai/luma-dream-machine/ray-2/reframe
         usage = None
         if biz in {"fal-ai"} and "voice-clone" not in path:  # 克隆除外
-            if url := payload.get("video_url") or payload.get("audio_url") or payload.get("file"):
+            if url := payload.get("video_url") or payload.get("audio_url") or payload.get("file"):  # 优先判断
                 duration = await get_file_duration(Path(url).name, url)
 
                 prompt_tokens = duration * 1000
@@ -222,8 +222,8 @@ async def create_task(
                     "total_tokens": prompt_tokens
                 }
 
-            elif any(i in path for i in {"tts", "speech"}):  # 按字符收费
-                text = payload.get("text", "")
+            elif any(i in path for i in {"tts", "speech"}) and (text := payload.get("text", "")):  # 按字符收费
+
                 prompt_tokens = len(text.encode())
                 usage = {
                     "prompt_tokens": prompt_tokens,
