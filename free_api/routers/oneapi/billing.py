@@ -72,6 +72,9 @@ async def create_chat_completions(
 
     chat_completion.usage = request.extra_body and CompletionUsage(**request.extra_body)
 
+    if request.user:
+        chat_completion.id = request.user  # task id
+
     return chat_completion
 
 

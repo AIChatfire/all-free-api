@@ -62,7 +62,7 @@ async def get_task(
         return response.get("result", {})
 
     # 上游信息
-    upstream_base_url = headers.get('upstream_base_url')
+    upstream_base_url = headers.get('upstream_base_url', "")
     upstream_path = headers.get('upstream_get_path') or path  # 推荐 path
     # https://open.bigmodel.cn/api/paas/v4/async-result/{id}
 
@@ -117,7 +117,9 @@ async def get_task(
                 flux_task_response.details['request'] = json.loads(request_data)
 
             data = flux_task_response.model_dump_json(exclude_none=True, indent=4)
-            await redis_aclient.set(f"response:{task_id}", data, ex=7 * 24 * 3600)
+
+            if "status" not in path:  # fal 除外
+                await redis_aclient.set(f"response:{task_id}", data, ex=7 * 24 * 3600)
 
         # 是否需要 按量计费 todo: request model
         # await billing_for_tokens(model, api_key=api_key, n=billing_n)
@@ -208,23 +210,36 @@ async def create_task(
         # 部分按量计费
         # https://fal.ai/models/fal-ai/topaz/upscale/video
         # https://fal.ai/models/fal-ai/luma-dream-machine/ray-2/reframe
-        if biz in {"fal-ai"}:
-            url = payload.get("video_url") or payload.get("audio_url") or payload.get("file")
-            duration = await get_file_duration(Path(url).name, url)
+        usage = None
+        if biz in {"fal-ai"} and "voice-clone" not in path:  # 克隆除外
+            if url := payload.get("video_url") or payload.get("audio_url") or payload.get("file"):
+                duration = await get_file_duration(Path(url).name, url)
 
-            prompt_tokens = duration * 1000
-            usage = {
-                "prompt_tokens": prompt_tokens,
-                "completion_tokens": 0,
-                "total_tokens": prompt_tokens
-            }
-            await billing_for_tokens(model, usage, api_key)
+                prompt_tokens = duration * 1000
+                usage = {
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": 0,
+                    "total_tokens": prompt_tokens
+                }
+
+            elif any(i in path for i in {"tts", "speech"}):  # 按字符收费
+                text = payload.get("text", "")
+                prompt_tokens = len(text.encode())
+                usage = {
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": 0,
+                    "total_tokens": prompt_tokens
+                }
+
+            await billing_for_tokens(model, usage, api_key, task_id=task_id)
             model = "async-task"  # 监听任务用
 
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
 
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
         if len(str(payload)) < 10000:  # 存储 request 方便定位问题
+            if usage: payload['usage'] = usage
+
             await redis_aclient.set(f"request:{task_id}", json.dumps(payload), ex=7 * 24 * 3600)
 
         return response
@@ -312,12 +327,13 @@ curl -X 'GET' http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/$REQUEST_
     -H 'Content-Type: application/json'
 
 
+
 UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
 API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
-REQUEST_ID="c687b2aa-c83b-4a6a-90a4-bf554755eced"
+REQUEST_ID="21700af5-0c80-44ec-8646-cf2d2de82424"
 
-curl -X 'GET' http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/$REQUEST_ID/status \
+curl -X 'GET' http://0.0.0.0:8000/async/fal-ai/v1/topaz/requests/$REQUEST_ID/status \
     -H "Authorization: Bearer $API_KEY" \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
     -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
@@ -325,6 +341,13 @@ curl -X 'GET' http://0.0.0.0:8000/async/fal-ai/v1/kling-video/requests/$REQUEST_
     -H 'accept: application/json' \
     -H 'Content-Type: application/json'
 
+curl -X 'GET' http://0.0.0.0:8000/async/fal-ai/v1/topaz/requests/$REQUEST_ID \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H "UPSTREAM_GET_PATH: $UPSTREAM_GET_PATH" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json'
 
 UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
