@@ -154,6 +154,9 @@ async def create_task(
     if "volc" in upstream_base_url:
         from meutils.apis.volcengine_apis.videos import get_valid_token
         upstream_api_key = await get_valid_token() or upstream_api_key
+    elif "ppinfra" in upstream_base_url:
+        from meutils.apis.ppio.videos import get_valid_token
+        upstream_api_key = await get_valid_token() or upstream_api_key
 
     upstream_path = headers.get('upstream_post_path') or path  # 路径不一致的时候要传 upstream_post_path
     # https://open.bigmodel.cn/api/paas/v4/videos/generations
@@ -211,8 +214,11 @@ async def create_task(
         # https://fal.ai/models/fal-ai/topaz/upscale/video
         # https://fal.ai/models/fal-ai/luma-dream-machine/ray-2/reframe
         usage = None
-        if biz in {"fal-ai"} and "voice-clone" not in path:  # 克隆除外
+        if biz in {"fal-ai"} and all(i not in path for i in {"voice-clone", "kling-video/lipsync"}):  # 克隆除外
+
             if url := payload.get("video_url") or payload.get("audio_url") or payload.get("file"):  # 优先判断
+                logger.debug(f"按量计费-按时长计费")
+
                 duration = await get_file_duration(Path(url).name, url)
 
                 prompt_tokens = duration * 1000
@@ -223,6 +229,7 @@ async def create_task(
                 }
 
             elif any(i in path for i in {"tts", "speech"}) and (text := payload.get("text", "")):  # 按字符收费
+                logger.debug(f"按量计费-按字符收费")
 
                 prompt_tokens = len(text.encode())
                 usage = {
@@ -231,8 +238,9 @@ async def create_task(
                     "total_tokens": prompt_tokens
                 }
 
-            await billing_for_tokens(model, usage, api_key, task_id=task_id)
-            model = "async-task"  # 监听任务用
+            if usage:
+                await billing_for_tokens(model, usage, api_key, task_id=task_id)  # 按量走了按次 会超时
+                model = "async-task"  # 监听任务用
 
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
 
@@ -257,7 +265,7 @@ if __name__ == '__main__':
 """
     
 UPSTREAM_BASE_URL="https://open.bigmodel.cn/api/paas/v4"
-UPSTREAM_API_KEY="e130b903ab684d4fad0d35e411162e99.PqyXq4QBjfTdhyCh"
+UPSTREAM_API_KEY="7d13207e1da54179921a2d037c088f2e.OMMGiUb00uxcryEk"
 API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
 
 curl -X 'POST' 'http://0.0.0.0:8000/async/zhipuai/v1/videos/generations' \
@@ -298,6 +306,29 @@ curl -X 'GET' 'http://0.0.0.0:8000/async/sf/v1/video/status?id=6b1ow1rsgq6a' \
     -H "Authorization: Bearer $API_KEY" \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
     -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY"
+
+UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
+UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
+API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+
+curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/vidu/q1/reference-to-video' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+  "prompt": "A young woman and a monkey inside a colorful house",
+  "reference_image_urls": [
+    "https://v3.fal.media/files/panda/HDpZj0eLjWwCpjA5__0l1_0e6cd0b9eb7a4a968c0019a4eee15e46.png",
+    "https://v3.fal.media/files/zebra/153izt1cBlMU-TwD0_B7Q_ea34618f5d974653a16a755aa61e488a.png",
+    "https://v3.fal.media/files/koala/RCSZ7VEEKGFDfMoGHCwzo_f626718793e94769b1ad36d5891864a4.png"
+  ],
+  "aspect_ratio": "16:9",
+  "movement_amplitude": "auto"
+}'
+
+
 
 UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
