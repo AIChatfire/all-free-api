@@ -18,6 +18,7 @@ from meutils.db.redis_db import redis_aclient
 from meutils.decorators.contextmanagers import atry_catch
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
 from meutils.io.files_utils import to_url, get_file_duration, to_bytes
+from meutils.llm.check_utils import get_valid_token_for_fal
 
 from meutils.apis.oneapi.user import get_user_money
 from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task, billing_for_tokens
@@ -150,13 +151,16 @@ async def create_task(
     upstream_api_key = headers.get('upstream_api_key')  # 上游号池管理
     upstream_api_key = await parse_token(upstream_api_key)
 
-    # 火山
+    ######## 轮询 key
     if "volc" in upstream_base_url:
         from meutils.apis.volcengine_apis.videos import get_valid_token
         upstream_api_key = await get_valid_token() or upstream_api_key
     elif "ppinfra" in upstream_base_url:
         from meutils.apis.ppio.videos import get_valid_token
         upstream_api_key = await get_valid_token() or upstream_api_key
+
+    elif "fal-ai" in upstream_base_url:  # todo
+        upstream_api_key = await get_valid_token_for_fal() or upstream_api_key
 
     upstream_path = headers.get('upstream_post_path') or path  # 路径不一致的时候要传 upstream_post_path
     # https://open.bigmodel.cn/api/paas/v4/videos/generations
@@ -187,7 +191,7 @@ async def create_task(
         # 检查余额
         if user_money := await get_user_money(api_key):
             if user_money < 1:
-                raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="余额不足")
+                raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="余额不足或API-KEY限额")
 
         # 执行任务
         response = await make_request(
@@ -244,10 +248,13 @@ async def create_task(
 
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
 
+        # 新增字段 usage 计费信息
+        if usage:
+            payload['usage'] = usage
+            response['usage'] = usage
+
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
         if len(str(payload)) < 10000:  # 存储 request 方便定位问题
-            if usage: payload['usage'] = usage
-
             await redis_aclient.set(f"request:{task_id}", json.dumps(payload), ex=7 * 24 * 3600)
 
         return response

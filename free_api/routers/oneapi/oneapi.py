@@ -10,7 +10,7 @@
 
 from meutils.pipe import *
 
-from meutils.apis.oneapi.tasks import polling_tasks
+from meutils.apis.oneapi.tasks import polling_tasks, refund_tasks
 from meutils.apis.oneapi.user import get_user, get_api_key_log
 from meutils.apis.oneapi.channel import ChannelInfo, create_or_update_channel as _create_or_update_channel
 
@@ -34,11 +34,15 @@ async def get_user_info(
             return data
 
 
-@router.get("/tasks")
+@router.get("/tasks/{type}")
 async def get_tasks(
+        type: str = "polling",
         # api_key: Optional[str] = Depends(get_bearer_token),
 ):
-    return await polling_tasks()
+    if type == "polling":
+        return await polling_tasks()
+    elif type == "refund":
+        return await refund_tasks()
 
 
 @router.post("/channel")

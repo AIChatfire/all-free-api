@@ -96,7 +96,7 @@ async def text_to_speech(
         # 检查余额
         if user_money := await get_user_money(api_key):
             if user_money < 1:
-                raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="余额不足")
+                raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="用户余额不足或者API-KEY限额")
 
         data = await make_request_httpx(
             base_url=upstream_base_url,

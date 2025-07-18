@@ -10,7 +10,7 @@
 
 from meutils.serving.fastapi import App
 
-from free_api.routers.oai import polling as oai_polling
+from free_api.routers.oai import polling as oai_polling, openai_audio
 
 from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
 from free_api.routers import openai_agent, openai_adapter, openai_redirect
@@ -27,7 +27,6 @@ from free_api.routers.dynamic import dynamic_async_tasks, dynamic_async_tasks_fo
 from free_api.routers.dynamic import dynamic_sync_tasks, dynamic_sync_tasks_plus
 
 from free_api.routers.audio import v1 as audio_v1, fish, tts, elevenlabs
-from free_api.routers.audio import openai_audio
 
 from free_api.routers.images import biz as images_biz
 from free_api.routers.images import v1 as images_v1

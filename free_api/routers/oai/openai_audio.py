@@ -34,15 +34,20 @@ async def text_to_speech(
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: dict = Depends(get_headers),
 
+        n: Optional[int] = 1,  # 是否计费, 放中转不计费
+
 ):
     model = request.model
     # model = "api-oss"
     async with atry_catch(f"{model}", api_key=api_key, callback=send_message, request=request):
         response = await gitee.text_to_speech(request)
 
-        async with ppu_flow(api_key, post=model, dynamic=True):
+        async with ppu_flow(api_key, post=model, dynamic=True, n=n):
             if isinstance(response, dict): return response
+
             return StreamingResponse([response.content], media_type="audio/mpeg")
+
+    # todo: fal
 
 
 if __name__ == '__main__':
