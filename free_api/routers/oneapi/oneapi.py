@@ -68,13 +68,13 @@ async def create_channel(
     # 飞书表格全部 key
     request.key = api_key
 
-    ############################################### 业务定制
-    if "volc" in request.base_url:  # 火山渠道
-        from meutils.apis.volcengine_apis.videos import get_valid_token
-
-        tokens = api_key and api_key.split()  # null
-
-        request.key = await get_valid_token(tokens)
+    ############################################### 业务定制 超刷
+    # if "volc" in request.base_url:  # 火山渠道
+    #     from meutils.apis.volcengine_apis.videos import get_valid_token
+    #
+    #     tokens = api_key and api_key.split()  # null
+    #
+    #     request.key = await get_valid_token(tokens)
 
     ###############################################
 

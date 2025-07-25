@@ -16,9 +16,11 @@ from meutils.decorators.contextmanagers import atry_catch
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
 from meutils.llm.completions import dify, sophnet, qwenllm, yuanbao, chat_gemini
+
 from meutils.apis.search import metaso
-from meutils.apis.google import chat as google_chat
 from meutils.apis.fal import chat as fal_chat
+from meutils.apis.google import chat as google_chat
+from meutils.apis.images import mj
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -112,6 +114,9 @@ async def create_chat_completions(
 
         elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
             response = qwenllm.create(request, cookie=headers.get("cookie"))
+
+        elif request.model.lower().startswith(("mj",)):
+            response = mj.generate(request, api_key=api_key)
 
         # google
         elif request.model.startswith(("gemini",)):
