@@ -56,6 +56,8 @@ async def create_chat_completions(
         request_model: Optional[str] = Query(None),  # 优先级最高
         response_model: Optional[str] = Query(None),  # 兼容newapi自定义接口 ?response_model=""
 
+        thinking: Optional[str] = Query(None),
+
 ):
     # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
 
@@ -81,6 +83,10 @@ async def create_chat_completions(
             request.model = request_model
 
         ###########################################################################
+
+        if thinking:
+            if request.model.startswith('doubao'):
+                request.thinking = {"type": thinking}  # disabled enabled auto
 
         client = Completions(base_url=base_url, api_key=api_key, http_client=http_client)
         response = await client.create(request)
