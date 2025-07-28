@@ -82,6 +82,7 @@ async def create_async_task(
             or payload.get("search_engine")
             or upstream_model
             or (upstream_model_key and payload.get(upstream_model_key))
+            # or path.replace('/', '-') # fal
             or "UNKNOWN"
     )
 

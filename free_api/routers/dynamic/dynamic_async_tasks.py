@@ -158,7 +158,7 @@ async def create_task(
         upstream_api_key = await get_next_token_for_polling(
             feishu_url=feishu_url,
             from_redis=True,
-            ttl=15 * 60,
+            ttl=24 * 3600,
             check_token=check_token_for_volc
         ) or upstream_api_key
 
