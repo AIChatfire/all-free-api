@@ -472,4 +472,49 @@ curl -X 'POST' 'http://0.0.0.0:8000/oneapi/channel' \
     }'
 
 
+
+UPSTREAM_BASE_URL=https://api.chatfire.cn
+UPSTREAM_API_KEY=
+
+API_KEY=https://xchatllm.feishu.cn/sheets/GYCHsvI4qhnDPNtI4VPcdw2knEd?sheet=Gvm9dt[:50]
+BASE_URL=https://openai.chatfire.cn/images
+
+
+curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -d '{
+        "id": "10010:10050",
+        "name": "fal-flux",
+        "tag": "fal-flux",
+        "key": "$KEY",
+        "type": 1,
+        "priority": 888,
+
+        "base_url": "'$BASE_URL'",
+        "group": "default",
+
+        "models":  "imagen3,imagen3-fast,imagen4,imagen4-fast,imagen4-ultra,recraft-v3,recraftv3,flux-pro-1.1-ultra,flux-kontext-pro,flux-kontext-max",
+        "model_mapping": {
+            "imagen3": "fal-ai/imagen3",
+            "imagen3-fast": "fal-ai/imagen3/fast",
+
+            "imagen4": "fal-ai/imagen4/preview",
+            "imagen4-fast": "fal-ai/imagen4/preview/fast",
+            "imagen4-ultra": "fal-ai/imagen4/preview/ultra",
+            "flux-pro-1.1-ultra": "fal-ai/flux-pro/v1.1-ultra",
+            "ideogram-ai/ideogram-v2-turbo": "fal-ai/ideogram/v2/turbo",
+            "ideogram-ai/ideogram-v2": "fal-ai/ideogram/v2",
+            "recraftv3": "fal-ai/recraft-v3",
+            "recraft-v3": "fal-ai/recraft-v3",
+            "imagen4": "fal-ai/imagen4/preview",
+            "flux-kontext-pro": "fal-ai/flux-pro/kontext",
+            "flux-kontext-max": "fal-ai/flux-pro/kontext/max"
+        }
+    }'
+
+
 """
