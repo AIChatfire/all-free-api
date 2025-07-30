@@ -14,7 +14,7 @@ from meutils.decorators.contextmanagers import atry_catch
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
 
 from meutils.apis.utils import make_request
-from meutils.apis.models import create_fal_models
+from meutils.apis.models import make_billing_model
 
 from meutils.apis.oneapi.user import get_user_money
 from meutils.llm.openai_utils.billing_utils import billing_for_async_task
@@ -56,7 +56,7 @@ async def create_fal_task(
 
     # 计费模型
     fal_model = path.split('/')[0]
-    if billing_model := create_fal_models(fal_model, payload):
+    if billing_model := make_billing_model(fal_model, payload):
         model = f"{model}_{billing_model}"
 
     # 执行

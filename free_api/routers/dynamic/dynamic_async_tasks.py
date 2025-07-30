@@ -25,6 +25,7 @@ from meutils.apis.oneapi.user import get_user_money
 from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task, billing_for_tokens
 from meutils.schemas.task_types import FluxTaskResponse
 from meutils.apis.utils import make_request
+from meutils.apis.models import make_billing_model
 
 from meutils.serving.fastapi.dependencies.auth import parse_token
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -188,6 +189,10 @@ async def create_task(
     if biz == "fal-ai":
         model = f"fal-{path}".replace("/", "-")  # fal-
         headers = {"Authorization": f"key {upstream_api_key}"}
+
+        # 计费模型
+        if billing_model := make_billing_model(model, payload):
+            model = f"{model}_{billing_model}"
 
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
