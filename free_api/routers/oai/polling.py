@@ -11,7 +11,7 @@
 
 from meutils.pipe import *
 from meutils.decorators.contextmanagers import atry_catch
-from meutils.apis.proxy.ips import get_proxies
+from meutils.apis.proxy.kdlapi import get_one_proxy
 
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.llm.openai_polling.chat import Completions
@@ -74,7 +74,7 @@ async def create_chat_completions(
         http_client = httpx.AsyncClient(proxy=proxy, timeout=100)
 
     if time.time() // 60 % (bins or 3) == 0 and any(i in base_url for i in {"siliconflow"}):  # 分桶 0
-        http_client = httpx.AsyncClient(proxy=await get_proxies(), timeout=100)
+        http_client = httpx.AsyncClient(proxy=await get_one_proxy(), timeout=100)
 
     response_model = response_model or request.model
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
