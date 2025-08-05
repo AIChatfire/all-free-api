@@ -11,6 +11,7 @@
 
 from meutils.pipe import *
 from meutils.decorators.contextmanagers import atry_catch
+from meutils.apis.proxy.ips import get_proxies
 
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.llm.openai_polling.chat import Completions
@@ -58,8 +59,13 @@ async def create_chat_completions(
 
         thinking: Optional[str] = Query(None),
 
+        bins: Optional[int] = Query(None),
+
 ):
     # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
+
+    # https://all.chatfire.cc/g/openai
+    base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"  # newapi里需反代
 
     # headers 代理
     http_client = None
@@ -67,8 +73,8 @@ async def create_chat_completions(
         proxy = random.choice(proxy.split(",") + [None])
         http_client = httpx.AsyncClient(proxy=proxy, timeout=100)
 
-    # https://all.chatfire.cc/g/openai
-    base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"  # newapi里需反代
+    if time.time() // 60 % (bins or 3) == 0 and any(i in base_url for i in {"siliconflow"}):  # 分桶 0
+        http_client = httpx.AsyncClient(proxy=await get_proxies(), timeout=100)
 
     response_model = response_model or request.model
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):

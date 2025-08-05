@@ -42,6 +42,8 @@ async def text_to_speech(
 ):
     model = request.model.lower()
     async with atry_catch(f"{model}", api_key=api_key, callback=send_message, request=request):
+
+        # todo 增加按量计费
         if model in {
             "minimax-speech-02-turbo", "minimax-speech-02-hd",
             "fal-ai/minimax/speech-02-turbo", "fal-ai/minimax/speech-02-hd",

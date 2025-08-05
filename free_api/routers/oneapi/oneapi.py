@@ -446,6 +446,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/oneapi/channel' \
         "deepseek-v3-0324": "deepseek-v3-250324",
         "deepseek-v3": "deepseek-v3-250324",
         "deepseek-chat": "deepseek-v3-250324",
+        
         "doubao-1-5-vision-pro-32k": "doubao-1-5-vision-pro-32k-250115",
         "doubao-1.5-vision-pro-32k": "doubao-1-5-vision-pro-32k-250115",
         
