@@ -75,9 +75,15 @@ curl -X 'POST' \
 curl -X 'POST' \
   'http://0.0.0.0:8000/v1/crop_enhance_image' \
   -H 'accept: application/json' \
-  -H 'Authorization: Bearer sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519' \
+  -H 'Authorization: Bearer sk-WEmN6rbcmEu5jRUT5c6b2d672119435c999d308bCc124009' \
   -d '{"data": "https://s3.ffire.cc/files/pdf_to_markdown.jpg","response_format": "url"}'
-                      
+  
+  
+curl -X 'POST' \
+  'https://api.chatfire.cn/textin/v1/crop_enhance_image' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer sk-WEmN6rbcmEu5jRUT5c6b2d672119435c999d308bCc124009' \
+  -d '{"data": "https://s3.ffire.cc/files/pdf_to_markdown.jpg","response_format": "url"}'                 
                     
 """
 
