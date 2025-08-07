@@ -59,29 +59,16 @@ async def create_chat_completions(
 
         thinking: Optional[str] = Query(None),
 
-        bins: Optional[int] = Query(None),
-
 ):
     # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
 
     # https://all.chatfire.cc/g/openai
     base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"  # newapi里需反代
 
-    # headers 代理
-    http_client = None
-    if proxy := headers.get("x-proxy"):
-        proxy = random.choice(proxy.split(",") + [None])
-        http_client = httpx.AsyncClient(proxy=proxy, timeout=100)
-
-    if time.time() // 60 % (bins or 3) == 0 and any(i in base_url for i in {"siliconflow"}):  # 分桶 0
-        proxy = await get_one_proxy()
-        http_client = httpx.AsyncClient(proxy=proxy, timeout=100)
-        logger.debug(f"使用代理：{proxy}")
-
     response_model = response_model or request.model
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
         ###########################################################################
-        # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
+        # 重定向：deepseek-chat==deepseek-v3 展示key 调用 value
 
         if request_model:
             request.model = request_model
@@ -96,7 +83,7 @@ async def create_chat_completions(
             if request.model.startswith('doubao'):
                 request.thinking = {"type": thinking}  # disabled enabled auto
 
-        client = Completions(base_url=base_url, api_key=api_key, http_client=http_client)
+        client = Completions(base_url=base_url, api_key=api_key)
         response = await client.create(request)
 
         # exceeds the maximum
