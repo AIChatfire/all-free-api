@@ -21,7 +21,7 @@ from free_api.routers import files, tasks
 
 from free_api.routers.oneapi import oneapi, billing
 from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
-from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, veo
+from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, minimax
 from free_api.routers.async_tasks import fal, fal_kling, fal_ai
 from free_api.routers.dynamic import dynamic_async_tasks, dynamic_async_tasks_for_sync
 from free_api.routers.dynamic import dynamic_sync_tasks, dynamic_sync_tasks_plus
@@ -99,7 +99,7 @@ app.include_router(fal.router, '/lipsync/v1', tags=fal.TAGS)
 app.include_router(fal_kling.router, '/kling-video/v1', tags=fal_kling.TAGS)
 app.include_router(jimeng.router, '/jimeng-video/v1', tags=jimeng.TAGS)
 
-app.include_router(veo.router, '/veo/v1', tags=veo.TAGS)
+app.include_router(minimax.router, '/minimax/v1', tags=minimax.TAGS)
 
 # 火山
 app.include_router(volcengine_apis.router, '/volc', tags=volcengine_apis.TAGS)
