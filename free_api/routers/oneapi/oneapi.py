@@ -568,7 +568,8 @@ curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
         "doubao-1.5-pro-32k": "doubao-1-5-pro-32k-250115",
         "doubao-1.5-pro-256k": "doubao-1-5-pro-256k-250115",
         "doubao-1-5-thinking-pro": "doubao-1-5-thinking-pro-250415",
-        "doubao-1-5-thinking-pro-vision": "doubao-1-5-thinking-pro-vision-250415"
+        "doubao-1-5-thinking-pro-vision": "doubao-1-5-thinking-pro-vision-250415",
+        "doubao-1-5-pro-32k-250115": "doubao-1-5-ui-tars-250428"
         }
     }'
 
