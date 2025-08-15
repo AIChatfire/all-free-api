@@ -86,10 +86,6 @@ async def create_chat_completions(
         client = Completions(base_url=base_url, api_key=api_key)
         response = await client.create(request)
 
-        # exceeds the maximum
-        # System is too busy now. Please try again later.
-        # 400 {"code":20015,"message":"length of prompt_tokens (235121) must be less than max_seq_len (65536).","data":null}
-
         if request.stream:
             return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=response_model))
 
@@ -110,12 +106,6 @@ async def create_images_generations(
         response_model: Optional[str] = Query(None),  # 兼容newapi自定义接口 ?model=""
 
 ):
-    # headers 代理
-    http_client = None
-    if proxy := headers.get("x-proxy"):
-        proxy = random.choice(proxy.split(",") + [None])
-        http_client = httpx.AsyncClient(proxy=proxy, timeout=100)
-
     base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"
 
     response_model = response_model or request.model

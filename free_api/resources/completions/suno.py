@@ -72,6 +72,7 @@ class Completions(object):
         task_id = await suno_api.create_task(request)
         logger.debug(task_id)
 
+
         # task_id = "5dc4c01c-7e7b-2d94-9868-f5f9742248cc"
         return create_chunks(task_id)
 
@@ -92,7 +93,7 @@ def music_info(df):
     # todo: 图片链接发生变化
     df['专辑图'] = df['id'].map(lambda x: f"![🖼](https://cdn1.suno.ai/image_{x}.jpeg)")  # _large
 
-    df_ = df[["id", "mv", "🎵音乐链接", "专辑图"]]
+    df_ = df[["id", "🎵音乐链接", "专辑图"]]
 
     return f"""
 🎵 **「{df['title'][0]}」**
@@ -129,7 +130,7 @@ async def create_chunks(task_id):
         data = await suno_api.get_task(task_id)
         logger.debug(bjson(data))
 
-        clips = data.get("data").get("data")
+        clips = data.get("data", {}).get("data", [])
 
         STATUS = {"streaming", "complete", "error", "running"}  # submitted queued streaming complete/error
         if clips and all(clip.get('status') in STATUS for clip in clips):  # 可提前返回
@@ -149,8 +150,8 @@ async def create_chunks(task_id):
 
 
 if __name__ == '__main__':
-    task_id = "5d10ae83-a0ee-205d-dc3f-f67ceb791496"
+    task_id = "77502da7-78bc-47ec-a3ce-79fefefc73bd"
 
-    # arun(create_chunks(task_id))
+    arun(create_chunks(task_id))
 
     # arun(Completions('x').create(ChatCompletionRequest(messages=[{'role': 'user', 'content': '写一首中国风的歌曲'}])))
