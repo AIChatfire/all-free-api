@@ -82,7 +82,7 @@ async def create_fal_task(
             debug=True
         )
 
-        await billing_for_async_task(model=model)  # 计费
+        await billing_for_async_task(model=model, api_key=api_key)  # 计费
 
         return response
 
