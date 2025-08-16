@@ -521,6 +521,28 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/volc/v1/contents/generations/tasks' \
         ]
     }'
 
+
+
+UPSTREAM_BASE_URL="https://queue.fal.run/fal-ai"
+UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=iFRwmM"
+API_KEY=sk-R6y5di2fR3OAxEH3idNZIc4sm3CWIS4LAzRfhxSVbhXrrIej
+
+curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/minimax/speech-02-hd' \
+    -H "Authorization: Bearer $API_KEY" \
+    -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM_API_KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+  "text": "你正在用海螺语音，先克隆音乐，然后合成语音。",
+  "voice_setting": {
+    "speed": 1,
+    "vol": 1,
+    "voice_id": "Voice904740431752642196",
+    "pitch": 0,
+    "english_normalization": false
+  },
+  "output_format": "url"
+}'
 """
 
-"fal-pixverse-v4.5-image-to-video"
