@@ -65,7 +65,7 @@ async def create_task(
     # 计费
     billing_model = make_billing_model("minimax", request)
     task_id = response.get("task_id")
-    await billing_for_async_task(billing_model, task_id)
+    await billing_for_async_task(billing_model, task_id=task_id, api_key=api_key)
 
     if len(str(request)) < 10000:  # 存储 request 方便定位问题
         await redis_aclient.set(f"request:{task_id}", json.dumps(request), ex=7 * 24 * 3600)
