@@ -69,7 +69,7 @@ async def create_channel(
     request.key = api_key
 
     ############################################### 业务定制 超刷
-    if "volc" in request.base_url and str(request.id) == "21222":  # 火山渠道 超刷
+    if "volc" in request.base_url and str(request.id) in "21222,21223,21224,21225":  # 火山渠道 超刷
         from meutils.apis.volcengine_apis.videos import get_valid_token
 
         tokens = api_key and api_key.split()  # null
@@ -572,5 +572,32 @@ curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
         }
     }'
     
+    
+UPSTREAM_BASE_URL=https://api.ffire.cc
+UPSTREAM_API_KEY=
+
+curl -X 'POST' 'http://openai-dev.chatfire.cn/oneapi/channel' \
+    -H 'Authorization: Bearer null' \
+    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -d '{
+        "id": 21223,
+        "name": "火山",
+        "tag": "火山",
+        "key": "$KEY",
+        "type": 8,
+        "priority": 99999,
+
+        "base_url": "https://ark.cn-beijing.volces.com/api/v3/embeddings",
+
+        "models": "doubao-embedding-vision-250615,doubao-embedding-large-text-250515,doubao-embedding-text-240715",
+        "group": "default,china,volc,volcengine",
+        
+        "status_code_mapping": "{\n  \"429\": \"500\"\n}"
+    }'
+    
+
 
 """

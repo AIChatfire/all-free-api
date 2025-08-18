@@ -59,6 +59,10 @@ ENV PPIO_BASE_URL=https://api.ppinfra.com/v3/openai
 # 暴露端口
 EXPOSE 8000
 
+# 健康检查
+HEALTHCHECK --start-period=30s --interval=30s --timeout=3s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
+
 
 # Install pip requirements
 COPY requirements.txt .

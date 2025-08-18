@@ -9,6 +9,7 @@
 # @Description  : 域名区分下？
 
 from meutils.serving.fastapi import App
+from free_api.routers import health
 
 from free_api.routers.oai import polling as oai_polling, openai_audio
 
@@ -45,6 +46,7 @@ app = App()
 
 # 空服务
 app.include_router(test.router, '/v0', tags=test.TAGS)
+app.include_router(health.router, '/health', tags=health.TAGS)
 
 # 信息类
 app.include_router(openai_assistants.router, '/assistants/v1', tags=openai_assistants.TAGS)
