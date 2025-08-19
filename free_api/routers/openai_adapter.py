@@ -21,6 +21,7 @@ from meutils.apis.search import metaso
 from meutils.apis.fal import chat as fal_chat
 from meutils.apis.google import chat as google_chat
 from meutils.apis.images import mj
+from meutils.apis.chatglm import zai
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -117,6 +118,10 @@ async def create_chat_completions(
 
         elif request.model.lower().startswith(("mj",)):
             response = mj.generate(request, api_key=api_key)
+
+        elif request.model.startswith(("glm",)):
+            response = await zai.Completions().create(request, api_key)
+
 
         # google
         elif request.model.startswith(("gemini",)):
