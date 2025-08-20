@@ -8,6 +8,7 @@
 # @Software     : PyCharm
 # @Description  : todo: 合并到 oai
 
+
 from meutils.pipe import *
 from meutils.io.files_utils import to_url, to_url_fal
 
@@ -62,6 +63,8 @@ async def create_generations(
 
         elif "chat/completions" in dynamic_router:
             request = await request.json()
+            # logger.debug(request)
+
             request = CompletionRequest(**request)
 
             chunks = await chat_for_image(generate, request, api_key=api_key)
@@ -93,7 +96,7 @@ async def create_generations(
 
             file_object: UploadFile
             for file_object in request.image:
-                image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)  # 国外
+                image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)  # 国外：fal
                 request.prompt = f"{request.prompt}\n{image_url}"
 
             request = ImageRequest(
