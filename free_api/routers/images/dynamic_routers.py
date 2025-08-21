@@ -46,7 +46,7 @@ async def create_generations(
 
         base_url: Optional[str] = Query(None),
 ):
-    logger.debug(dynamic_router)
+    logger.debug(f"dynamic_router: {dynamic_router}, api_key: {api_key}")
 
     base_url = base_url or headers.get("x-base-url")
 
