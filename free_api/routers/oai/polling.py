@@ -59,11 +59,17 @@ async def create_chat_completions(
 
         thinking: Optional[str] = Query(None),
 
+        base_url: Optional[str] = Query(None),
+
 ):
     # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
 
     # https://all.chatfire.cc/g/openai
-    base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"  # newapi里需反代
+    base_url = (
+            base_url
+            or headers.get("base-url") or headers.get("x-base-url")
+            or "https://api.siliconflow.cn/v1"
+    )
 
     response_model = response_model or request.model
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):

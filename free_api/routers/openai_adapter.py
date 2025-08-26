@@ -144,8 +144,8 @@ async def create_chat_completions(
                     except Exception as e:
                         logger.error(e)
                         request.model = "gemini-2.0-flash"
-                        client = chat_gemini.Completions(api_key=api_key)
-                        response = await client.create(request)  # 果果兜底：最终弃用
+                        response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_files(request)
+
 
 
         ############ apikey判别
