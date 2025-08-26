@@ -80,12 +80,11 @@ async def create_chat_completions(
         ###########################################################################
 
         if thinking and 'thinking' not in request.model:
-            if request.model.startswith(('doubao', 'deepseek')):
-                request.thinking = {"type": thinking}  # disabled enabled auto
-            elif request.model.startswith(('deepseek',)):
+            if 'volc' in base_url:  # disabled enabled auto
                 request.thinking = {"type": thinking}
-                request.enable_thinking = True if thinking == 'enabled' else False
-            elif request.model.startswith(('qwen',)):
+
+            elif request.model.startswith(('qwen', 'deepseek', 'glm')):  # 其他
+                # parameter.enable_thinking only support stream
                 request.enable_thinking = True if thinking == 'enabled' else False
 
         client = Completions(base_url=base_url, api_key=api_key)
