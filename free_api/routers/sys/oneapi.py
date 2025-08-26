@@ -71,7 +71,7 @@ async def create_channel(
 
     ############################################### 业务定制 超刷
     if "volc" in request.base_url and str(request.id) in "21222,21223,21224,21225":  # 火山渠道
-        if (status != await get_channel_info(request.id, upstream_base_url)) and status != 1:  # 不正常 刷新渠道
+        if (status := await get_channel_info(request.id, upstream_base_url)) and status != 1:  # 不正常 刷新渠道
             from meutils.apis.volcengine_apis.videos import get_valid_token
 
             tokens = api_key and api_key.split()  # null

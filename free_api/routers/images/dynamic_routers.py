@@ -94,14 +94,21 @@ async def create_generations(
                 request["image"] = images
             request = ImageEditRequest(**request)  # todo: 优化
 
+            image = None
             file_object: UploadFile
             for file_object in request.image:
-                image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)  # 国外：fal
-                request.prompt = f"{request.prompt}\n{image_url}"
+                if request.model.startswith("fal-"): # 国外：fal
+                    image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)
+                    request.prompt = f"{request.prompt}\n{image_url}"
+
+                else:
+                    image_url = await to_url(file_object.file.read(), content_type=file_object.content_type)
+                    image = image_url
 
             request = ImageRequest(
                 model=request.model,
                 prompt=request.prompt,
+                image=image,
                 n=request.n,
                 size=request.size,  # aspect_ratio
                 response_format=request.response_format
