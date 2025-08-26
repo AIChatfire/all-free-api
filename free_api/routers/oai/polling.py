@@ -70,7 +70,7 @@ async def create_chat_completions(
         ###########################################################################
         # 重定向：deepseek-chat==deepseek-v3 展示key 调用 value
 
-        if request_model:
+        if request_model and (request_model := np.random.choice(request_model.split(','))):
             request.model = request_model
 
         if "==" in request.model:
@@ -79,9 +79,14 @@ async def create_chat_completions(
 
         ###########################################################################
 
-        if thinking:
-            if request.model.startswith('doubao'):
+        if thinking and 'thinking' not in request.model:
+            if request.model.startswith(('doubao', 'deepseek')):
                 request.thinking = {"type": thinking}  # disabled enabled auto
+            elif request.model.startswith(('deepseek',)):
+                request.thinking = {"type": thinking}
+                request.enable_thinking = True if thinking == 'enabled' else False
+            elif request.model.startswith(('qwen',)):
+                request.enable_thinking = True if thinking == 'enabled' else False
 
         client = Completions(base_url=base_url, api_key=api_key)
         response = await client.create(request)

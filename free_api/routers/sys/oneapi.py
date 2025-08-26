@@ -12,6 +12,7 @@ from meutils.pipe import *
 
 from meutils.apis.oneapi.tasks import polling_tasks, refund_tasks
 from meutils.apis.oneapi.user import get_user, get_api_key_log
+from meutils.apis.oneapi.channel import get_channel_info
 from meutils.apis.oneapi.channel import ChannelInfo, create_or_update_channel as _create_or_update_channel
 
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -69,12 +70,15 @@ async def create_channel(
     request.key = api_key
 
     ############################################### 业务定制 超刷
-    if "volc" in request.base_url and str(request.id) in "21222,21223,21224,21225":  # 火山渠道 超刷
-        from meutils.apis.volcengine_apis.videos import get_valid_token
+    if "volc" in request.base_url and str(request.id) in "21222,21223,21224,21225":  # 火山渠道
+        if (status != await get_channel_info(request.id, upstream_base_url)) and status != 1:  # 不正常 刷新渠道
+            from meutils.apis.volcengine_apis.videos import get_valid_token
 
-        tokens = api_key and api_key.split()  # null
+            tokens = api_key and api_key.split()  # null
 
-        request.key = await get_valid_token(tokens)
+            request.key = await get_valid_token(tokens)
+        else:
+            logger.debug(f"渠道「{request.id}」: status={status}")
 
     ###############################################
 

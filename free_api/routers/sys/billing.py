@@ -119,14 +119,14 @@ async def create_async_task_for_billing(
             }
 
         return {
-            "id": id,
+            "id": id,  # uuid
             "result": {},
             "status": "Processing",
         }
 
     """
     {
-        "id": "fddbade0-a2f7-4082-981a-961616870906",
+        "id": "fddbade0-a2f7-4082-981a-961616870906", 
         "status": "Task not found",
         "result": null,
         "progress": null,

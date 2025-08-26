@@ -120,7 +120,7 @@ async def create_chat_completions(
             response = mj.generate(request, api_key=api_key)
 
         elif request.model.startswith(("glm",)):
-            response = await zai.Completions().create(request, api_key)
+            response = await zai.Completions(api_key).create(request)
 
 
         # google

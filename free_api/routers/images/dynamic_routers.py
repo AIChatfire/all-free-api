@@ -48,7 +48,7 @@ async def create_generations(
 ):
     logger.debug(f"dynamic_router: {dynamic_router}, api_key: {api_key}")
 
-    base_url = base_url or headers.get("x-base-url")
+    base_url = base_url or headers.get("x-base-url")  # 转发兼容 chat
 
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
@@ -58,7 +58,7 @@ async def create_generations(
 
             request = ImageRequest(**request)
 
-            response = await generate(request, api_key)
+            response = await generate(request, api_key=api_key, base_url=base_url)
             return response
 
         elif "chat/completions" in dynamic_router:
@@ -67,7 +67,7 @@ async def create_generations(
 
             request = CompletionRequest(**request)
 
-            chunks = await chat_for_image(generate, request, api_key=api_key)
+            chunks = await chat_for_image(generate, request, api_key=api_key, base_url=base_url)
 
             if request.stream:
                 return EventSourceResponse(chunks)

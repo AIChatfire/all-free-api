@@ -20,7 +20,7 @@ from free_api.routers import chat_image, chat_to_audio, chat_video, chat_suno
 from free_api.routers import test
 from free_api.routers import files, tasks
 
-from free_api.routers.oneapi import oneapi, billing
+from free_api.routers.sys import oneapi, billing
 from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
 from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, minimax
 from free_api.routers.async_tasks import fal, fal_kling, fal_ai
