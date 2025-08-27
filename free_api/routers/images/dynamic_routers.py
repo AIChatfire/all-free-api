@@ -67,6 +67,8 @@ async def create_generations(
 
             request = CompletionRequest(**request)
 
+            # logger.debug(request)
+
             chunks = await chat_for_image(generate, request, api_key=api_key, base_url=base_url)
 
             if request.stream:
@@ -90,25 +92,28 @@ async def create_generations(
             # logger.debug(form_data.getlist("image[]"))
 
             request = form_data._dict
-            if images := form_data.getlist("image[]"):
+            if images := form_data.getlist("image[]"):  # 数组
                 request["image"] = images
+
             request = ImageEditRequest(**request)  # todo: 优化
 
             image = None
             file_object: UploadFile
+            image_urls = []
             for file_object in request.image:
-                if request.model.startswith("fal-"): # 国外：fal
+                if request.model.startswith("fal-"):  # 国外：fal
+                    # image_url = await to_url_fal(file_object.file.read(), content_type="image/png")
                     image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)
-                    request.prompt = f"{request.prompt}\n{image_url}"
+                    image_urls.append(image_url)
 
                 else:
                     image_url = await to_url(file_object.file.read(), content_type=file_object.content_type)
-                    image = image_url
+                    image_urls.append(image_url)
 
             request = ImageRequest(
                 model=request.model,
                 prompt=request.prompt,
-                image=image,
+                image=image_urls,
                 n=request.n,
                 size=request.size,  # aspect_ratio
                 response_format=request.response_format

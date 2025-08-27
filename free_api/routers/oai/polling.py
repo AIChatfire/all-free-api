@@ -76,7 +76,7 @@ async def create_chat_completions(
         ###########################################################################
         # 重定向：deepseek-chat==deepseek-v3 展示key 调用 value
 
-        if request_model and (request_model := np.random.choice(request_model.split(','))):
+        if request_model and "," in request_model and (request_model := np.random.choice(request_model.split(','))):
             request.model = request_model
 
         if "==" in request.model:

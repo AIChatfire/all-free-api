@@ -18,8 +18,11 @@ from meutils.db.redis_db import redis_aclient
 from meutils.decorators.contextmanagers import atry_catch
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
 from meutils.io.files_utils import to_url, get_file_duration, to_bytes
-from meutils.llm.check_utils import get_valid_token_for_fal, check_token_for_volc
 from meutils.config_utils.lark_utils import get_next_token_for_polling
+
+from meutils.llm.check_utils import get_valid_token_for_fal, check_token_for_volc
+from meutils.apis.ppio.videos import get_valid_token as get_valid_token_for_ppio
+from meutils.apis.volcengine_apis.videos import get_valid_token as get_valid_token_for_volc
 
 from meutils.apis.oneapi.user import get_user_money
 from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task, billing_for_tokens
@@ -154,18 +157,18 @@ async def create_task(
     upstream_api_key = await parse_token(upstream_api_key)
 
     ######## 轮询 key
-    if "volc" in upstream_base_url:
-        feishu_url = "https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=rcoDg7"
-        upstream_api_key = await get_next_token_for_polling(
-            feishu_url=feishu_url,
-            from_redis=True,
-            ttl=24 * 3600,
-            check_token=check_token_for_volc
-        ) or upstream_api_key
+    if "volc" in upstream_base_url: # todo get_valid_token_for_volc 包月设计
+        upstream_api_key = await get_valid_token_for_volc(force_update=False) or upstream_api_key
+        # feishu_url = "https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=rcoDg7"
+        # upstream_api_key = await get_next_token_for_polling(
+        #     feishu_url=feishu_url,
+        #     from_redis=True,
+        #     ttl=24 * 3600,
+        #     check_token=check_token_for_volc
+        # ) or upstream_api_key
 
     elif "ppinfra" in upstream_base_url:
-        from meutils.apis.ppio.videos import get_valid_token
-        upstream_api_key = await get_valid_token() or upstream_api_key
+        upstream_api_key = await get_valid_token_for_ppio() or upstream_api_key
 
     elif "fal-ai" in upstream_base_url:  # todo
         upstream_api_key = await get_valid_token_for_fal() or upstream_api_key
