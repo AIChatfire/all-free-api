@@ -123,7 +123,7 @@ async def create_generations(
                 response_format=request.response_format
             )
 
-            return await generate(request, api_key)  # token
+            return await generate(request, api_key=api_key, base_url=base_url)
 
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
