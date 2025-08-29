@@ -18,7 +18,6 @@ from meutils.notice.feishu import send_message_for_dynamic_router as send_messag
 from meutils.schemas.image_types import ImageRequest, ImageEditRequest
 from meutils.schemas.openai_types import CompletionRequest
 
-from meutils.apis.fal.images import generate as fal_generate
 from meutils.apis.images.generations import generate
 
 from meutils.decorators.contextmanagers import try_catch, atry_catch
@@ -48,7 +47,8 @@ async def create_generations(
 ):
     logger.debug(f"dynamic_router: {dynamic_router}, api_key: {api_key}")
 
-    base_url = base_url or headers.get("x-base-url")  # 转发兼容 chat
+    base_url = base_url or headers.get("x-base-url")  # 环境变量
+    # base_url = base_url or "https://api.huandutech.com/v1"
 
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
@@ -62,6 +62,9 @@ async def create_generations(
             return response
 
         elif "chat/completions" in dynamic_router:
+            # logger.debug(headers.get("x-nochat"))
+            # if headers.get("x-nochat"): raise HTTPException(status_code=500, detail=f"SkipChat")
+
             request = await request.json()
             # logger.debug(request)
 
@@ -122,7 +125,7 @@ async def create_generations(
             return await generate(request, api_key)  # token
 
         else:
-            raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail=f"Not implemented: {dynamic_router}")
 
 

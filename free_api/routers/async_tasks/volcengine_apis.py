@@ -63,7 +63,7 @@ async def get_video_task(
     return await videos.get_task(task_id)
 
 
-@router.post("/contents/{dynamic_router:path}")  # 通用类
+@router.post("/contents/{dynamic_router:path}")  # 通用类 v1/doubao-seedance-1-0-lite-i2v-250428
 async def create_video_task(
         dynamic_router: str,  # /tasks
         request: CompletionRequest,

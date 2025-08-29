@@ -158,7 +158,7 @@ async def create_task(
 
     ######## 轮询 key
     if "volc" in upstream_base_url: # todo get_valid_token_for_volc 包月设计
-        upstream_api_key = await get_valid_token_for_volc(force_update=False) or upstream_api_key
+        upstream_api_key = await get_valid_token_for_volc(force_update=True) or upstream_api_key
         # feishu_url = "https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=rcoDg7"
         # upstream_api_key = await get_next_token_for_polling(
         #     feishu_url=feishu_url,
