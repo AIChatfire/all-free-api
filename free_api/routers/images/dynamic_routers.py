@@ -48,7 +48,7 @@ async def create_generations(
     logger.debug(f"dynamic_router: {dynamic_router}, api_key: {api_key}")
 
     base_url = base_url or headers.get("x-base-url")  # 环境变量
-    # base_url = base_url or "https://api.huandutech.com/v1"
+    base_url = base_url or "https://api.huandutech.com/v1"
     # base_url="https://all.chatfire.cn/openrouter/v1"
 
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
