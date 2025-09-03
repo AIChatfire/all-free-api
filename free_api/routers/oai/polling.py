@@ -84,53 +84,21 @@ async def create_chat_completions(
             request.model = request_model
 
         ###########################################################################
-
-        if thinking and 'thinking' not in request.model:
-            if 'volc' in base_url:  # disabled enabled auto
+        if thinking:  # "doubao-seed-1-6-thinking"关不掉
+            if request.model.startswith("deepseek-v3-1"):  # disabled enabled auto
+                thinking = "enabled" if "thinking" in request.model else "disabled"
                 request.thinking = {"type": thinking}
 
             elif request.model.startswith(('qwen', 'deepseek', 'glm')):  # 其他
                 # parameter.enable_thinking only support stream
-                request.enable_thinking = True if thinking == 'enabled' else False
+                enable_thinking = True if thinking == 'enabled' else False
+                request.enable_thinking = enable_thinking
 
         client = Completions(base_url=base_url, api_key=api_key)
         response = await client.create(request)
 
         if request.stream:
             return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=response_model))
-
-        if hasattr(response, "model"):
-            response.model = response_model
-
-        return response
-
-
-@router.post("/images/{path:path}")
-async def create_images_generations(
-        path: str,  # "images/generations" ############ todo 兼容 chat
-        request: ImageRequest,
-
-        headers: dict = Depends(get_headers),
-        api_key: Optional[str] = Depends(get_bearer_token),
-
-        response_model: Optional[str] = Query(None),  # 兼容newapi自定义接口 ?model=""
-
-):
-    base_url = headers.get("base-url") or headers.get("x-base-url") or "https://api.siliconflow.cn/v1"
-
-    response_model = response_model or request.model
-    async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
-        ###########################################################################
-        # 重定向：deepseek-chat==deepseek-v3 展示key 调用value
-
-        if "==" in request.model:
-            response_model, request_model = request.model.split("==", maxsplit=1)
-            request.model = request_model
-
-        ###########################################################################
-
-        images = Images(base_url=base_url, api_key=api_key, http_client=http_client)
-        response = await images.generate(request)
 
         if hasattr(response, "model"):
             response.model = response_model
