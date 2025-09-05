@@ -43,6 +43,9 @@ async def text_to_speech(
         headers: dict = Depends(get_headers),
 
 ):
+    # 跳过计费
+    is_free = True if headers.get("x-free") else False
+
     upstream_base_url = headers.get('upstream_base_url') or "https://api.elevenlabs.io"
     upstream_api_key = headers.get('upstream_api_key')  # 上游号池管理
     upstream_api_key = await parse_token(upstream_api_key)
@@ -93,7 +96,7 @@ async def text_to_speech(
                           upstream_base_url=upstream_base_url, upstream_path=path, request={**payload, **data}):
 
         # 检查余额
-        if user_money := await get_user_money(api_key):
+        if not is_free and (user_money := await get_user_money(api_key)):
             if user_money < 1:
                 raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="余额不足")
 
@@ -112,7 +115,7 @@ async def text_to_speech(
 
         # 计费
         n = 1 if prompt_tokens == 0 else None
-        await billing_for_tokens(model=f"elevenlabs/{model}", api_key=api_key, usage=usage, n=n)
+        not is_free and await billing_for_tokens(model=f"elevenlabs/{model}", api_key=api_key, usage=usage, n=n)
 
         if isinstance(data, dict): return data
 
