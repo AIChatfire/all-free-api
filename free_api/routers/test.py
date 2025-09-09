@@ -27,6 +27,13 @@ class H(BaseModel):
     reasoning_stream: bool
 
 
+@router.api_route("/status/{status_code}", methods=["GET", "POST"])
+async def create_request(
+        status_code: int,
+):
+    raise HTTPException(status_code=status_code, detail=f"Not Implemented: {status_code}")
+
+
 @router.api_route("/{path:path}", methods=["GET", "POST"])
 async def create_request(
         path: str,
@@ -77,8 +84,6 @@ async def create_request(
         #                                                                                       'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),
         #  'a': 'xxx'}
 
-
-
     form = (await request.form())._dict
 
     data = {
@@ -115,5 +120,3 @@ if __name__ == '__main__':
     app.run()
 
     os.getenv("OPENAI_API_KEY_OPENAI")
-
-
