@@ -48,8 +48,7 @@ async def create_generations(
     logger.debug(f"dynamic_router: {dynamic_router}, api_key: {api_key}")
 
     base_url = base_url or headers.get("x-base-url")  # 环境变量
-    # base_url = base_url or "https://new.yunai.link/v1"
-    base_url = os.getenv("FFIRE_BASE_URL")
+    base_url = base_url or "https://new.yunai.link/v1" or os.getenv("FFIRE_BASE_URL")
 
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
