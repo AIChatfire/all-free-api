@@ -113,13 +113,8 @@ async def create_generations(
 
             request["image"] = [file_object.file.read() for file_object in files]  # file_objects
 
-
             request = ImageEditRequest(**request)  # todo: 优化
-            logger.debug(len(request.image))
 
-            # file_object: UploadFile
-
-            image_urls = []
             # for file_object in request.image:  # 并发 + b64
             #     if request.model.startswith("fal-"):  # 国外：fal
             #         # image_url = await to_url_fal(file_object.file.read(), content_type="image/png")
@@ -131,11 +126,18 @@ async def create_generations(
             #         image_urls.append(image_url)
 
             # todo 是不是直接传 b64 就可以了， 逻辑放在generate 中
-            if request.model.startswith("fal-"):  # 国外：fal
-                image_urls = await to_url_fal(request.image, content_type="image/png")  # file_object.content_type
-            elif request.model.startswith("doubao-seed"):
-                image_urls = await to_png(request.image, response_format='b64_json')  # 临时方案
-            else:
+            # if request.model.startswith("fal-"):  # 国外：fal
+            #     image_urls = await to_url_fal(request.image, content_type="image/png")  # file_object.content_type
+            # elif request.model.startswith(("doubao-seed",)):  # todo: 拓展
+            #     # image_urls = await to_png(request.image, response_format='b64_json')  # 临时方案
+            #     image_urls = request.image
+            # else:  # 默认转 url
+            #     image_urls = await to_url(request.image, filename='.png', content_type="image/png")
+
+            if request.model.startswith(("doubao-seed",)):  # todo: 拓展
+                # image_urls = await to_png(request.image, response_format='b64_json')  # 临时方案
+                image_urls = request.image
+            else:  # 默认转 url
                 image_urls = await to_url(request.image, filename='.png', content_type="image/png")
 
             request = ImageRequest(
