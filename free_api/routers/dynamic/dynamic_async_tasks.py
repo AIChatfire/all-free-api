@@ -157,15 +157,10 @@ async def create_task(
     upstream_api_key = await parse_token(upstream_api_key)
 
     ######## 轮询 key
-    if "volc" in upstream_base_url: # todo get_valid_token_for_volc 包月设计
-        upstream_api_key = await get_valid_token_for_volc(force_update=True) or upstream_api_key
-        # feishu_url = "https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=rcoDg7"
-        # upstream_api_key = await get_next_token_for_polling(
-        #     feishu_url=feishu_url,
-        #     from_redis=True,
-        #     ttl=24 * 3600,
-        #     check_token=check_token_for_volc
-        # ) or upstream_api_key
+    if "volc" in upstream_base_url:  # todo get_valid_token_for_volc 包月设计
+        upstream_api_key = await get_valid_token_for_volc() or upstream_api_key
+        upstream_api_key = np.random.choice(upstream_api_key.split())  # 随机增加并发
+
 
     elif "ppinfra" in upstream_base_url:
         upstream_api_key = await get_valid_token_for_ppio() or upstream_api_key
@@ -548,4 +543,3 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/minimax/speech-02-hd' \
   "output_format": "url"
 }'
 """
-

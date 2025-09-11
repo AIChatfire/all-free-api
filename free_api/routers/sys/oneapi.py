@@ -719,4 +719,30 @@ curl -X 'POST' 'http://0.0.0.0:8000/oneapi/channel?batch_size=2' \
 
 
 
+UPSTREAM_BASE_URL=https://api.ffire.cc
+UPSTREAM_API_KEY=
+BATCH_SIZE=1
+
+
+curl -X 'POST' http://openai-dev.chatfire.cn/oneapi/channel?batch_size=$BATCH_SIZE \
+    -H 'Authorization: Bearer null' \
+    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+      -d '{
+        "id": 29494,
+        "name": "火山",
+        "tag": "火山",
+        "key": "$KEY",
+        "type": 45,
+        "priority": 99999,
+
+        "models": "doubao-seedream-4-0-250828",
+        "group": "default,volc,volcengine",
+        
+        "status_code_mapping": "{\n  \"429\": \"500\"\n}",
+        "setting": "{\n  \"pass_through_body_enabled\": true}",
+        "param_override": "{\n  \"watermark\": false\n}"
+    }'
 """
