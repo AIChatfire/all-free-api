@@ -28,12 +28,22 @@ TAGS = ["oneapi"]
 @router.get("/token")
 async def get_user_info(
         api_key: Optional[str] = Depends(get_bearer_token),
+        user_id: Optional[str] = Query(None)
 ):
+    if user_id:
+        data = await get_user(user_id)
+        return {
+            "id": user_id,
+            "balance": data['data']['quota'] / 500000,
+        }
+
     data = await get_api_key_log(api_key)
     if data and (user_id := data[0]['user_id']):
         if data := await get_user(user_id):
-            data['data']['access_token'] = '🔥chatfire'
-            return data
+            return {
+                "id": user_id,
+                "balance": data['data']['quota'] / 500000,
+            }
 
 
 @router.get("/tasks/{type}")
