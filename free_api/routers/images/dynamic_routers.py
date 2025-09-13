@@ -7,7 +7,7 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  : todo: 合并到 oai
-
+import os
 
 from meutils.pipe import *
 from meutils.io.files_utils import to_url, to_url_fal, to_png, to_base64
@@ -49,7 +49,7 @@ async def create_generations(
 
     base_url = base_url or headers.get("x-base-url")  # 环境变量
     base_url = base_url or "https://new.yunai.link/v1" or os.getenv("FFIRE_BASE_URL")
-
+    base_url = os.getenv("VOLC_BASE_URL")
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
 

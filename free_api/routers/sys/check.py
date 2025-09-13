@@ -6,14 +6,11 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
-
+# @Description  :
+import time
 
 from meutils.pipe import *
-
-from meutils.apis.oneapi.tasks import polling_tasks, refund_tasks
-from meutils.apis.oneapi.user import get_user, get_api_key_log
-from meutils.apis.oneapi.channel import ChannelInfo, create_or_update_channel as _create_or_update_channel
+from meutils.apis.volcengine_apis.videos import get_valid_token
 
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 
@@ -24,12 +21,22 @@ router = APIRouter()
 TAGS = ["sys"]
 
 
-@router.get("/token/{biz}")
+@router.get("/{biz}")
 async def get_user_info(
         biz: str,
+        batch_size: Optional[int] = Query(None),
 ):
     if biz == 'volc':
-        pass
+        if tokens := await get_valid_token(batch_size=batch_size, seed=int(time.time())):
+            return {
+                'biz': biz,
+                'tokens': tokens.split(),
+            }
+
+    return {
+        'biz': biz,
+        'tokens': [],
+    }
 
 
 if __name__ == '__main__':
@@ -37,6 +44,6 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '/oneapi')
+    app.include_router(router, '/check')
 
     app.run()
