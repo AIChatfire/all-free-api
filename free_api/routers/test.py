@@ -27,11 +27,18 @@ class H(BaseModel):
     reasoning_stream: bool
 
 
-@router.api_route("/status/{status_code}", methods=["GET", "POST"])
+@router.api_route("/error", methods=["GET"])
 async def create_request(
-        status_code: int,
+        status_code: Optional[int] = Query(None),
+        detail: Optional[str] = Query("xx"),
 ):
-    raise HTTPException(status_code=status_code, detail=f"Not Implemented: {status_code}")
+    if status_code:
+        raise HTTPException(status_code=status_code, detail=detail)
+    else:
+        raise Exception(
+            f"{status_code}: {detail}"
+        )
+    # raise HTTPException(status_code=status_code, detail=f"Not Implemented: {status_code}")
 
 
 @router.api_route("/{path:path}", methods=["GET", "POST"])
