@@ -7,13 +7,12 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import time
 
 from meutils.pipe import *
 
 from meutils.apis.oneapi.tasks import polling_tasks, refund_tasks
 from meutils.apis.oneapi.user import get_user, get_api_key_log
-from meutils.apis.oneapi.channel import get_channel_info
+from meutils.apis.oneapi.channel import get_channel_info, update_channel
 from meutils.apis.oneapi.channel import ChannelInfo, create_or_update_channel as _create_or_update_channel
 
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -62,7 +61,9 @@ async def create_channel(
         request: ChannelInfo,
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: dict = Depends(get_headers),
-        batch_size: Optional[int] = Query(None)
+        batch_size: Optional[int] = Query(None),
+
+        key_mode: Optional[str] = Query(None),
 ):
     upstream_base_url = headers.get('upstream-base-url')
     upstream_api_key = headers.get('upstream-api-key')
@@ -71,6 +72,10 @@ async def create_channel(
     logger.debug(upstream_api_key)
     logger.debug(api_key)
     logger.debug(request.base_url)
+
+    if key_mode and request.id in {21249, 21250, 21251}:  # 敏感操作限制
+        _ = await update_channel(request.id, upstream_base_url, key=request.key, key_mode=key_mode)
+        return _
 
     create_or_update_channel = partial(
         _create_or_update_channel,
@@ -83,13 +88,18 @@ async def create_channel(
 
     ############################################### 业务定制 超刷
     if "volc" in request.base_url or request.type == 45:  # 火山渠道 # and str(request.id) in "21222,21223,21224,21225,29483"
-        if (status := await get_channel_info(request.id, upstream_base_url)) and status != 1:  # 禁用才刷新渠道
+
+        multi_key_status = await get_channel_info(request.id, upstream_base_url, response_format="multi_key_status")
+        if not multi_key_status:  # 不是全key正常就刷新渠道
             from meutils.apis.volcengine_apis.videos import get_valid_token
+
+            logger.debug(f"渠道「{request.id}」: status={multi_key_status}")
 
             tokens = api_key and api_key.split()  # null
             request.key = await get_valid_token(tokens, batch_size=batch_size, seed=int(time.time()))  # 动态更新 keys
-        else:
-            logger.debug(f"渠道「{request.id}」: status={status}")
+
+        else:  # 跳出
+            return {"info": f"渠道「{request.id}」: status={multi_key_status}"}
 
     ###############################################
 
@@ -756,39 +766,45 @@ curl -X 'POST' http://openai-dev.chatfire.cn/oneapi/channel?batch_size=$BATCH_SI
         "param_override": "{\n  \"watermark\": false\n}"
     }'
     
-    
+
+BASE_URL=http://0.0.0.0:8000
+# BASE_URL=http://110.42.51.143:40003
 UPSTREAM_BASE_URL=https://api.ffire.cc
 UPSTREAM_API_KEY=
 BATCH_SIZE=2
+ID=29499
 
+# curl http://8.134.213.231:40003/sys/check/volc?batch_size=$BATCH_SIZE
 
-curl -X 'POST' http://0.0.0.0:8000/oneapi/channel?batch_size=$BATCH_SIZE \
+curl -s -X 'POST' "$BASE_URL/oneapi/channel?batch_size=$BATCH_SIZE" \
     -H 'Authorization: Bearer null' \
     -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
     -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
       -d '{
-        "id": 29495,
+        "id": '$ID',
         "name": "火山",
         "tag": "火山",
         "key": "$KEY",
         "type": 45,
         "priority": 99999,
 
-        "models": "doubao-seed-1-6-vision-250815,deepseek-v3-1-250821,doubao-1-5-pro-32k-character-250715,doubao-pro-32k-character-241215,doubao-1-5-thinking-vision-pro-250428,doubao-seed-1-6-thinking-250715,kimi-k2-250905,kimi-k2-0905-preview,kimi-k2-250711,kimi-k2-0711-preview,moonshotai/kimi-k2-instruct,doubao-seed-1-6-250615,doubao-seed-1-6-flash-250615,doubao-seed-1-6-thinking-250615,doubao-1-5-ui-tars-250428,deepseek-r1-250528,doubao-1-5-thinking-pro-m-250428,doubao-1-5-thinking-vision-pro-250428,doubao-1.5-vision-pro-250328,deepseek-v3,deepseek-v3-0324,deepseek-v3-250324,deepseek-v3-8k,deepseek-v3-128k,deepseek-chat,deepseek-chat-8k,deepseek-chat-64k,deepseek-chat-164k,deepseek-chat:function,deepseek-vl2,deepseek-ai/deepseek-vl2,deepseek-r1,deepseek-r1-8k,deepseek-reasoner,deepseek-reasoner-8k,deepseek-r1-250120,deepseek-search,deepseek-r1-search,deepseek-reasoner-search,deepseek-r1-think,deepseek-reasoner-think,deepseek-r1-plus,deepseek-r1:1.5b,deepseek-r1-lite,deepseek-r1-distill-qwen-1.5b,deepseek-r1:7b,deepseek-r1-distill-qwen-7b,deepseek-r1:8b,deepseek-r1-distill-llama-8b,deepseek-r1:14b,deepseek-r1-distill-qwen-14b,deepseek-r1:32b,deepseek-r1-distill-qwen-32b,deepseek-r1:70b,deepseek-r1-distill-llama-70b,deepseek-r1-metasearch,doubao-1-5-pro-32k,doubao-1-5-pro-32k-250115,doubao-1-5-pro-256k,doubao-1-5-pro-256k-250115,doubao-1-5-vision-pro-32k,doubao-1-5-vision-pro-32k-250115,doubao-lite-128k,doubao-lite-32k,doubao-lite-32k-character,doubao-lite-4k,doubao-1.5-lite-32k,doubao-pro-4k,doubao-pro-32k,doubao-pro-32k-character,doubao-pro-128k,doubao-pro-256k,doubao-1.5-pro-32k,doubao-1.5-pro-256k,doubao-1.5-vision-pro-32k,doubao-vision-lite-32k,doubao-vision-pro-32k,doubao-1-5-pro-thinking,doubao-1-5-vision-thinking,doubao-1-5-thinking-pro-250415,doubao-1-5-thinking-pro-vision,doubao-1-5-thinking-pro-vision-250415,doubao-1-5-thinking-pro-m-250415,moonshot-v1-8k,moonshot-v1-32k,moonshot-v1-128k",
+        "models": "deepseek-v3-1-terminus,deepseek-v3.1-terminus,doubao-seed-1-6-vision-250815,deepseek-v3-1-250821,doubao-1-5-pro-32k-character-250715,doubao-pro-32k-character-241215,doubao-1-5-thinking-vision-pro-250428,doubao-seed-1-6-thinking-250715,kimi-k2-250905,kimi-k2-0905-preview,kimi-k2-250711,kimi-k2-0711-preview,moonshotai/kimi-k2-instruct,doubao-seed-1-6-250615,doubao-seed-1-6-flash-250615,doubao-seed-1-6-thinking-250615,doubao-1-5-ui-tars-250428,deepseek-r1-250528,doubao-1-5-thinking-pro-m-250428,doubao-1-5-thinking-vision-pro-250428,doubao-1.5-vision-pro-250328,deepseek-v3,deepseek-v3-0324,deepseek-v3-250324,deepseek-v3-8k,deepseek-v3-128k,deepseek-chat,deepseek-chat-8k,deepseek-chat-64k,deepseek-chat-164k,deepseek-chat:function,deepseek-vl2,deepseek-ai/deepseek-vl2,deepseek-r1,deepseek-r1-8k,deepseek-reasoner,deepseek-reasoner-8k,deepseek-r1-250120,deepseek-search,deepseek-r1-search,deepseek-reasoner-search,deepseek-r1-think,deepseek-reasoner-think,deepseek-r1-plus,deepseek-r1:1.5b,deepseek-r1-lite,deepseek-r1-distill-qwen-1.5b,deepseek-r1:7b,deepseek-r1-distill-qwen-7b,deepseek-r1:8b,deepseek-r1-distill-llama-8b,deepseek-r1:14b,deepseek-r1-distill-qwen-14b,deepseek-r1:32b,deepseek-r1-distill-qwen-32b,deepseek-r1:70b,deepseek-r1-distill-llama-70b,deepseek-r1-metasearch,doubao-1-5-pro-32k,doubao-1-5-pro-32k-250115,doubao-1-5-pro-256k,doubao-1-5-pro-256k-250115,doubao-1-5-vision-pro-32k,doubao-1-5-vision-pro-32k-250115,doubao-lite-128k,doubao-lite-32k,doubao-lite-32k-character,doubao-lite-4k,doubao-1.5-lite-32k,doubao-pro-4k,doubao-pro-32k,doubao-pro-32k-character,doubao-pro-128k,doubao-pro-256k,doubao-1.5-pro-32k,doubao-1.5-pro-256k,doubao-1.5-vision-pro-32k,doubao-vision-lite-32k,doubao-vision-pro-32k,doubao-1-5-pro-thinking,doubao-1-5-vision-thinking,doubao-1-5-thinking-pro-250415,doubao-1-5-thinking-pro-vision,doubao-1-5-thinking-pro-vision-250415,doubao-1-5-thinking-pro-m-250415,moonshot-v1-8k,moonshot-v1-32k,moonshot-v1-128k",
         "group": "default,volc,volcengine",
         
         "status_code_mapping": "{\n  \"429\": \"500\"\n}",
         "model_mapping": {
         
-        "kimi-k2-0711-preview":"kimi-k2-250711",
+        "kimi-k2-250711":"kimi-k2-250905",
+        "kimi-k2-0711-preview":"kimi-k2-250905",
          "kimi-k2-0905-preview":"kimi-k2-250905",
 
-        "moonshotai/kimi-k2-instruct":"kimi-k2-250711",
+        "moonshotai/kimi-k2-instruct":"kimi-k2-250905",
 
-        "deepseek-r1": "deepseek-r1-250120",
-        "deepseek-reasoner": "deepseek-r1-250120",
+        "deepseek-v3.1-terminus": "deepseek-v3-1-terminus",
+        "deepseek-r1": "deepseek-r1-250528",
+        "deepseek-reasoner": "deepseek-r1-250528",
         "deepseek-v3-0324": "deepseek-v3-250324",
         "deepseek-v3": "deepseek-v3-250324",
         "deepseek-chat": "deepseek-v3-250324",
@@ -815,6 +831,27 @@ curl -X 'POST' http://0.0.0.0:8000/oneapi/channel?batch_size=$BATCH_SIZE \
     }'
 
 
+
+
+
+
+BASE_URL=http://0.0.0.0:8000
+UPSTREAM_BASE_URL=https://api.chatfire.cn
+UPSTREAM_API_KEY=
+BATCH_SIZE=2
+ID=21250
+KEYS="k1\nk2\nk3"
+
+curl -s -X 'POST' "$BASE_URL/oneapi/channel?key_mode=append" \
+    -H 'Authorization: Bearer null' \
+    -H "UPSTREAM-BASE-URL: $UPSTREAM_BASE_URL" \
+    -H "UPSTREAM-API-KEY: $UPSTREAM_API_KEY" \
+    -H 'accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -d '{
+        "id": '$ID',
+        "key": "'$KEYS'"
+    }'
 
 
 """
