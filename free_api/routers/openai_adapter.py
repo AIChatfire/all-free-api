@@ -122,7 +122,8 @@ async def create_chat_completions(
         # qwen
         elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向
             cookie = headers.get("cookie")
-            if any( i in request.model.lower() for i in ("vl", "image")):
+            if request.model.endswith(("-video")):
+                request.model = request.model.removesuffix("-video") #
                 response = await QwenCompletions(api_key=api_key).create(request, cookie=cookie)
             else:
                 response = qwenllm.create(request, cookie=cookie)
@@ -216,7 +217,9 @@ if __name__ == '__main__':
     os.getenv("OPENAI_API_KEY_OPENAI")
 
 """
-curl 'http://0.0.0.0:8000/v1/chat/completions' \
+BASE_URL=http://0.0.0.0:8000
+BASE_URL=http://8.134.213.231:40003/adapter
+curl $BASE_URL/v1/chat/completions \
   -H 'Accept: */*' \
   -H 'Accept-Language: zh-CN' \
   -H 'Proxy-Connection: keep-alive' \

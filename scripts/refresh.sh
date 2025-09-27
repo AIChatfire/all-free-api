@@ -6,14 +6,6 @@
 # @Software     : PyCharm
 # @Description  :
 
-docker run -d \
-  --name autoheal \
-  --restart always \
-  -e TZ=Asia/Shanghai \
-  -e AUTOHEAL_CONTAINER_LABEL=all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  willfarrell/autoheal
-
 # 清空docker日志
 truncate -s 0 /var/lib/docker/containers/*/*-json.log
 
@@ -32,3 +24,13 @@ echo "正在删除未被容器使用的镜像..."
 docker image prune -a -f
 
 echo "清理完成！"
+
+
+
+docker run -d \
+  --name autoheal \
+  --restart always \
+  -e TZ=Asia/Shanghai \
+  -e AUTOHEAL_CONTAINER_LABEL=all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  willfarrell/autoheal
