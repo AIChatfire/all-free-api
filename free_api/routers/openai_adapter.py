@@ -23,6 +23,7 @@ from meutils.apis.google import chat as google_chat
 from meutils.apis.images import mj
 from meutils.apis.chatglm import zai
 from meutils.apis.meituan import chat as meituan_chat
+from meutils.apis.qwen.chat import Completions as QwenCompletions
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -66,6 +67,10 @@ async def create_chat_completions(
 
         if max_turns:  # 限制对话轮次
             request.messages = request.messages[-(2 * max_turns - 1):]
+
+        if "==" in request.model:
+            response_model, request_model = request.model.split("==", maxsplit=1)
+            request.model = request_model
 
         response = None
         if request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
@@ -114,8 +119,13 @@ async def create_chat_completions(
         #     client = dify.Completions(api_key=api_key)
         #     response = client.create(request)  # List[str]
 
-        elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向 o1 c35 ###################
-            response = qwenllm.create(request, cookie=headers.get("cookie"))
+        # qwen
+        elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向
+            cookie = headers.get("cookie")
+            if any( i in request.model.lower() for i in ("vl", "image")):
+                response = await QwenCompletions(api_key=api_key).create(request, cookie=cookie)
+            else:
+                response = qwenllm.create(request, cookie=cookie)
 
         elif request.model.lower().startswith(("mj",)):
             response = mj.generate(request, api_key=api_key)
@@ -128,7 +138,7 @@ async def create_chat_completions(
 
 
         # google
-        elif request.model.startswith(("gemini",)): # todo base_url|api_key
+        elif request.model.startswith(("gemini",)):  # todo base_url|api_key
             if "|" in api_key:
                 base_url, api_key = api_key.split("|")
                 client = chat_gemini.Completions(base_url=base_url, api_key=api_key)
@@ -204,3 +214,18 @@ if __name__ == '__main__':
     app.run()
 
     os.getenv("OPENAI_API_KEY_OPENAI")
+
+"""
+curl 'http://0.0.0.0:8000/v1/chat/completions' \
+  -H 'Accept: */*' \
+  -H 'Accept-Language: zh-CN' \
+  -H 'Proxy-Connection: keep-alive' \
+  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) CherryStudio/1.6.1 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36' \
+  -H 'authorization: Bearer null' \
+  -H 'content-type: application/json' \
+  -H 'http-referer: https://cherry-ai.com' \
+  -H 'x-title: Cherry Studio' \
+  --data-raw '{"model":"qwen3-vl-plus","temperature":2,"top_p":1,"enable_thinking":true,"thinking_budget":2918,"messages":[{"role":"user","content":"hi"}],"stream":false,"max_tokens":10}'
+
+
+"""

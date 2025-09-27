@@ -769,6 +769,9 @@ curl -X 'POST' http://openai-dev.chatfire.cn/oneapi/channel?batch_size=$BATCH_SI
 
 BASE_URL=http://0.0.0.0:8000
 # BASE_URL=http://110.42.51.143:40003
+# BASE_URL=http://110.42.51.143:40003
+BASE_URL=https://openai-dev.chatfire.cn
+
 UPSTREAM_BASE_URL=https://api.ffire.cc
 UPSTREAM_API_KEY=
 BATCH_SIZE=2
@@ -798,7 +801,7 @@ curl -s -X 'POST' "$BASE_URL/oneapi/channel?batch_size=$BATCH_SIZE" \
         
         "kimi-k2-250711":"kimi-k2-250905",
         "kimi-k2-0711-preview":"kimi-k2-250905",
-         "kimi-k2-0905-preview":"kimi-k2-250905",
+        "kimi-k2-0905-preview":"kimi-k2-250905",
 
         "moonshotai/kimi-k2-instruct":"kimi-k2-250905",
 
@@ -836,6 +839,7 @@ curl -s -X 'POST' "$BASE_URL/oneapi/channel?batch_size=$BATCH_SIZE" \
 
 
 BASE_URL=http://0.0.0.0:8000
+BASE_URL=https://openai-dev.chatfire.cn/sys
 UPSTREAM_BASE_URL=https://api.chatfire.cn
 UPSTREAM_API_KEY=
 BATCH_SIZE=2
@@ -854,4 +858,14 @@ curl -s -X 'POST' "$BASE_URL/oneapi/channel?key_mode=append" \
     }'
 
 
+curl --location --request POST 'https://openai-dev.chatfire.cn/sys/oneapi/channel?key_mode=append' \
+    -H 'Authorization: Bearer xx' \
+    --header 'priority: u=1, i' \
+    --header 'upstream-base-url: https://api.chatfire.cn' \
+    --header 'User-Agent: Apifox/1.0.0 (https://apifox.com)' \
+    --header 'content-type: application/json' \
+    --data-raw '{
+      "id": 21249,
+      "key": "k1\nk2"
+    }'
 """

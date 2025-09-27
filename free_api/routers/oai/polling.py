@@ -11,14 +11,11 @@
 
 from meutils.pipe import *
 from meutils.decorators.contextmanagers import atry_catch
-from meutils.apis.proxy.kdlapi import get_one_proxy
 
 from meutils.llm.openai_utils import create_chat_completion_chunk
 from meutils.llm.openai_polling.chat import Completions
-from meutils.llm.openai_polling.images import Images
 
 from meutils.schemas.openai_types import CompletionRequest
-from meutils.schemas.image_types import ImageRequest, ImagesResponse
 
 from meutils.serving.fastapi.dependencies import get_headers, get_bearer_token
 
@@ -41,7 +38,7 @@ ChatCompletionResponse = Union[ChatCompletion, List[ChatCompletionChunk]]
 6. 支持流转非流、非流转流
 7. 计算tokens
 
-“{model}::{redirect_model}”
+“{model}=={redirect_model}”
 """
 
 

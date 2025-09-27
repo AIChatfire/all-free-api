@@ -55,6 +55,7 @@ ENV MODELSCOPE_BASE_URL=https://api-inference.modelscope.cn/v1
 ENV OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 ENV VOLC_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
 ENV PPIO_BASE_URL=https://api.ppinfra.com/v3/openai
+ENV OLLAMA_BASE_URL=https://ollama.com/v1
 
 # 暴露端口
 EXPOSE 8000
