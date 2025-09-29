@@ -64,13 +64,14 @@ async def create_chat_completions(
         response_model = response_model or request.model
         if not request_model.startswith("v1"):  # 重定向
             request.model = request_model  # qwen-plus-latest
+        elif "==" in request.model:
+            response_model, request_model = request.model.split("==", maxsplit=1)
+            request.model = request_model
+
+        logger.debug(request)
 
         if max_turns:  # 限制对话轮次
             request.messages = request.messages[-(2 * max_turns - 1):]
-
-        if "==" in request.model:
-            response_model, request_model = request.model.split("==", maxsplit=1)
-            request.model = request_model
 
         response = None
         if request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
@@ -122,9 +123,18 @@ async def create_chat_completions(
         # qwen
         elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向
             cookie = headers.get("cookie")
-            if request.model.endswith(("-video")):
-                request.model = request.model.removesuffix("-video") #
+
+            if request.model.endswith(("-video", "-video-thinking")):
+                request.model = request.model.removesuffix("-video").removesuffix("-video-thinking")
+                request.thinking_budget = 81920
                 response = await QwenCompletions(api_key=api_key).create(request, cookie=cookie)
+
+            elif headers.get("x-version") == "v2":
+            # elif 1:
+                response = await QwenCompletions(
+                    default_model=headers.get("x-model"),
+                    api_key=api_key,
+                ).create(request, cookie=cookie)
             else:
                 response = qwenllm.create(request, cookie=cookie)
 
