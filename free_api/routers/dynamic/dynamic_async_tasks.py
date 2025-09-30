@@ -39,8 +39,6 @@ router = APIRouter()
 TAGS = ["通用异步任务"]
 
 
-
-
 @router.get("/{biz}/v1/{path:path}")
 async def get_task(
         request: Request,
@@ -224,8 +222,11 @@ async def create_task(
                 or response.get("task_id")
                 or response.get("request_id")
                 or response.get("requestId")
-                or "undefined task_id"
+            # or "undefined task_id"
         )
+        if not task_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"未获取到task_id: {response}")
+
         # 部分按量计费
         # https://fal.ai/models/fal-ai/topaz/upscale/video
         # https://fal.ai/models/fal-ai/luma-dream-machine/ray-2/reframe
