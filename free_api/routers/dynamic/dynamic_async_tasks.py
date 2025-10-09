@@ -157,7 +157,7 @@ async def create_task(
     upstream_api_key = await parse_token(upstream_api_key)
 
     ######## 轮询 key
-    if "volc" in upstream_base_url:  # todo get_valid_token_for_volc 包月设计
+    if "volc" in upstream_base_url:  # todo get_valid_token_for_volc 包月设计 todo 修复bug
         upstream_api_key = await get_valid_token_for_volc() or upstream_api_key
         upstream_api_key = np.random.choice(upstream_api_key.split())  # 随机增加并发
 
