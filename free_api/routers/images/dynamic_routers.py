@@ -50,6 +50,7 @@ async def create_generations(
     base_url = base_url or headers.get("x-base-url")  # 环境变量
     # base_url = base_url or "https://new.yunai.link/v1" or os.getenv("FFIRE_BASE_URL")
     # base_url = os.getenv("VOLC_BASE_URL")
+    # base_url = "http://all.chatfire.cn/ppinfra/v1"
 
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
@@ -164,3 +165,18 @@ if __name__ == '__main__':
     app.include_router(router, '/v1')
 
     app.run()
+
+"""
+
+curl --location --request POST 'http://0.0.0.0:8000/v1/images/generations' \
+--header 'User-Agent: Apifox/1.0.0 (https://apifox.com)' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer sk_f1ScGw5Q2RxkNUk6fFSX32CtzSokjtsOJmZWLVveLHA' \
+--data-raw '{
+  "model": "doubao-seedream-4-0-250828",
+  "n": 1,
+  "prompt": "生成3张女孩和奶牛玩偶在游乐园开心地坐过山车的图片，涵盖早晨、中午、晚上",
+  "size": "1024x1024"
+  
+}'
+"""
