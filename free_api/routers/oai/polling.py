@@ -61,6 +61,10 @@ async def create_chat_completions(
 ):
     # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
 
+    if param_override := headers.get("param_override"):  # 默认参数 强行覆盖 为了 开启思考
+        request = request.model_copy(update=param_override)
+    # request_model = request_model or headers.get("request_model", "").split(',')
+
     # https://all.chatfire.cc/g/openai
     base_url = (
             base_url
@@ -81,7 +85,7 @@ async def create_chat_completions(
             request.model = request_model
 
         ###########################################################################
-        if thinking:  # "doubao-seed-1-6-thinking"关不掉
+        if thinking:  # "doubao-seed-1-6-thinking"关不掉  todo param_override 可以解决
             if request.model.startswith("deepseek-v3-1"):  # disabled enabled auto
                 thinking = "enabled" if "thinking" in request.model else "disabled"
                 request.thinking = {"type": thinking}
