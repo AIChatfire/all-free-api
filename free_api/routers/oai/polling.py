@@ -91,7 +91,7 @@ async def create_chat_completions(
         ###########################################################################
         if (
                 request.enable_thinking or
-                any(i in request.model for i in {"thinking", "deepseek-r"})
+                any(i in response_model for i in {"thinking", "deepseek-r"})
         ) and "volc" in base_url:
             request.thinking = {"type": "enabled"}
 
