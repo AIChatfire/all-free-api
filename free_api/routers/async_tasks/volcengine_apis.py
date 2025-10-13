@@ -80,8 +80,13 @@ async def create_video_task(
         chunks = await chat_for_video(videos.get_task, task_id)
         return EventSourceResponse(chunks)
 
+
+    # raise Exception("转异步接口")
+
     N = get_payment_times(request)
     # N = 0
+
+    # todo 废弃
 
     dynamic_model = f"api-{request.model}"
     if resolution := request.model_dump().get("resolution"):

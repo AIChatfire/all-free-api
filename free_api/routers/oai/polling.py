@@ -51,60 +51,61 @@ async def create_chat_completions(
         headers: dict = Depends(get_headers),
         api_key: Optional[str] = Depends(get_bearer_token),
 
+        # mode 轮询模式
+        mode: Optional[str] = Query(None),  # tokens 计算模式
+
+        # todo: 放到文件头
         request_model: Optional[str] = Query(None),  # 优先级最高
         response_model: Optional[str] = Query(None),  # 兼容newapi自定义接口 ?response_model=""
-
-        thinking: Optional[str] = Query(None),
-
         base_url: Optional[str] = Query(None),
 
 ):
-    # logger.debug(request.model_dump_json(exclude_none=True, indent=4))
+    # logger.debug(headers)
 
     if param_override := headers.get("param_override"):  # 默认参数 强行覆盖 为了 开启思考
+        # logger.debug(headers)
         request = request.model_copy(update=param_override)
+        # logger.debug(request)
+        # exclude_models
+
+        # inner = {"thinking": {"type": "disabled"}}
+        # outer = {"param_override": json.dumps(inner)}
+        # print(json.dumps(outer))
     # request_model = request_model or headers.get("request_model", "").split(',')
 
-    # https://all.chatfire.cc/g/openai
     base_url = (
             base_url
             or headers.get("base-url") or headers.get("x-base-url")
             or "https://api.siliconflow.cn/v1"
     )
 
+    request.model = request_model or request.model
     response_model = response_model or request.model
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
         ###########################################################################
-        # 重定向：deepseek-chat==deepseek-v3 展示key 调用 value
-
-        if request_model and "," in request_model and (request_model := np.random.choice(request_model.split(','))):
-            request.model = request_model
+        # 重定向：deepseek-chat：deepseek-chat==deepseek-v3 展示key 调用 value
 
         if "==" in request.model:
             response_model, request_model = request.model.split("==", maxsplit=1)
             request.model = request_model
 
         ###########################################################################
-        if thinking:  # "doubao-seed-1-6-thinking"关不掉  todo param_override 可以解决
-            if request.model.startswith("deepseek-v3-1"):  # disabled enabled auto
-                thinking = "enabled" if "thinking" in request.model else "disabled"
-                request.thinking = {"type": thinking}
+        if (
+                request.enable_thinking or
+                any(i in request.model for i in {"thinking", "deepseek-r"})
+        ) and "volc" in base_url:
+            request.thinking = {"type": "enabled"}
 
-            elif request.model.startswith(('qwen', 'deepseek', 'glm')):  # 其他
-                # parameter.enable_thinking only support stream
-                enable_thinking = True if thinking == 'enabled' else False
-                request.enable_thinking = enable_thinking
+    client = Completions(base_url=base_url, api_key=api_key, mode=mode)
+    response = await client.create(request)
 
-        client = Completions(base_url=base_url, api_key=api_key)
-        response = await client.create(request)
+    if request.stream:
+        return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=response_model))
 
-        if request.stream:
-            return EventSourceResponse(create_chat_completion_chunk(response, redirect_model=response_model))
+    if hasattr(response, "model"):
+        response.model = response_model
 
-        if hasattr(response, "model"):
-            response.model = response_model
-
-        return response
+    return response
 
 
 if __name__ == '__main__':
@@ -240,6 +241,25 @@ curl -X 'POST' \
   ],
   "model": "gemini-2.0-flash",
   "stream": false
+}'
+
+
+
+curl -X 'POST' \
+  'http://0.0.0.0:8000/v1/chat/completions?base_url=https://ark.cn-beijing.volces.com/api/v3' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer db8ac34e-3df7-4508-bc74-1c89b79253dc' \
+  -H 'param_override: {"thinking":{"type": "enabled"}}' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "messages": [
+    {
+      "content": "讲个故事",
+      "role": "user"
+    }
+  ],
+  "model": "deepseek-v3-1-terminus",
+  "stream": true
 }'
 
 """
