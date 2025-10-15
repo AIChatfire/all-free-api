@@ -79,7 +79,7 @@ async def create_chat_completions(
             or "https://api.siliconflow.cn/v1"
     )
     response_model = response_model or request.model
-    request.model = request_model or request.model  # 实际请求的模型
+    request.model = request_model or request.model  # 实际请求的模型 ?request_model=doubao-seed-1-6-vision-250815
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
         ###########################################################################
         # 重定向：deepseek-chat：deepseek-chat==deepseek-v3 展示key 调用 value
@@ -258,7 +258,28 @@ curl -X 'POST' \
     }
   ],
   "model": "deepseek-v3-1-terminus",
-  "stream": true
+  "stream": true,
+  "max_tokens": 10
+}'
+
+curl -X 'POST' \
+https://openai-dev.chatfire.cn/polling/v1/chat/completions?base_url=https://ark.cn-beijing.volces.com/api/v3 \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer db8ac34e-3df7-4508-bc74-1c89b79253dc' \
+  -H 'param_override: {"thinking":{"type": "enabled"}}' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "messages": [
+    {
+      "content": "讲个故事",
+      "role": "user"
+    }
+  ],
+  "model": "deepseek-v3-1-terminus",
+  "stream": true,
+  "max_tokens": 10
 }'
 
 """
+
+

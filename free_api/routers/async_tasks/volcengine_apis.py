@@ -80,28 +80,7 @@ async def create_video_task(
         chunks = await chat_for_video(videos.get_task, task_id)
         return EventSourceResponse(chunks)
 
-
-    # raise Exception("转异步接口")
-
-    N = get_payment_times(request)
-    # N = 0
-
-    # todo 废弃
-
-    dynamic_model = f"api-{request.model}"
-    if resolution := request.model_dump().get("resolution"):
-        dynamic_model += f"-{resolution}"
-    else:
-        for resolution in {"480p", "720p", "1080p"}:
-            if resolution in str(request):
-                dynamic_model += f"-{resolution}"
-                break
-
-    async with atry_catch(f"{dynamic_model}", api_key=api_key, callback=send_message, request=request):
-
-        async with ppu_flow(api_key, post=dynamic_model, dynamic=True, n=N):
-            response = await videos.create_task(request)
-            return response
+    raise Exception("转异步接口")
 
 
 if __name__ == '__main__':
