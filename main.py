@@ -21,13 +21,12 @@ from free_api.routers import chat_image, chat_to_audio, chat_video, chat_suno
 from free_api.routers import test
 from free_api.routers import files, tasks
 
-from free_api.routers.sys import oneapi, billing, check, kv
+from free_api.routers.sys import oneapi, billing, check, kv, webhook
 from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
 from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, minimax
 from free_api.routers.async_tasks import fal, fal_kling, fal_ai
 from free_api.routers.dynamic import dynamic_async_tasks, dynamic_async_tasks_for_sync
 from free_api.routers.dynamic import dynamic_sync_tasks, dynamic_sync_tasks_plus
-
 
 from free_api.routers.images import biz as images_biz
 from free_api.routers.images import v1 as images_v1
@@ -150,6 +149,7 @@ app.include_router(oneapi.router, '/sys/oneapi', tags="sys")
 app.include_router(billing.router, '/sys/billing', tags="sys")  # 计费系统
 app.include_router(check.router, '/sys/check', tags="sys")
 app.include_router(kv.router, '/sys/r', tags="sys")
+app.include_router(webhook.router, '/sys/webhook', tags="sys")
 
 # 采购项
 app.include_router(textin_v1.router, '/textin/v1', tags=textin_v1.TAGS)
