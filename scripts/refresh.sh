@@ -17,7 +17,7 @@ docker images
 
 # 删除无标签的镜像（即 <none>:<none> 的镜像）
 echo "正在删除无标签的镜像..."
-docker rmi $(docker images -f "dangling=true" -q)
+docker images -f "dangling=true" -q | xargs -r docker rmi
 
 # 删除未被容器使用的镜像（谨慎操作，可能会删除一些你认为有用的镜像）
 echo "正在删除未被容器使用的镜像..."
