@@ -91,7 +91,7 @@ async def create_channel(
 
         multi_key_status = await get_channel_info(request.id, upstream_base_url, response_format="multi_key_status")
         if not multi_key_status:  # 不是全key正常就刷新渠道
-            from meutils.apis.volcengine_apis.videos import get_valid_token
+            from meutils.apis.volcengine_apis.videos import get_valid_token  # todo 挑选未刷的key
 
             logger.debug(f"渠道「{request.id}」: status={multi_key_status}")
 

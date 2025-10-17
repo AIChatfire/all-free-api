@@ -71,14 +71,15 @@ async def create_chat_completions(
         # inner = {"thinking": {"type": "disabled"}}
         # outer = {"param_override": json.dumps(inner)}
         # print(json.dumps(outer))
-    # request_model = request_model or headers.get("request_model", "").split(',')
 
     base_url = (
             base_url
             or headers.get("base-url") or headers.get("x-base-url")
             or "https://api.siliconflow.cn/v1"
     )
+
     response_model = response_model or request.model
+    request_model = request_model and np.random.choice(request_model.split(','))
     request.model = request_model or request.model  # 实际请求的模型 ?request_model=doubao-seed-1-6-vision-250815
     async with atry_catch(f"{base_url}/{path}", api_key=api_key, headers=headers, request=request):
         ###########################################################################
@@ -266,7 +267,7 @@ curl -X 'POST' \
 https://openai-dev.chatfire.cn/polling/v1/chat/completions?base_url=https://ark.cn-beijing.volces.com/api/v3 \
   -H 'accept: application/json' \
   -H 'Authorization: Bearer db8ac34e-3df7-4508-bc74-1c89b79253dc' \
-  -H 'param_override: {"thinking":{"type": "enabled"}}' \
+  -H 'param-override: {"thinking":{"type": "enabled"}}' \
   -H 'Content-Type: application/json' \
   -d '{
   "messages": [
@@ -281,5 +282,3 @@ https://openai-dev.chatfire.cn/polling/v1/chat/completions?base_url=https://ark.
 }'
 
 """
-
-

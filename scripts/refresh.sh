@@ -25,9 +25,7 @@ docker image prune -a -f
 
 echo "清理完成！"
 
-
-
-docker run -d \
+docker rm -f autoheal && docker run -d \
   --name autoheal \
   --restart always \
   -e TZ=Asia/Shanghai \
