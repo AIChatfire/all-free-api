@@ -9,6 +9,15 @@
 # 清空docker日志
 truncate -s 0 /var/lib/docker/containers/*/*-json.log
 
+# autoheal
+docker rm -f autoheal && docker run -d \
+  --name autoheal \
+  --restart always \
+  -e TZ=Asia/Shanghai \
+  -e AUTOHEAL_CONTAINER_LABEL=all \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  willfarrell/autoheal
+
 # 显示当前所有镜像echo "当前所有镜像如下："docker images
 
 # 显示当前所有镜像
@@ -24,11 +33,3 @@ echo "正在删除未被容器使用的镜像..."
 docker image prune -a -f
 
 echo "清理完成！"
-
-docker rm -f autoheal && docker run -d \
-  --name autoheal \
-  --restart always \
-  -e TZ=Asia/Shanghai \
-  -e AUTOHEAL_CONTAINER_LABEL=all \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  willfarrell/autoheal
