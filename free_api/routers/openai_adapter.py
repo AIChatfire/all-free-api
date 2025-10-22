@@ -70,7 +70,6 @@ async def create_chat_completions(
             response_model, request_model = request.model.split("==", maxsplit=1)
             request.model = request_model
 
-        logger.debug(request)
 
         if max_turns:  # 限制对话轮次
             request.messages = request.messages[-(2 * max_turns - 1):]

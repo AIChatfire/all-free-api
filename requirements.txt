@@ -27,7 +27,7 @@ tiktoken
 langchain
 fal-client
 replicate
-gradio_client==1.3.0
+gradio_client
 edge_tts
 sensenova
 qianfan
