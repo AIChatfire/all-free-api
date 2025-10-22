@@ -24,6 +24,7 @@ from meutils.apis.images import mj
 from meutils.apis.chatglm import zai
 from meutils.apis.meituan import chat as meituan_chat
 from meutils.apis.qwen.chat import Completions as QwenCompletions
+from meutils.apis.gradio_api import deepseek_ocr
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -130,7 +131,7 @@ async def create_chat_completions(
                 response = await QwenCompletions(api_key=api_key).create(request, cookie=cookie)
 
             elif headers.get("x-version") == "v2":
-            # elif 1:
+                # elif 1:
                 response = await QwenCompletions(
                     default_model=headers.get("x-model"),
                     api_key=api_key,
@@ -147,6 +148,8 @@ async def create_chat_completions(
         elif request.model.lower().startswith(("longcat",)):
             response = meituan_chat.Completions(api_key).create(request)
 
+        elif any(i in request.model.lower() for i in ("deepseek-ocr", "deepseek_ocr")):
+            response = deepseek_ocr.Completions(api_key=api_key).create(request)
 
         # google
         elif request.model.startswith(("gemini",)):  # todo base_url|api_key
@@ -231,7 +234,7 @@ if __name__ == '__main__':
     os.getenv("OPENAI_API_KEY_OPENAI")
 
 """
-BASE_URL=http://0.0.0.0:8000
+BASE_URL=http://0.0.0.0:8000/adapter
 BASE_URL=http://8.134.213.231:40003/adapter
 curl $BASE_URL/v1/chat/completions \
   -H 'Accept: */*' \
