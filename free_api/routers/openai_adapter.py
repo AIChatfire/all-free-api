@@ -171,6 +171,10 @@ async def create_chat_completions(
                         request.model = "gemini-2.0-flash"
                         response = google_chat.Completions(api_key=api_key, base_url=base_url).create_for_files(request)
 
+        elif request.model.startswith(("hunyuan",)):
+            client = yuanbao.Completions()
+            logger.debug(request)
+            response = client.create(request)
 
 
         ############ apikey判别

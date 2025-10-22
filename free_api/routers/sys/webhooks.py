@@ -6,8 +6,8 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
-
+# @Description  :
+import json
 
 from meutils.pipe import *
 from meutils.notice.feishu import send_message
@@ -28,20 +28,27 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, 
     Body
 
 router = APIRouter()
-TAGS = ["webhook"]
+TAGS = ["webhooks"]
 
 
-@router.post("/{biz}", tags=TAGS)
+@router.api_route("/{biz}", methods=["GET", "POST"], tags=TAGS)
 async def webhook(
-        request: dict,
+        request: Request,
         biz: str,
 
         expr: str = Query(None),
+        task_id: str = Query(None),
         # event: str = Form(None),
         # user: str = Form(""),
         # file: UploadFile | None = File(None) # todo 兼容 formdata
 ):
     # ct = request.headers.get("content-type", "")
+
+    if request.method == "GET" and task_id:  # 通用接口
+        if (data := await redis_aclient.lrange(f"webhook:{biz}:{task_id}", 0, -1)):
+            return json.loads(data[0])
+        else:
+            raise HTTPException(status_code=404, detail="task_id not found")
 
     # data = await request.json()
     data = request
@@ -56,7 +63,10 @@ async def webhook(
     if not task_id and expr and (task_ids := json_path(data, expr)):
         task_id = task_ids[0]
 
-    await redis_aclient.lpush(f"webhook:{biz}:{task_id}", json.dumps(data))
+    key = f"webhook:{biz}:{task_id}"
+    await redis_aclient.lpush(key, json.dumps(data))
+    await redis_aclient.expire(key, 3600)
+
     # logger.debug(bjson(data))
 
     # logger.debug(f"webhook: {biz} {task_id} {expr}")
@@ -83,6 +93,6 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '/webhook')
+    app.include_router(router, '/webhooks')
 
     app.run()

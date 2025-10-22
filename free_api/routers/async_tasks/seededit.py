@@ -16,7 +16,6 @@ from meutils.llm.openai_utils import ppu_flow
 from meutils.apis.jimeng import images
 from meutils.apis.jimeng.files import face_recognize
 from meutils.schemas.jimeng_types import FEISHU_URL_MAPPER
-from meutils.apis.oneapi.user import get_user_from_api_key
 
 from meutils.config_utils.lark_utils import get_next_token_for_polling
 
