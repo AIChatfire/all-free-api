@@ -19,8 +19,8 @@ ENV WORKER_TYPE=fastapi
 ENV FLOWER_UNAUTHENTICATED_API=true
 
 # 环境变量
-#ENV HF_ENDPOINT=https://hf.chatfire.cc
-ENV HF_TOKEN=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
+#ENV HF_ENDPOINT=http://hf.chatfire.cc
+#ENV HF_TOKEN=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
 # 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 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
 # FEISHU_APP_SECRET
 # MINIO_ACCESS_KEY
