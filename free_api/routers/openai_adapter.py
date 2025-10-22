@@ -25,6 +25,7 @@ from meutils.apis.chatglm import zai
 from meutils.apis.meituan import chat as meituan_chat
 from meutils.apis.qwen.chat import Completions as QwenCompletions
 from meutils.apis.gradio_api import deepseek_ocr
+from meutils.apis.gitee.ocr import Completions as GiteeCompletions
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -69,7 +70,6 @@ async def create_chat_completions(
         elif "==" in request.model:
             response_model, request_model = request.model.split("==", maxsplit=1)
             request.model = request_model
-
 
         if max_turns:  # 限制对话轮次
             request.messages = request.messages[-(2 * max_turns - 1):]
@@ -148,6 +148,10 @@ async def create_chat_completions(
         elif request.model.lower().startswith(("longcat",)):
             response = meituan_chat.Completions(api_key).create(request)
 
+        # OCR
+        elif request.model in {"DeepSeek-OCR", "PaddleOCR-VL"}:
+            response = GiteeCompletions(api_key=api_key).create(request)
+
         elif any(i in request.model.lower() for i in ("deepseek-ocr", "deepseek_ocr")):
             response = deepseek_ocr.Completions(api_key=api_key).create(request)
 
@@ -178,6 +182,7 @@ async def create_chat_completions(
             client = yuanbao.Completions()
             logger.debug(request)
             response = client.create(request)
+
 
 
         ############ apikey判别
