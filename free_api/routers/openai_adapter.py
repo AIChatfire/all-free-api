@@ -57,7 +57,8 @@ async def create_chat_completions(
 
         headers: dict = Depends(get_headers),
 ):
-    logger.debug(request.model_dump_json(indent=4))
+    if len(str(request)) < 2000: logger.debug(request.model_dump_json(indent=4))
+
     logger.debug(response_model)
 
     async with atry_catch(f"{base_url}/{response_model}", api_key=api_key, request=request):
