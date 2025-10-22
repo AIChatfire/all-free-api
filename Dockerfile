@@ -20,8 +20,9 @@ ENV FLOWER_UNAUTHENTICATED_API=true
 
 # 环境变量
 #ENV HF_ENDPOINT=http://hf.chatfire.cc
-#ENV HF_TOKEN=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
-# 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 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
+#ENV HF_TOKEN=xx
+
+
 # FEISHU_APP_SECRET
 # MINIO_ACCESS_KEY
 ENV FEISHU_APP_ID=cli_a45451400dfd900b
