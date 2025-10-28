@@ -61,6 +61,10 @@ async def create_generations(
             request = ImageRequest(**request)
 
             response = await generate(request, api_key=api_key, base_url=base_url)
+
+            if not response:
+                raise HTTPException(status_code=500, detail=f"image response is null")
+
             return response
 
         elif "chat/completions" in dynamic_router:
@@ -150,7 +154,10 @@ async def create_generations(
                 response_format=request.response_format
             )
 
-            return await generate(request, api_key=api_key, base_url=base_url)
+            response = await generate(request, api_key=api_key, base_url=base_url)
+            if not response:
+                raise HTTPException(status_code=500, detail=f"image response is null")
+            return response
 
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

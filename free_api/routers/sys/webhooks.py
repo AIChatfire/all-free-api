@@ -50,8 +50,7 @@ async def webhook(
         else:
             raise HTTPException(status_code=404, detail="task_id not found")
 
-    # data = await request.json()
-    data = request
+    data = await request.json()
 
     task_id = (
             data.get("id")
