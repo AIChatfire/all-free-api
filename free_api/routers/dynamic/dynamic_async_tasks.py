@@ -25,7 +25,8 @@ from meutils.apis.ppio.videos import get_valid_token as get_valid_token_for_ppio
 from meutils.apis.volcengine_apis.videos import get_valid_token as get_valid_token_for_volc
 
 from meutils.apis.oneapi.user import get_user_money
-from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task, billing_for_tokens
+from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task, billing_for_tokens, \
+    get_billing_model
 from meutils.schemas.task_types import FluxTaskResponse
 from meutils.apis.utils import make_request
 from meutils.apis.models import make_billing_model
@@ -195,6 +196,7 @@ async def create_task(
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
 
+
     async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
 
@@ -258,6 +260,11 @@ async def create_task(
             if usage:
                 await billing_for_tokens(model, usage, api_key, task_id=task_id)  # 按量走了按次 会超时
                 model = "async-task"  # 监听任务用
+
+        #
+        if model.startswith("doubao-seedance"):
+            model = get_billing_model(payload)
+            billing_n = 1
 
         await billing_for_async_task(model, task_id=task_id, api_key=api_key, n=billing_n)
 
