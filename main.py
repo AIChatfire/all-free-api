@@ -11,7 +11,7 @@
 from meutils.serving.fastapi import App
 from free_api.routers import health
 
-from free_api.routers.oai import polling as oai_polling, openai_audio
+from free_api.routers.oai import polling as oai_polling, openai_audio, videos
 from free_api.routers.audio import v1 as audio_v1, fish, tts, elevenlabs
 
 from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
@@ -81,6 +81,9 @@ app.include_router(images.router, '/images/v1', tags=images.TAGS)  # todo：未�
 
 app.include_router(images_biz.router, '', tags=images_biz.TAGS)  # 适配其他渠道
 app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
+
+# Videos
+app.include_router(videos.router, '/videos/v1', tags=videos.TAGS)  # todo：未来以这个为准
 
 # files
 app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
