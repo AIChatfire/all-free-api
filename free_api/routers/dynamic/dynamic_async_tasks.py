@@ -196,7 +196,6 @@ async def create_task(
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
 
-
     async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
 
@@ -256,12 +255,12 @@ async def create_task(
                     "completion_tokens": 0,
                     "total_tokens": prompt_tokens
                 }
+            # todo 按tokens 提前计算
 
             if usage:
                 await billing_for_tokens(model, usage, api_key, task_id=task_id)  # 按量走了按次 会超时
                 model = "async-task"  # 监听任务用
 
-        #
         if model.startswith("doubao-seedance"):
             model = get_billing_model(payload)
             billing_n = 1
