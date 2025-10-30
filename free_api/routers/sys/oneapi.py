@@ -63,7 +63,7 @@ async def create_channel(
     logger.debug(api_key)
     logger.debug(request.base_url)
 
-    if key_mode and request.id in {21249, 21250, 21251}:  # 敏感操作限制
+    if key_mode and request.id in {21249, 21250, 21251, 21180}:  # 敏感操作限制
         _ = await update_channel(request.id, upstream_base_url, key=request.key, key_mode=key_mode)
         return _
 

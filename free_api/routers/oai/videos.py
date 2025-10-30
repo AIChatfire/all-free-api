@@ -14,8 +14,7 @@ from meutils.oss.minio_oss import Minio
 from meutils.io.files_utils import to_url, to_bytes
 
 from meutils.db.redis_db import redis_aclient
-from meutils.llm.openai_utils import appu, ppu_flow
-from meutils.serving.fastapi.dependencies.auth import get_bearer_token, HTTPAuthorizationCredentials
+from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 
 from meutils.apis.voice_clone import fish
 from meutils.apis.textin import document_process as textin_fileparser
@@ -49,12 +48,19 @@ async def create_video(
 
         api_key: Optional[str] = Depends(get_bearer_token),
 
+        headers: Optional[dict] = Depends(get_headers),
+
 ):
+    resolution = None
+    if '_' in model:
+        model, resolution = model.split('_', maxsplit=1)  # model_resolution 模型路由
+
     request = SoraVideoRequest(
         model=model,
         prompt=prompt,
         seconds=seconds,
-        size=size or "720x1280",
+        size=size or "720x1280",  # 兼容 1:1
+        resolution=resolution,
     )
 
     if input_reference:
