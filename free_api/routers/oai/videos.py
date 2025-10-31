@@ -22,11 +22,7 @@ from meutils.apis.kuaishou import kolors, klingai
 
 from meutils.schemas.video_types import Video, SoraVideoRequest
 from meutils.apis.runware import videos as runware_videos
-
-from enum import Enum
-from openai import OpenAI
-from openai._types import FileTypes
-from openai.types.file_object import FileObject
+from meutils.apis.videos.videos import OpenAIVideos
 
 from fastapi import APIRouter, File, UploadFile, Query, Form, BackgroundTasks, Depends, HTTPException, Request, status
 from fastapi.responses import Response, FileResponse, RedirectResponse
@@ -51,27 +47,27 @@ async def create_video(
         headers: Optional[dict] = Depends(get_headers),
 
 ):
-    resolution = None
-    if '_' in model:
-        model, resolution = model.split('_', maxsplit=1)  # model_resolution 模型路由
-
     request = SoraVideoRequest(
         model=model,
         prompt=prompt,
         seconds=seconds,
         size=size or "720x1280",  # 兼容 1:1
-        resolution=resolution,
     )
 
     if input_reference:
         files = [await file.read() for file in input_reference]
         request.input_reference = files
 
+    ########## 判断逻辑放videos李
+    if request.model.startswith("doubao-seedance-1-0-pro-fast-251015"):
+        videos = OpenAIVideos(api_key=api_key)
+        return await videos.create(request)
+
+    ###### todo 放弃
     _ = await runware_videos.create_task(
         request,
         api_key,
     )
-
     return _
 
 
@@ -80,8 +76,12 @@ async def get_video(
         id: str,
         # auth: Optional[str] = Depends(get_bearer_token),
 ):
-    video = await runware_videos.get_task(id)
-    return video
+    ########## 判断逻辑放videos李
+    if id.startswith("cgt-"):
+        return await OpenAIVideos().get(id)
+
+    ###### todo 放弃
+    return await runware_videos.get_task(id)
 
 
 @router.get("/videos/{id}/content")
