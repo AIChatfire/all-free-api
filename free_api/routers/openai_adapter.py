@@ -16,6 +16,7 @@ from meutils.decorators.contextmanagers import atry_catch
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, to_openai_params
 from meutils.llm.completions import dify, sophnet, qwenllm, yuanbao, chat_gemini
+from meutils.llm.clients import zhipuai_client
 
 from meutils.apis.search import metaso
 from meutils.apis.fal import chat as fal_chat
@@ -60,7 +61,11 @@ async def create_chat_completions(
 ):
     if len(str(request)) < 2000: logger.debug(request.model_dump_json(indent=4))
 
-    logger.debug(response_model)
+    # tools
+    # request.messages
+    if hasattr(request, 'tools') and request.tools:
+        request.model = "glm-4.5-flash"
+        response = await zhipuai_client.chat.completions.create(**to_openai_params(request))
 
     async with atry_catch(f"{base_url}/{response_model}", api_key=api_key, request=request):
 
@@ -70,9 +75,12 @@ async def create_chat_completions(
         elif "==" in request.model:
             response_model, request_model = request.model.split("==", maxsplit=1)
             request.model = request_model
+            logger.debug(response_model)
 
         if max_turns:  # 限制对话轮次
             request.messages = request.messages[-(2 * max_turns - 1):]
+
+        logger.debug(request.model_dump_json(indent=4))
 
         response = None
         if request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
@@ -130,14 +138,13 @@ async def create_chat_completions(
                 request.thinking_budget = 81920
                 response = await QwenCompletions(api_key=api_key).create(request, cookie=cookie)
 
-            elif headers.get("x-version") == "v2":
+            else:
                 # elif 1:
                 response = await QwenCompletions(
                     default_model=headers.get("x-model"),
                     api_key=api_key,
                 ).create(request, cookie=cookie)
-            else:
-                response = qwenllm.create(request, cookie=cookie)
+
 
         elif request.model.lower().startswith(("mj",)):
             response = mj.generate(request, api_key=api_key)
