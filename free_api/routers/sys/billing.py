@@ -140,6 +140,7 @@ async def create_async_task_for_billing(
         payload = (await request.form())._dict
         payload = payload or (await request.body()).decode()
 
+    payload['id'] = payload.get("id") or payload.get("seed")
     # payload['polling_url'] = "TODO"
     return payload
 

@@ -111,7 +111,13 @@ async def create_request(
     if isinstance(payload, dict):
         data.update(payload)
 
-    logger.debug(bjson(data))
+    try:
+        logger.debug(bjson(data))
+    except Exception as e:
+        logger.error(e)
+
+    if "dev" in path:
+        return {}
 
     return data
 

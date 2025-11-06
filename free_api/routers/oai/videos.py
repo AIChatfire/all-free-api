@@ -31,6 +31,16 @@ router = APIRouter()
 TAGS = ['Videos']
 
 
+@router.post("/dev/videos")  # 核心
+async def create_video(
+
+        request: Request,
+
+):
+    pass
+
+
+
 @router.post("/videos")  # 核心
 async def create_video(
 
