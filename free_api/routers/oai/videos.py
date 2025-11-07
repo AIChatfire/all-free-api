@@ -41,7 +41,7 @@ async def create_video(
 
 
 @router.post("/videos")  # 核心
-async def create_video(
+async def create_video(  # todo 通用型
 
         model: str = Form(...),
         prompt: str = Form(...),
@@ -51,11 +51,13 @@ async def create_video(
         seconds: Optional[str] = Form(None),
         size: Optional[str] = Form(None),
 
+        image: Optional[List[str]] = Form(None),
+
         api_key: Optional[str] = Depends(get_bearer_token),
-
         headers: Optional[dict] = Depends(get_headers),
-
 ):
+    logger.debug(image)
+
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
     request = SoraVideoRequest(

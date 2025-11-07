@@ -91,7 +91,7 @@ async def create_request(
         #                                                                                       'content-type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})),
         #  'a': 'xxx'}
 
-    form = (await request.form())._dict
+    form = (await request.form())._dict  # 优化数组
 
     data = {
         "id": "test",
