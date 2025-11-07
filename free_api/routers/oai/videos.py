@@ -56,8 +56,7 @@ async def create_video(
         headers: Optional[dict] = Depends(get_headers),
 
 ):
-    base_url = headers.get("base-url") or headers.get("x-base-url")
-    logger.debug(f"base_url: {base_url}")
+    base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
     request = SoraVideoRequest(
         model=model,
@@ -70,31 +69,37 @@ async def create_video(
         files = [await file.read() for file in input_reference]
         request.input_reference = files
 
-    if ":" in model and "@" in model:  ###### todo 放弃
+    ###### todo 放弃
+    if "runware" in base_url:
         _ = await runware_videos.create_task(
             request,
             api_key,
         )
         return _
+    ##########################################
 
     videos = OpenAIVideos(base_url=base_url, api_key=api_key)
     return await videos.create(request)
 
 
-@router.get("/videos/{id}")
+@router.get("/videos/{id:path}")
 async def get_video(
         id: str,
         # auth: Optional[str] = Depends(get_bearer_token),
+
+        headers: Optional[dict] = Depends(get_headers),
 ):
-    ########## 判断逻辑放videos李
-    if id.startswith("cgt-"):
-        return await OpenAIVideos().get(id)
+    base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
     ###### todo 放弃
-    return await runware_videos.get_task(id)
+    if "runware" in base_url:
+        return await runware_videos.get_task(id)
+    ##########################################
+
+    return await OpenAIVideos().get(id)
 
 
-@router.get("/videos/{id}/content")
+@router.get("/videos/{id:path}/content")
 async def get_file_content(
         id: str,
 ):
