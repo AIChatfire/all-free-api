@@ -40,7 +40,6 @@ async def create_video(
     pass
 
 
-
 @router.post("/videos")  # 核心
 async def create_video(
 
@@ -57,28 +56,29 @@ async def create_video(
         headers: Optional[dict] = Depends(get_headers),
 
 ):
+    base_url = headers.get("base-url") or headers.get("x-base-url")
+    logger.debug(f"base_url: {base_url}")
+
     request = SoraVideoRequest(
         model=model,
         prompt=prompt,
         seconds=seconds,
-        size=size or "720x1280",  # 兼容 1:1
+        size=size
     )
 
     if input_reference:
         files = [await file.read() for file in input_reference]
         request.input_reference = files
 
-    ########## 判断逻辑放videos李
-    if request.model.startswith("doubao-seedance-1-0-pro-fast-251015"):
-        videos = OpenAIVideos(api_key=api_key)
-        return await videos.create(request)
+    if ":" in model and "@" in model:  ###### todo 放弃
+        _ = await runware_videos.create_task(
+            request,
+            api_key,
+        )
+        return _
 
-    ###### todo 放弃
-    _ = await runware_videos.create_task(
-        request,
-        api_key,
-    )
-    return _
+    videos = OpenAIVideos(base_url=base_url, api_key=api_key)
+    return await videos.create(request)
 
 
 @router.get("/videos/{id}")
