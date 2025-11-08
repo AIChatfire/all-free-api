@@ -56,7 +56,7 @@ async def create_video(  # todo 通用型
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
 ):
-    logger.debug(image)
+    logger.debug(image)  # ['image1', 'image2'] ['image1']
 
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
@@ -93,10 +93,7 @@ async def get_video(
 ):
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
-    ###### todo 放弃
-    if "runware" in base_url:
-        return await runware_videos.get_task(id)
-    ##########################################
+    logger.debug(f"get base_url: {base_url}")
 
     return await OpenAIVideos().get(id)
 
