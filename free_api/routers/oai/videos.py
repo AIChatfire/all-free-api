@@ -56,7 +56,7 @@ async def create_video(  # todo 通用型
 
 @router.post("/videos")  # 核心
 async def create_video(  # todo 通用型
-        request: Request,
+        # request: Request,
 
         model: str = Form(...),
         prompt: str = Form(...),
@@ -74,9 +74,9 @@ async def create_video(  # todo 通用型
     logger.debug(image)  # ['image1', 'image2'] ['image1']
     logger.debug(input_reference)
 
-    formdata = await request.form()
-    formdata = form_to_dict(formdata)
-    logger.debug(bjson(formdata))
+    # formdata = await request.form()
+    # formdata = form_to_dict(formdata)
+    # logger.debug(bjson(formdata))
 
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
