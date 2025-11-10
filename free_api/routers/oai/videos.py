@@ -15,10 +15,7 @@ from meutils.io.files_utils import to_url, to_bytes
 
 from meutils.db.redis_db import redis_aclient
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
-
-from meutils.apis.voice_clone import fish
-from meutils.apis.textin import document_process as textin_fileparser
-from meutils.apis.kuaishou import kolors, klingai
+from meutils.serving.fastapi.utils import form_to_dict
 
 from meutils.schemas.video_types import Video, SoraVideoRequest
 from meutils.apis.runware import videos as runware_videos
@@ -31,18 +28,10 @@ router = APIRouter()
 TAGS = ['Videos']
 
 
-@router.post("/dev/videos")  # 核心
-async def create_video(
-
-        request: Request,
-
-):
-    pass
-
-
-@router.post("/videos")  # 核心
+@router.post("/videos-test")  # 核心
 async def create_video(  # todo 通用型
 
+        request: Request,
         model: str = Form(...),
         prompt: str = Form(...),
 
@@ -56,7 +45,36 @@ async def create_video(  # todo 通用型
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
 ):
+    logger.debug(image)
+
+    formdata = await request.form()
+    _ = form_to_dict(formdata)
+
+    logger.debug(_)
+
+
+@router.post("/videos")  # 核心
+async def create_video(  # todo 通用型
+        request: Request,
+
+        model: str = Form(...),
+        prompt: str = Form(...),
+
+        input_reference: Optional[List[UploadFile]] = File(None),
+
+        seconds: Optional[str] = Form(None),
+        size: Optional[str] = Form(None),
+
+        image: Optional[Union[str, List[str]]] = Form(None),
+
+        api_key: Optional[str] = Depends(get_bearer_token),
+        headers: Optional[dict] = Depends(get_headers),
+):
     logger.debug(image)  # ['image1', 'image2'] ['image1']
+
+    formdata = await request.form()
+    formdata = form_to_dict(formdata)
+    logger.debug(bjson(formdata))
 
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
@@ -64,12 +82,17 @@ async def create_video(  # todo 通用型
         model=model,
         prompt=prompt,
         seconds=seconds,
-        size=size
+        size=size,
+        image=image,
+        first_frame_image=formdata.get("first_frame_image"),
+        last_frame_image=formdata.get("last_frame_image"),
     )
 
-    if input_reference:
+    if input_reference:  # 图片处理
         files = [await file.read() for file in input_reference]
         request.input_reference = files
+    # elif image:
+    #     pass
 
     ###### todo 放弃
     if "runware" in base_url:
@@ -93,7 +116,7 @@ async def get_video(
 ):
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
-    logger.debug(f"get base_url: {base_url}")
+    logger.debug(f"get base_url: {base_url}")  # 这里好像未生效
 
     return await OpenAIVideos().get(id)
 
