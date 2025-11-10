@@ -28,14 +28,14 @@ router = APIRouter()
 TAGS = ['Videos']
 
 
-@router.post("/videos-test")  # 核心
+@router.post("/videos-test/v1/videos")  # 核心
 async def create_video(  # todo 通用型
 
         request: Request,
         model: str = Form(...),
         prompt: str = Form(...),
 
-        input_reference: Optional[List[UploadFile]] = File(None),
+        input_reference: Optional[Union[List[str], List[UploadFile]]] = File(None),
 
         seconds: Optional[str] = Form(None),
         size: Optional[str] = Form(None),
@@ -46,6 +46,7 @@ async def create_video(  # todo 通用型
         headers: Optional[dict] = Depends(get_headers),
 ):
     logger.debug(image)
+    logger.debug(input_reference)
 
     formdata = await request.form()
     _ = form_to_dict(formdata)
@@ -60,7 +61,7 @@ async def create_video(  # todo 通用型
         model: str = Form(...),
         prompt: str = Form(...),
 
-        input_reference: Optional[List[UploadFile]] = File(None),
+        input_reference: Optional[Union[List[str], List[UploadFile]]] = File(None),
 
         seconds: Optional[str] = Form(None),
         size: Optional[str] = Form(None),
@@ -71,6 +72,7 @@ async def create_video(  # todo 通用型
         headers: Optional[dict] = Depends(get_headers),
 ):
     logger.debug(image)  # ['image1', 'image2'] ['image1']
+    logger.debug(input_reference)
 
     formdata = await request.form()
     formdata = form_to_dict(formdata)
