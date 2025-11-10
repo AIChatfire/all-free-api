@@ -72,9 +72,10 @@ async def create_video(  # todo 通用型
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
 ):
-    logger.debug(image)  # ['image1', 'image2'] ['image1']
+    # logger.debug(image)  # ['image1', 'image2'] ['image1']
     logger.debug(input_reference)
 
+    formdata = {}
     # formdata = await request.form()
     # formdata = form_to_dict(formdata)
     # logger.debug(bjson(formdata))
