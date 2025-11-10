@@ -65,7 +65,7 @@ async def create_video(  # todo 通用型
         seconds: Optional[str] = Form(None),
         size: Optional[str] = Form(None),
 
-        image: Optional[Union[str, List[str]]] = Form(None),
+        image: Optional[List[str]] = Form(None),
 
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
