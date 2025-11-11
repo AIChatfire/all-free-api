@@ -11,7 +11,7 @@
 
 from meutils.pipe import *
 from meutils.oss.minio_oss import Minio
-from meutils.io.files_utils import to_url, to_bytes
+from meutils.io.files_utils import to_url, to_bytes, to_url_fal, to_base64
 
 from meutils.db.redis_db import redis_aclient
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -85,6 +85,7 @@ async def create_video(  # todo 通用型
     # logger.debug(bjson(formdata))
 
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
+    input_reference_format = headers.get("input-reference-format") or ""
 
     request = SoraVideoRequest(
         model=model,
@@ -96,11 +97,27 @@ async def create_video(  # todo 通用型
         last_frame_image=formdata.get("last_frame_image"),
     )
 
-    if input_reference:  # 图片处理
-        files = [await file.read() if isinstance(file, UploadFile) else file for file in input_reference]
-        request.input_reference = files
-    # elif image:
-    #     pass
+    if input_reference:  # 统一处理
+        if isinstance(input_reference[0], str):
+            request.input_reference = input_reference
+        elif input_reference_format in ("base64", "b64"):
+            tasks = [
+                to_base64(await file.read(), file.content_type) for file in input_reference
+                if isinstance(file, UploadFile)
+            ]
+            request.input_reference = await asyncio.gather(*tasks)
+        elif input_reference_format == "oss":  # url
+            tasks = [
+                to_url(await file.read(), file.content_type) for file in input_reference
+                if isinstance(file, UploadFile)
+            ]
+            request.input_reference = await asyncio.gather(*tasks)
+        else:  # fal url
+            tasks = [
+                to_url_fal(await file.read(), file.content_type) for file in input_reference
+                if isinstance(file, UploadFile)
+            ]
+            request.input_reference = await asyncio.gather(*tasks)
 
     ###### todo 放弃
     if "runware" in base_url:
