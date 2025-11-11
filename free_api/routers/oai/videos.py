@@ -65,8 +65,8 @@ async def create_video(  # todo 通用型
         model: str = Form(...),
         prompt: str = Form(...),
 
-        input_reference: Optional[List[UploadFile]] = File(None),
-        # input_reference: Optional[Union[List[str], List[UploadFile]]] = File(None),
+        # input_reference: Optional[List[UploadFile]] = File(None),
+        input_reference: Optional[Union[List[str], List[UploadFile]]] = File(None),
 
         seconds: Optional[str] = Form(None),
         size: Optional[str] = Form(None),
@@ -97,7 +97,7 @@ async def create_video(  # todo 通用型
     )
 
     if input_reference:  # 图片处理
-        files = [await file.read() for file in input_reference]
+        files = [await file.read() if isinstance(file, UploadFile) else file for file in input_reference]
         request.input_reference = files
     # elif image:
     #     pass
