@@ -28,7 +28,7 @@ router = APIRouter()
 TAGS = ['Videos']
 
 
-@router.post("/videos-test/v1/videos")  # 核心
+@router.post("/dev/v1/videos")  # 核心
 async def create_video(  # todo 通用型
 
         request: Request,
@@ -44,14 +44,18 @@ async def create_video(  # todo 通用型
 
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
+
 ):
     logger.debug(image)
     logger.debug(input_reference)
 
     formdata = await request.form()
-    _ = form_to_dict(formdata)
+    _ = form_to_dict(formdata, file2json=True)
 
     logger.debug(_)
+    return Video(
+        **_
+    )
 
 
 @router.post("/videos")  # 核心
@@ -73,7 +77,7 @@ async def create_video(  # todo 通用型
         headers: Optional[dict] = Depends(get_headers),
 ):
     # logger.debug(image)  # ['image1', 'image2'] ['image1']
-    logger.debug(input_reference)
+    logger.debug(input_reference)  # json
 
     formdata = {}
     # formdata = await request.form()
