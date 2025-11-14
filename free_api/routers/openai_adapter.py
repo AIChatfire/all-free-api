@@ -80,8 +80,6 @@ async def create_chat_completions(
         if max_turns:  # 限制对话轮次
             request.messages = request.messages[-(2 * max_turns - 1):]
 
-        logger.debug(request.model_dump_json(indent=4))
-
         response = None
         if request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
             request = ChatCompletionRequest(**request.model_dump())
@@ -132,18 +130,21 @@ async def create_chat_completions(
         # qwen
         elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向
             cookie = headers.get("cookie")
+            http_client = headers.get('http-client')
+
+            qwen_client = QwenCompletions(
+                api_key=api_key,
+                default_model=headers.get("x-model"),
+                http_client=http_client
+            )
 
             if request.model.endswith(("-video", "-video-thinking")):
                 request.model = request.model.removesuffix("-video").removesuffix("-video-thinking")
-                request.thinking_budget = 81920
-                response = await QwenCompletions(api_key=api_key).create(request, cookie=cookie)
+                request.thinking_budget = 8192
+                response = await qwen_client.create(request, cookie=cookie)
 
             else:
-                # elif 1:
-                response = await QwenCompletions(
-                    default_model=headers.get("x-model"),
-                    api_key=api_key,
-                ).create(request, cookie=cookie)
+                response = await qwen_client.create(request, cookie=cookie)
 
 
         elif request.model.lower().startswith(("mj",)):
