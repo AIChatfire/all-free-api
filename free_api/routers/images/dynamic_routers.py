@@ -47,10 +47,8 @@ async def create_generations(
 ):
     logger.debug(f"dynamic_router: {dynamic_router}, api_key: {api_key}")
 
-    base_url = base_url or headers.get("x-base-url")  # 环境变量
-    # base_url = base_url or "https://new.yunai.link/v1" or os.getenv("FFIRE_BASE_URL")
-    # base_url = os.getenv("VOLC_BASE_URL")
-    # base_url = "http://all.chatfire.cn/ppinfra/v1"
+    base_url = base_url or headers.get("x-base-url")
+    http_client = headers.get("http-client")
 
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
@@ -60,7 +58,7 @@ async def create_generations(
 
             request = ImageRequest(**request)
 
-            response = await generate(request, api_key=api_key, base_url=base_url)
+            response = await generate(request, api_key=api_key, base_url=base_url, http_client=http_client)
 
             if not response:
                 raise HTTPException(status_code=500, detail=f"image response is null")
@@ -78,7 +76,12 @@ async def create_generations(
 
             # logger.debug(request)
 
-            chunks = await chat_for_image(generate, request, api_key=api_key, base_url=base_url)
+            chunks = await chat_for_image(
+                generate, request,
+                api_key=api_key,
+                base_url=base_url,
+                http_client=http_client
+            )
 
             if request.stream:
                 return EventSourceResponse(chunks)
@@ -154,7 +157,7 @@ async def create_generations(
                 response_format=request.response_format
             )
 
-            response = await generate(request, api_key=api_key, base_url=base_url)
+            response = await generate(request, api_key=api_key, base_url=base_url, http_client=http_client)
             if not response:
                 raise HTTPException(status_code=500, detail=f"image response is null")
             return response
