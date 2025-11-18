@@ -6,7 +6,7 @@
 # @Author       : betterme
 # @WeChat       : meutils
 # @Software     : PyCharm
-# @Description  : 
+# @Description  : todo 其他 sora 格式标准化
 
 
 from meutils.pipe import *
@@ -21,8 +21,9 @@ from meutils.schemas.video_types import Video, SoraVideoRequest
 from meutils.apis.runware import videos as runware_videos
 from meutils.apis.videos.videos import OpenAIVideos
 
-from fastapi import APIRouter, File, UploadFile, Query, Form, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi import APIRouter, File, UploadFile,Query, Form, BackgroundTasks, Depends, HTTPException, Request, status
 from fastapi.responses import Response, FileResponse, RedirectResponse
+from starlette.datastructures import UploadFile as _UploadFile
 
 router = APIRouter()
 TAGS = ['Videos']
@@ -97,6 +98,7 @@ async def create_video(  # todo 通用型
         last_frame_image=formdata.get("last_frame_image"),
     )
 
+
     if input_reference:  # 统一处理
         if isinstance(input_reference[0], str):  # url
             request.input_reference = input_reference
@@ -104,22 +106,25 @@ async def create_video(  # todo 通用型
         elif input_reference_format in ("base64", "b64"):
             tasks = [
                 to_base64(await file.read(), file.content_type) for file in input_reference
-                if isinstance(file, UploadFile)
+                if isinstance(file, _UploadFile)
             ]
             request.input_reference = await asyncio.gather(*tasks)
         elif input_reference_format == "oss":  # to url
             tasks = [
                 to_url(await file.read(), file.content_type) for file in input_reference
-                if isinstance(file, UploadFile)
+                if isinstance(file, _UploadFile)
             ]
             request.input_reference = await asyncio.gather(*tasks)
         else:  # fal url
             tasks = [
                 to_url_fal(await file.read(), file.content_type) for file in input_reference
-                if isinstance(file, UploadFile)
+                if isinstance(file, _UploadFile)
             ]
             request.input_reference = await asyncio.gather(*tasks)
 
+
+    if len(str(request.input_reference)) < 1000:
+        logger.debug(request)
     ###### todo 放弃
     if "runware" in base_url:
         _ = await runware_videos.create_task(
