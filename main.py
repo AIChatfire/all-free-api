@@ -11,7 +11,7 @@
 from meutils.serving.fastapi import App
 from free_api.routers import health
 
-from free_api.routers.oai import polling as oai_polling, openai_audio, videos
+from free_api.routers.oai import polling as oai_polling, openai_audio, videos, images
 from free_api.routers.audio import v1 as audio_v1, fish, tts, elevenlabs
 
 from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
@@ -30,7 +30,6 @@ from free_api.routers.dynamic import dynamic_sync_tasks, dynamic_sync_tasks_plus
 
 from free_api.routers.images import biz as images_biz
 from free_api.routers.images import v1 as images_v1
-from free_api.routers.images import dynamic_routers as images
 
 from free_api.routers.crawler import reader
 from free_api.routers.search import web_search

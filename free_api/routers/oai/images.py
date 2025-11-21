@@ -89,7 +89,7 @@ async def create_generations(
             return chunks
 
 
-        elif "images/edits" in dynamic_router:
+        elif "images/edits" in dynamic_router: # todo 优化 form
             """
             {'prompt': 'A cute baby sea otter wearing a beret', 'model': 'dall-e-3', 'n': '1', 'size': '1024x1024', 'image': UploadFile(filename='test.png', size=24809, headers=Headers({'content-disposition': 'form-data; name="image"; filename="test.png"', 'content-type': 'image/png'})), 'mask': UploadFile(filename='test.png', size=24809, headers=Headers({'content-disposition': 'form-data; name="mask"; filename="test.png"', 'content-type': 'image/png'}))}
             """
