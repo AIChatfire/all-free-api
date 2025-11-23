@@ -23,6 +23,7 @@ pyexecjs
 PyJWT
 
 websocket
+websockets
 tiktoken
 langchain
 fal-client
