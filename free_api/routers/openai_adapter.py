@@ -27,6 +27,7 @@ from meutils.apis.meituan import chat as meituan_chat
 from meutils.apis.qwen.chat import Completions as QwenCompletions
 from meutils.apis.gradio_api import deepseek_ocr
 from meutils.apis.gitee.ocr import Completions as GiteeCompletions
+from meutils.apis.replicate.chat import Completions as ReplicateCompletions
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -61,6 +62,8 @@ async def create_chat_completions(
 ):
     if len(str(request)) < 2000: logger.debug(request.model_dump_json(indent=4))
 
+    base_url = base_url or headers.get("x-base-url") or ''
+
     # tools
     # request.messages
     if hasattr(request, 'tools') and request.tools:
@@ -81,7 +84,16 @@ async def create_chat_completions(
             request.messages = request.messages[-(2 * max_turns - 1):]
 
         response = None
-        if request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
+
+        ########################################################################
+        # 适配replicate
+        if "replicate" in base_url:
+            # api_key=None
+            response = ReplicateCompletions(api_key=api_key).create(request)
+
+        ########################################################################
+
+        elif request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
             request = ChatCompletionRequest(**request.model_dump())
 
             if "RESPOND ONLY WITH THE TITLE TEXT" in str(request.last_content): return
@@ -134,8 +146,6 @@ async def create_chat_completions(
             cookie = headers.get("cookie")
             bx_ua = headers.get("bx-ua")
             umid_token = headers.get("bx-umidtoken")
-
-
 
             qwen_client = QwenCompletions(
                 api_key=api_key,
