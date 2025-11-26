@@ -29,7 +29,7 @@ async def root():
 
 @router.get("/redirect/{biz}", response_class=RedirectResponse)
 async def generate_and_redirect(
-        biz: str = Query("Cherry Studio", description="业务线"),
+        biz: str,
         id: str = Query("🔥ChatfireAI", description="提供商ID"),
         name: str = Query("🔥ChatfireAI", description="显示名称"),
         api_key: str = Query("{api_key}", alias="api_key", description="API密钥"),
