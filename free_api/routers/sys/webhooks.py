@@ -64,7 +64,7 @@ async def webhook(
 
     key = f"webhook:{biz}:{task_id}"
     await redis_aclient.lpush(key, json.dumps(data))
-    await redis_aclient.expire(key, 7 * 24 * 3600)
+    await redis_aclient.expire(key, 15 * 24 * 3600)
 
     # logger.debug(bjson(data))
 
