@@ -10,19 +10,24 @@
 
 from meutils.pipe import *
 from fastapi import FastAPI, Query, HTTPException
+
+from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
+
 from fastapi.responses import RedirectResponse
-import base64
-import json
+from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks, \
+    Body
+
+router = APIRouter()
 
 app = FastAPI(title="Cherry Studio URL Generator")
 
 
-@app.get("/")
+@router.get("/")
 async def root():
     return {"message": "Cherry Studio 链接生成器，访问 /redirect 接口"}
 
 
-@app.get("/redirect/{biz}", response_class=RedirectResponse)
+@router.get("/redirect/{biz}", response_class=RedirectResponse)
 async def generate_and_redirect(
         biz: str = Query("Cherry Studio", description="业务线"),
         id: str = Query("🔥ChatfireAI", description="提供商ID"),
