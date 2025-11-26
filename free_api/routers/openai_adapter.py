@@ -141,7 +141,7 @@ async def create_chat_completions(
 
         # qwen
         elif request.model.lower().startswith(("qwen", "qvq", "qwq")):  # 逆向
-            http_client = headers.get('http-client')
+            http_url = headers.get('http-url')
 
             cookie = headers.get("cookie")
             bx_ua = headers.get("bx-ua")
@@ -150,7 +150,7 @@ async def create_chat_completions(
             qwen_client = QwenCompletions(
                 api_key=api_key,
                 default_model=headers.get("x-model"),
-                http_client=http_client
+                http_url=http_url
             )
 
             if request.model.endswith(("-video", "-video-thinking")):

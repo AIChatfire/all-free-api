@@ -27,7 +27,7 @@ async def root():
     return {"message": "Cherry Studio 链接生成器，访问 /redirect 接口"}
 
 
-@router.get("/redirect/{biz}", response_class=RedirectResponse)
+@router.get("/{biz:path}", response_class=RedirectResponse)
 async def generate_and_redirect(
         biz: str,
         id: str = Query("🔥ChatfireAI", description="提供商ID"),
