@@ -80,7 +80,7 @@ async def create_generations(
                 generate, request,
                 api_key=api_key,
                 base_url=base_url,
-                http_client=http_client
+                http_url=http_url
             )
 
             if request.stream:
@@ -157,7 +157,7 @@ async def create_generations(
                 response_format=request.response_format
             )
 
-            response = await generate(request, api_key=api_key, base_url=base_url, http_client=http_client)
+            response = await generate(request, api_key=api_key, base_url=base_url, http_url=http_url)
             if not response:
                 raise HTTPException(status_code=500, detail=f"image response is null")
             return response
