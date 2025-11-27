@@ -73,6 +73,8 @@ async def create_video(  # todo 通用型
         size: Optional[str] = Form(None),
 
         image: Optional[List[str]] = Form(None),
+        first_frame_image: Optional[str] = Form(None),
+        last_frame_image: Optional[str] = Form(None),
 
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
@@ -94,8 +96,10 @@ async def create_video(  # todo 通用型
         seconds=seconds,
         size=size,
         image=image,
-        first_frame_image=formdata.get("first_frame_image"),
-        last_frame_image=formdata.get("last_frame_image"),
+        first_frame_image=first_frame_image,
+        last_frame_image=last_frame_image,
+        # first_frame_image=formdata.get("first_frame_image"),
+        # last_frame_image=formdata.get("last_frame_image"),
     )
 
     if input_reference:  # 统一处理
@@ -107,7 +111,7 @@ async def create_video(  # todo 通用型
             tasks = [to_base64(await file.read(), file.content_type) for file in input_reference]
             request.input_reference = await asyncio.gather(*tasks)
 
-        elif input_reference_format == "oss":  # to url
+        elif input_reference_format == "oss":  # to url todo海外服务器
             tasks = [to_url(await file.read(), file.content_type) for file in input_reference]
             request.input_reference = await asyncio.gather(*tasks)
 
