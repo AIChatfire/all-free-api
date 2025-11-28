@@ -107,7 +107,7 @@ async def create_video(  # todo 通用型
         if isinstance(input_reference[0], str):  # url
             request.input_reference = input_reference
 
-        elif input_reference_format in ("base64", "b64"):
+        elif input_reference_format in {"base64", "b64"}:
             tasks = [to_base64(await file.read(), file.content_type) for file in input_reference]
             request.input_reference = await asyncio.gather(*tasks)
 
