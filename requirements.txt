@@ -15,6 +15,7 @@ sqlmodel
 
 jsonpath
 json_repair
+toon_python
 
 tabulate
 tenacity
