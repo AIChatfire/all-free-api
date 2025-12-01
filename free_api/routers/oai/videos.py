@@ -67,7 +67,7 @@ async def create_video(  # todo 通用型
         prompt: str = Form(...),
 
         # input_reference: Optional[List[UploadFile]] = File(None),
-        input_reference: Optional[Union[List[str], List[UploadFile]]] = File(None),  # [""]
+        input_reference: Optional[Union[List[UploadFile], List[str]]] = File(None),  # [""]
 
         seconds: Optional[str] = Form(None),
         size: Optional[str] = Form(None),
@@ -75,6 +75,8 @@ async def create_video(  # todo 通用型
         image: Optional[List[str]] = Form(None),
         first_frame_image: Optional[str] = Form(None),
         last_frame_image: Optional[str] = Form(None),
+        audio: Optional[str] = Form(None),
+        video: Optional[str] = Form(None),
 
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
@@ -98,11 +100,16 @@ async def create_video(  # todo 通用型
         image=image,
         first_frame_image=first_frame_image,
         last_frame_image=last_frame_image,
+        audio=audio,
+        video=video,
         # first_frame_image=formdata.get("first_frame_image"),
         # last_frame_image=formdata.get("last_frame_image"),
     )
 
-    if input_reference and input_reference[0]:  # 统一处理
+    if (
+            input_reference and input_reference[0]
+            and (isinstance(input_reference[0], _UploadFile) and input_reference[0].filename)
+    ):  # 统一处理
         file: _UploadFile
         if isinstance(input_reference[0], str):  # url
             request.input_reference = input_reference
