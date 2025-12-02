@@ -61,7 +61,7 @@ async def create_video(  # todo 通用型
 
 @router.post("/videos")  # 核心
 async def create_video(  # todo 通用型
-        # request: Request,
+        request: Request,
 
         model: str = Form(...),
         prompt: str = Form(...),
@@ -84,47 +84,50 @@ async def create_video(  # todo 通用型
     # logger.debug(image)  # ['image1', 'image2'] ['image1']
     logger.debug(input_reference)  # None [""] [UploadFile()]
 
-    formdata = {}
-    # formdata = await request.form()
-    # formdata = form_to_dict(formdata)
-    # logger.debug(bjson(formdata))
-
+    request_mode = headers.get("x-request-mode") or ""
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
     input_reference_format = headers.get("input-reference-format") or ""
 
-    request = SoraVideoRequest(
-        model=model,
-        prompt=prompt,
-        seconds=seconds,
-        size=size,
-        image=image,
-        first_frame_image=first_frame_image,
-        last_frame_image=last_frame_image,
-        audio=audio,
-        video=video,
-        # first_frame_image=formdata.get("first_frame_image"),
-        # last_frame_image=formdata.get("last_frame_image"),
-    )
+    if request_mode:  # 通用模式
+        formdata = await request.form()
+        formdata = form_to_dict(formdata)
 
-    if (
-            input_reference and input_reference[0]
-            and (isinstance(input_reference[0], _UploadFile) and input_reference[0].filename)
-    ):  # 统一处理
-        file: _UploadFile
-        if isinstance(input_reference[0], str):  # url
+        logger.debug(formdata)
+        formdata.pop("input_reference", None)  # 单独处理
+        request = SoraVideoRequest(**formdata)
+        logany(request)
+    else:
+
+        request = SoraVideoRequest(
+            model=model,
+            prompt=prompt,
+            seconds=seconds,
+            size=size,
+            image=image,
+            first_frame_image=first_frame_image,
+            last_frame_image=last_frame_image,
+            audio=audio,
+            video=video,
+        )
+
+    if (input_reference and (file := input_reference[0])):  # 统一处理
+        if isinstance(file, str):  # url
             request.input_reference = input_reference
 
-        elif input_reference_format in {"base64", "b64"}:
-            tasks = [to_base64(await file.read(), file.content_type) for file in input_reference]
-            request.input_reference = await asyncio.gather(*tasks)
+        elif (isinstance(file, _UploadFile) and file.filename):  # file
 
-        elif input_reference_format == "oss":  # to url todo海外服务器
-            tasks = [to_url(await file.read(), file.content_type) for file in input_reference]
-            request.input_reference = await asyncio.gather(*tasks)
+            if input_reference_format in {"base64", "b64"}:
 
-        else:  # fal url
-            tasks = [to_url_fal(await file.read(), file.content_type) for file in input_reference]
-            request.input_reference = await asyncio.gather(*tasks)
+                tasks = [to_base64(await file.read(), file.content_type) for file in input_reference]
+                request.input_reference = await asyncio.gather(*tasks)
+
+            elif input_reference_format == "oss":  # to url todo海外服务器
+                tasks = [to_url(await file.read(), file.content_type) for file in input_reference]
+                request.input_reference = await asyncio.gather(*tasks)
+
+            else:  # fal url
+                tasks = [to_url_fal(await file.read(), file.content_type) for file in input_reference]
+                request.input_reference = await asyncio.gather(*tasks)
 
     if len(str(request.input_reference)) < 1000: logger.debug(request)
 

@@ -34,6 +34,7 @@ ENV FAL_KEY=7f9f3f03-fa08-4734-9bc2-cb5b549a77fa:b3fc9389d508c17b6981e698e742bf9
 ENV OPENAI_BASE_URL=https://api.chatfire.cn/v1
 ENV DIFY_BASE_URL=http://dify.chatfire.cn/v1
 ENV SEARXNG_BASE_URL=https://search.chatfire.cn
+ENV WEBHOOK_URL=https://oneapi.chatfire.cn/sys/webhook
 
 # 代理
 ENV KDLAPI_SECRET_ID=o0xwup2fyhkd5qelqvoo
