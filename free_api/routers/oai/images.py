@@ -95,7 +95,7 @@ async def create_generations(
             """
             form_data = await request.form()
 
-            # logger.debug(form_data)
+            logger.debug(form_data)
             # logger.debug(form_data._dict)
 
             # logger.debug(form_data.multi_items())
@@ -121,6 +121,8 @@ async def create_generations(
 
             request["image"] = [file_object.file.read() for file_object in files]  # file_objects
 
+            # todo 重构
+
             request = ImageEditRequest(**request)  # todo: 优化
 
             # for file_object in request.image:  # 并发 + b64
@@ -142,11 +144,8 @@ async def create_generations(
             # else:  # 默认转 url
             #     image_urls = await to_url(request.image, filename='.png', content_type="image/png")
 
-            if request.model.startswith(("doubao-seed",)):  # todo: 拓展
-                # image_urls = await to_png(request.image, response_format='b64_json')  # 临时方案
-                image_urls = request.image
-            else:  # 默认转 url
-                image_urls = await to_url(request.image, filename='.png', content_type="image/png")
+
+            image_urls = await to_url(request.image, filename='.png', content_type="image/png")
 
             request = ImageRequest(
                 model=request.model,
