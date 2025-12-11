@@ -6,6 +6,9 @@
 # @Software     : PyCharm
 # @Description  :
 
+#
+ntpdate cn.pool.ntp.org
+
 # 清空docker日志
 truncate -s 0 /var/lib/docker/containers/*/*-json.log
 
@@ -33,3 +36,5 @@ docker rm -f autoheal && docker run -d \
   -e AUTOHEAL_CONTAINER_LABEL=all \
   -v /var/run/docker.sock:/var/run/docker.sock \
   willfarrell/autoheal
+
+

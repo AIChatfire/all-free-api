@@ -10,7 +10,7 @@
 import os
 
 from meutils.pipe import *
-from meutils.io.files_utils import to_url, to_url_fal, to_png, to_base64
+from meutils.io.files_utils import to_url, to_url_fal, to_png, to_base64, do_file_data
 
 from meutils.llm.openai_utils.adapters import chat_for_image
 from meutils.notice.feishu import send_message_for_dynamic_router as send_message
@@ -23,9 +23,10 @@ from meutils.apis.images.generations import generate
 from meutils.decorators.contextmanagers import try_catch, atry_catch
 
 from meutils.serving.fastapi.dependencies import get_headers, get_bearer_token
+from meutils.serving.fastapi.utils import form_to_dict
 
 from sse_starlette import EventSourceResponse
-from starlette.datastructures import UploadFile
+from starlette.datastructures import UploadFile as _UploadFile
 
 from fastapi import APIRouter, BackgroundTasks, Depends
 from fastapi import File, Query, Form, Body, Request, HTTPException, status
@@ -49,6 +50,7 @@ async def create_generations(
 
     base_url = base_url or headers.get("x-base-url")
     http_url = headers.get("http-url")
+    input_reference_format = headers.get("input-reference-format") or ""
 
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
@@ -89,72 +91,21 @@ async def create_generations(
             return chunks
 
 
-        elif "images/edits" in dynamic_router: # todo 优化 form
+        elif "images/edits" in dynamic_router:  # todo 通用化
             """
             {'prompt': 'A cute baby sea otter wearing a beret', 'model': 'dall-e-3', 'n': '1', 'size': '1024x1024', 'image': UploadFile(filename='test.png', size=24809, headers=Headers({'content-disposition': 'form-data; name="image"; filename="test.png"', 'content-type': 'image/png'})), 'mask': UploadFile(filename='test.png', size=24809, headers=Headers({'content-disposition': 'form-data; name="mask"; filename="test.png"', 'content-type': 'image/png'}))}
             """
-            form_data = await request.form()
 
-            logger.debug(form_data)
-            # logger.debug(form_data._dict)
+            formdata = await request.form()
+            formdata = form_to_dict(formdata)
+            input_reference, mask = formdata.pop("image", None), formdata.pop("mask", None)
 
-            # logger.debug(form_data.multi_items())
-            # logger.debug(form_data._list)
-            # 93 - [('image', UploadFile(filename='edit1.webp', size=236232, headers=Headers(
-            #     {'content-disposition': 'form-data; name="image"; filename="edit1.webp"',
-            #      'content-type': 'image/webp'}))), ('image', UploadFile(filename='edit2.webp', size=134912,
-            #                                                             headers=Headers({
-            #                                                                                 'content-disposition': 'form-data; name="image"; filename="edit2.webp"',
-            #                                                                                 'content-type': 'image/webp'}))),
-            #       ('prompt', '将小黄鸭放到T恤上'), ('model', 'doubao-seedream-4-0-250828')]
+            logger.debug(f"input_reference: {input_reference}, mask: {mask}")
 
-            # logger.debug(form_data.getlist("image[]"))
+            request = ImageRequest(**formdata)
+            request.image = await do_file_data(input_reference, input_reference_format)
 
-            request = form_data._dict
-            # if images := form_data.getlist("image[]"):  # 数组
-            #     request["image"] = images
-            files = []
-            for k, v in form_data.multi_items():  # images
-                # logger.debug(type(v))
-                if isinstance(v, UploadFile):
-                    files.append(v)
-
-            request["image"] = [file_object.file.read() for file_object in files]  # file_objects
-
-            # todo 重构
-
-            request = ImageEditRequest(**request)  # todo: 优化
-
-            # for file_object in request.image:  # 并发 + b64
-            #     if request.model.startswith("fal-"):  # 国外：fal
-            #         # image_url = await to_url_fal(file_object.file.read(), content_type="image/png")
-            #         image_url = await to_url_fal(file_object.file.read(), content_type=file_object.content_type)
-            #         image_urls.append(image_url)
-            #
-            #     else:
-            #         image_url = await to_url(file_object.file.read(), content_type=file_object.content_type)
-            #         image_urls.append(image_url)
-
-            # todo 是不是直接传 b64 就可以了， 逻辑放在generate 中
-            # if request.model.startswith("fal-"):  # 国外：fal
-            #     image_urls = await to_url_fal(request.image, content_type="image/png")  # file_object.content_type
-            # elif request.model.startswith(("doubao-seed",)):  # todo: 拓展
-            #     # image_urls = await to_png(request.image, response_format='b64_json')  # 临时方案
-            #     image_urls = request.image
-            # else:  # 默认转 url
-            #     image_urls = await to_url(request.image, filename='.png', content_type="image/png")
-
-
-            image_urls = await to_url(request.image, filename='.png', content_type="image/png")
-
-            request = ImageRequest(
-                model=request.model,
-                prompt=request.prompt,
-                image=image_urls,
-                n=request.n,
-                size=request.size,  # aspect_ratio
-                response_format=request.response_format
-            )
+            logany(request)
 
             response = await generate(request, api_key=api_key, base_url=base_url, http_url=http_url)
             if not response:

@@ -12,7 +12,7 @@ from meutils.serving.fastapi import App
 from free_api.routers import health
 
 from free_api.routers.oai import polling as oai_polling, openai_audio, videos, images
-from free_api.routers.audio import v1 as audio_v1, fish, tts, elevenlabs
+from free_api.routers.audio import v1 as audio_v1, fish, tts, elevenlabs, minimax_audio
 
 from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
 from free_api.routers import openai_agent, openai_adapter, openai_redirect
@@ -103,6 +103,7 @@ app.include_router(fal_kling.router, '/kling-video/v1', tags=fal_kling.TAGS)
 app.include_router(jimeng.router, '/jimeng-video/v1', tags=jimeng.TAGS)
 
 app.include_router(minimax.router, '/minimax/v1', tags=minimax.TAGS)
+# app.include_router(minimax_audio.router, '/minimax', tags=minimax_audio.TAGS)
 
 # 火山
 app.include_router(volcengine_apis.router, '/volc', tags=volcengine_apis.TAGS)

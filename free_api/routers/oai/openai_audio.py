@@ -52,7 +52,7 @@ async def text_to_speech(
                 request.model = f"""fal-ai/minimax/{model.removeprefix("minimax-").removeprefix("fal-ai/minimax/")}"""
                 response = await fal_audio.text_to_speech(request, api_key)
             else:
-                response = await ppio_audio.text_to_speech(request, api_key)
+                response = await ppio_audio.text_to_speech(request, api_key)  # todo 废弃
 
             if isinstance(response, dict): return response
             return StreamingResponse([response], media_type="audio/mpeg")
