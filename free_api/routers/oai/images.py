@@ -46,11 +46,11 @@ async def create_generations(
 
         base_url: Optional[str] = Query(None),
 ):
-    logger.debug(f"dynamic_router: {dynamic_router}, api_key: {api_key}")
-
     base_url = base_url or headers.get("x-base-url")
     http_url = headers.get("http-url")
     input_reference_format = headers.get("input-reference-format") or ""
+
+    logger.debug(f"\n\ndynamic_router/base_url/api_key: \n{dynamic_router}\n{base_url}\n{api_key}\n\n")
 
     async with atry_catch(f"{dynamic_router}", base_url=base_url, api_key=api_key, callback=send_message,
                           request=request):
