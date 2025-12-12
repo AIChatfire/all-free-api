@@ -505,9 +505,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/zhipu-sync/v1/web_search' \
 
 
 UPSTREAM_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
-UPSTREAM_API_KEY="8a907822-58ed-4e2f-af25-b7b358e3164c"
-UPSTREAM_API_KEY="feishu:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=rcoDg7"
-UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=ydUVB1"
+UPSTREAM_API_KEY=
 
 API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519
 
