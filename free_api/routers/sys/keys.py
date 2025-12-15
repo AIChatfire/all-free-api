@@ -52,7 +52,7 @@ async def polling_key(
         "api_key": api_key,
     }
 
-    logger.debug(bjson(data))
+    # logger.debug(bjson(data))
 
     return data
 

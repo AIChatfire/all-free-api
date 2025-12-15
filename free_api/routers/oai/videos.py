@@ -66,8 +66,8 @@ async def create_video(  # todo 通用型
         model: str = Form(...),
         prompt: str = Form(...),
 
-        # input_reference: Optional[List[UploadFile]] = File(None),
-        input_reference: Optional[Union[List[UploadFile], List[str]]] = File(None),  # [""]
+        # input_reference: Optional[List[UploadFile]] = Form(None),
+        input_reference: Optional[Union[List[UploadFile], List[str]]] = Form(None),  # [""]
 
         seconds: Optional[str] = Form(None),
         size: Optional[str] = Form(None),
