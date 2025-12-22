@@ -11,7 +11,7 @@
 
 from meutils.pipe import *
 from meutils.oss.minio_oss import Minio
-from meutils.io.files_utils import to_url, to_bytes, to_url_fal, to_base64
+from meutils.io.files_utils import to_url, to_bytes, to_url_fal, to_base64, guess_mime_type
 
 from meutils.db.redis_db import redis_aclient
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -66,15 +66,16 @@ async def create_video(  # todo 通用型
         model: str = Form(...),
         prompt: str = Form(...),
 
-        # input_reference: Optional[List[UploadFile]] = Form(None),
         input_reference: Optional[Union[List[UploadFile], List[str]]] = Form(None),  # [""]
 
         seconds: Optional[str] = Form(None),
         size: Optional[str] = Form(None),
 
+        # url or base64
         image: Optional[List[str]] = Form(None),
-        first_frame_image: Optional[str] = Form(None),
+        first_frame_image: Optional[str] = Form(None),  # Part exceeded maximum size of 1024KB
         last_frame_image: Optional[str] = Form(None),
+
         audio: Optional[str] = Form(None),
         video: Optional[str] = Form(None),
 
@@ -87,6 +88,8 @@ async def create_video(  # todo 通用型
     request_mode = headers.get("x-request-mode") or ""
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
     input_reference_format = headers.get("input-reference-format") or ""
+
+    logger.debug(headers)
 
     if request_mode:  # 通用模式
         formdata = await request.form()
@@ -110,7 +113,14 @@ async def create_video(  # todo 通用型
             video=video,
         )
 
-    if (input_reference and (file := input_reference[0])):  # 统一处理
+    # frame_image 处理
+    # if first_frame_image and "amazonaws" in first_frame_image:
+    #     request.first_frame_image = await to_base64(first_frame_image, guess_mime_type(first_frame_image))
+    #
+    # if last_frame_image and "amazonaws" in last_frame_image:
+    #     request.last_frame_image = await to_base64(last_frame_image, guess_mime_type(last_frame_image))
+
+    if (input_reference and (file := input_reference[0])):  # todo 统一处理
         if isinstance(file, str):  # url
             request.input_reference = input_reference
 
@@ -129,7 +139,7 @@ async def create_video(  # todo 通用型
                 tasks = [to_url_fal(await file.read(), file.content_type) for file in input_reference]
                 request.input_reference = await asyncio.gather(*tasks)
 
-    if len(str(request.input_reference)) < 1000: logger.debug(request)
+    if len(str(request)) < 1000: logger.debug(request)
 
     ###### todo 放弃
     if "runware" in base_url:
