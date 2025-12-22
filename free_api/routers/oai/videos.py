@@ -127,7 +127,7 @@ async def create_video(  # todo 通用型
         elif (isinstance(file, _UploadFile) and file.filename):  # file
 
             # 内部 'content-type': 'application/octet-stream'
-            content_type = guess_mime_type(file.filename)
+            content_type = guess_mime_type(file.filename, default='image/png')
             logger.debug(f"content_type: {content_type}")
 
             if input_reference_format in {"base64", "b64"}:
