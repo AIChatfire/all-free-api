@@ -132,15 +132,15 @@ async def create_video(  # todo 通用型
 
             if input_reference_format in {"base64", "b64"}:
 
-                tasks = [to_base64(await file.read(), content_type) for file in input_reference]
+                tasks = [to_base64(await file.read(), content_type=content_type) for file in input_reference]
                 request.input_reference = await asyncio.gather(*tasks)
 
             elif input_reference_format == "oss":  # to url todo海外服务器
-                tasks = [to_url(await file.read(), content_type) for file in input_reference]
+                tasks = [to_url(await file.read(), content_type=content_type) for file in input_reference]
                 request.input_reference = await asyncio.gather(*tasks)
 
             else:  # fal url
-                tasks = [to_url_fal(await file.read(), content_type) for file in input_reference]
+                tasks = [to_url_fal(await file.read(), content_type=content_type) for file in input_reference]
                 request.input_reference = await asyncio.gather(*tasks)
 
     if len(str(request)) < 1000: logger.debug(request)
