@@ -11,7 +11,7 @@
 
 from meutils.pipe import *
 from meutils.oss.minio_oss import Minio
-from meutils.io.files_utils import to_url, to_bytes, to_url_fal, to_base64, guess_mime_type
+from meutils.io.files_utils import to_url, to_bytes, to_url_fal, to_base64, guess_mime_type, do_file_data
 
 from meutils.db.redis_db import redis_aclient
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -72,12 +72,11 @@ async def create_video(  # todo 通用型
         size: Optional[str] = Form(None),
 
         # url or base64
-        image: Optional[List[str]] = Form(None),
-        first_frame_image: Optional[str] = Form(None),  # Part exceeded maximum size of 1024KB
-        last_frame_image: Optional[str] = Form(None),
+        first_frame_image: Optional[Union[UploadFile, str]] = Form(None),  # Part exceeded maximum size of 1024KB
+        last_frame_image: Optional[Union[UploadFile, str]] = Form(None),
 
-        audio: Optional[str] = Form(None),
-        video: Optional[str] = Form(None),
+        audio: Optional[Union[UploadFile, str]] = Form(None),
+        video: Optional[Union[UploadFile, str]] = Form(None),
 
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
@@ -91,6 +90,10 @@ async def create_video(  # todo 通用型
 
     logger.debug(headers)
 
+    content_type = None
+    if model.startswith(("doubao-seedance")):
+        content_type = "image/png"
+
     if request_mode:  # 通用模式
         formdata = await request.form()
         formdata = form_to_dict(formdata)
@@ -101,47 +104,49 @@ async def create_video(  # todo 通用型
         logany(request)
     else:
 
+        input_reference, first_frame_image, last_frame_image = await do_file_data(
+            [input_reference, first_frame_image, last_frame_image],
+            input_reference_format=input_reference_format,
+            content_type=content_type
+        )
+
         request = SoraVideoRequest(
             model=model,
             prompt=prompt,
             seconds=seconds,
             size=size,
-            image=image,
+
+            # file
+            input_reference=input_reference,
             first_frame_image=first_frame_image,
             last_frame_image=last_frame_image,
             audio=audio,
             video=video,
         )
 
-    # frame_image 处理
-    # if first_frame_image and "amazonaws" in first_frame_image:
-    #     request.first_frame_image = await to_base64(first_frame_image, guess_mime_type(first_frame_image))
     #
-    # if last_frame_image and "amazonaws" in last_frame_image:
-    #     request.last_frame_image = await to_base64(last_frame_image, guess_mime_type(last_frame_image))
-
-    if (input_reference and (file := input_reference[0])):  # todo 统一处理
-        if isinstance(file, str):  # url
-            request.input_reference = input_reference
-
-        elif (isinstance(file, _UploadFile) and file.filename):  # file
-
-            # 内部 'content-type': 'application/octet-stream'
-            content_type = guess_mime_type(file.filename, default='image/png')
-            logger.debug(f"content_type: {content_type}")
-
-            if input_reference_format in {"base64", "b64"}:
-
-                tasks = [to_base64(await file.read(), content_type=content_type) for file in input_reference]
-                request.input_reference = await asyncio.gather(*tasks)
-
-            elif input_reference_format == "oss":  # to url todo海外服务器
-                tasks = [to_url(await file.read(), content_type=content_type) for file in input_reference]
-                request.input_reference = await asyncio.gather(*tasks)
-
-            else:  # fal url
-                tasks = [to_url_fal(await file.read(), content_type=content_type) for file in input_reference]
-                request.input_reference = await asyncio.gather(*tasks)
+    # if (input_reference and (file := input_reference[0])):  # todo 统一处理
+    #     if isinstance(file, str):  # url
+    #         request.input_reference = input_reference
+    #
+    #     elif (isinstance(file, _UploadFile) and file.filename):  # file
+    #
+    #         # 内部 'content-type': 'application/octet-stream'
+    #         content_type = guess_mime_type(file.filename, default='image/png')  # seedance newapi内部都是 application/octet-stream
+    #         logger.debug(f"content_type: {content_type}")
+    #
+    #         if input_reference_format in {"base64", "b64"}:
+    #
+    #             tasks = [to_base64(await file.read(), content_type=content_type) for file in input_reference]
+    #             request.input_reference = await asyncio.gather(*tasks)
+    #
+    #         elif input_reference_format == "oss":  # to url todo海外服务器
+    #             tasks = [to_url(await file.read(), content_type=content_type) for file in input_reference]
+    #             request.input_reference = await asyncio.gather(*tasks)
+    #
+    #         else:  # fal url
+    #             tasks = [to_url_fal(await file.read(), content_type=content_type) for file in input_reference]
+    #             request.input_reference = await asyncio.gather(*tasks)
 
     if len(str(request)) < 1000: logger.debug(request)
 
