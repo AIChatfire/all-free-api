@@ -156,10 +156,10 @@ async def create_chat_completions(
             if request.model.endswith(("-video", "-video-thinking")):
                 request.model = request.model.removesuffix("-video").removesuffix("-video-thinking")
                 request.thinking_budget = 8192
-                response = await qwen_client.create(request, cookie=cookie, bx_ua=bx_ua, umid_token=umid_token)
+                response = await qwen_client.create(request, cookie=cookie)
 
             else:
-                response = await qwen_client.create(request, cookie=cookie, bx_ua=bx_ua, umid_token=umid_token)
+                response = await qwen_client.create(request, cookie=cookie)
 
 
         elif request.model.lower().startswith(("mj",)):
