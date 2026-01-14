@@ -16,11 +16,10 @@ from meutils.pipe import *
 
 from meutils.db.redis_db import redis_aclient
 from meutils.decorators.contextmanagers import atry_catch
-from meutils.notice.feishu import send_message_for_dynamic_router as send_message
+from meutils.notice.feishu import send_message_for_dynamic_router as send_message, send_message_for_tasks
 from meutils.io.files_utils import to_url, get_file_duration, to_bytes
-from meutils.config_utils.lark_utils import get_next_token_for_polling
 
-from meutils.llm.check_utils import get_valid_token_for_fal, check_token_for_volc
+from meutils.llm.check_utils import get_valid_token_for_fal
 from meutils.apis.ppio.videos import get_valid_token as get_valid_token_for_ppio
 from meutils.apis.volcengine_apis.videos import get_valid_token as get_valid_token_for_volc
 
@@ -272,7 +271,14 @@ async def create_task(
             payload['usage'] = usage
             response['usage'] = usage
 
+        # todo 丢任务
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
+        await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
+        await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
+
+        # 备份
+        send_message_for_tasks(upstream_api_key, task_id)
+
         if len(str(payload)) < 10000:  # 存储 request 方便定位问题
             await redis_aclient.set(f"request:{task_id}", json.dumps(payload), ex=7 * 24 * 3600)
 
