@@ -91,7 +91,7 @@ async def create_video(  # todo 通用型
     logger.debug(headers)
 
     content_type = None
-    if model.startswith(("doubao-seedance")):
+    if model.startswith(("doubao-seedance")) or any(i in base_url for i in {'aimlapi'}):
         content_type = "image/png"
 
     if request_mode:  # 通用模式
@@ -175,7 +175,6 @@ async def get_video(
     logger.debug(f"get base_url: {base_url}")  # 这里好像未生效
 
     return await OpenAIVideos().get(id)
-
 
 
 @router.get("/videos/{id:path}/content")
