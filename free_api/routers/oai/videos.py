@@ -75,6 +75,7 @@ async def create_video(  # todo 通用型
         first_frame_image: Optional[Union[UploadFile, str]] = Form(None),  # Part exceeded maximum size of 1024KB
         last_frame_image: Optional[Union[UploadFile, str]] = Form(None),
 
+        image: Optional[Union[UploadFile, str]] = Form(None),
         audio: Optional[Union[UploadFile, str]] = Form(None),
         video: Optional[Union[UploadFile, str]] = Form(None),
 
@@ -91,8 +92,8 @@ async def create_video(  # todo 通用型
     logger.debug(headers)
 
     content_type = None
-    if model.startswith(("doubao-seedance")) or any(i in base_url for i in {'aimlapi'}):
-        content_type = "image/png"
+    if model.startswith(("doubao-seedance")) or any(i in base_url for i in {'aimlapi', 'hailuo'}):
+        content_type = "image/jpeg"
 
     if request_mode:  # 通用模式
         formdata = await request.form()
@@ -120,6 +121,7 @@ async def create_video(  # todo 通用型
             input_reference=input_reference,
             first_frame_image=first_frame_image,
             last_frame_image=last_frame_image,
+            image=image,
             audio=audio,
             video=video,
         )
@@ -148,7 +150,7 @@ async def create_video(  # todo 通用型
     #             tasks = [to_url_fal(await file.read(), content_type=content_type) for file in input_reference]
     #             request.input_reference = await asyncio.gather(*tasks)
 
-    if len(str(request)) < 1000: logger.debug(request)
+    if len(str(request)) < 2000: logger.debug(request)
 
     ###### todo 放弃
     if "runware" in base_url:

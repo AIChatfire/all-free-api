@@ -271,13 +271,14 @@ async def create_task(
             payload['usage'] = usage
             response['usage'] = usage
 
-        # todo 丢任务
+        # 备份
+        send_message_for_tasks(upstream_api_key, task_id)
+
+        # todo 丢任务 redis+mysql
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
 
-        # 备份
-        send_message_for_tasks(upstream_api_key, task_id)
 
         if len(str(payload)) < 10000:  # 存储 request 方便定位问题
             await redis_aclient.set(f"request:{task_id}", json.dumps(payload), ex=7 * 24 * 3600)
