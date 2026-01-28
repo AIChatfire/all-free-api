@@ -43,10 +43,56 @@ async def create_video(  # todo 通用型
 
         image: Optional[List[str]] = Form(None),
 
+        n: Optional[int] = Form(None),
+
         headers: Optional[dict] = Depends(get_headers),
 ):
     logger.debug(image)
     logger.debug(input_reference)
+    if n == 1:
+        return {}
+    elif n == 2:
+        return {
+            "id": "video_123",
+            "object": "video",
+            "model": "sora-2",
+            "created_at": 1640995200,
+            "status": "processing",
+            "progress": 0
+        }
+
+    elif n == 3:
+        return {
+            "id": "video_123",
+            "object": "video",
+            "model": "sora-2",
+            "created_at": 1640995200,
+            "status": "processing",
+            "progress": 0,
+            "error": "xxxx"
+        }
+
+    elif n == 4:
+        return {
+            "id": "video_123",
+            "object": "video",
+            "model": "sora-2",
+            "created_at": 1640995200,
+            "status": "processing",
+            "progress": 0,
+            "error": {}
+        }
+
+    elif n == 5:
+        return {
+            "id": "video_123",
+            "object": "video",
+            "model": "sora-2",
+            "created_at": 1640995200,
+            "status": "processing",
+            "progress": 0,
+            "error": {"code": 1, "message": "error"}
+        }
 
     formdata = await request.form()
     _ = form_to_dict(formdata, file2json=True)
