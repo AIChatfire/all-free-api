@@ -50,8 +50,6 @@ async def create_video(  # todo 通用型
     logger.debug(image)
     logger.debug(input_reference)
     if n == 1:
-        return {}
-    elif n == 2:
         return {
             "id": "video_123",
             "object": "video",
@@ -80,7 +78,7 @@ async def create_video(  # todo 通用型
             "created_at": 1640995200,
             "status": "processing",
             "progress": 0,
-            "error": {}
+            "error": {"code": 4, "message": "error"} # code 必须字符串
         }
 
     elif n == 5:
