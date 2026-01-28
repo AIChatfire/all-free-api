@@ -7,7 +7,7 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  : todo 其他 sora 格式标准化
-
+import json
 
 from meutils.pipe import *
 from meutils.oss.minio_oss import Minio
@@ -44,12 +44,24 @@ async def create_video(  # todo 通用型
         image: Optional[List[str]] = Form(None),
 
         n: Optional[int] = Form(None),
+        error: Optional[str] = Form(None),
 
         headers: Optional[dict] = Depends(get_headers),
 ):
     logger.debug(image)
     logger.debug(input_reference)
     if n == 1:
+        return {
+            "id": "video_123",
+            "object": "video",
+            "model": "sora-2",
+            "created_at": 1640995200,
+            "status": "processing",
+            "progress": 0,
+            "error": json.loads(error)
+        }
+
+    if n == 2:
         return {
             "id": "video_123",
             "object": "video",
@@ -67,7 +79,7 @@ async def create_video(  # todo 通用型
             "created_at": 1640995200,
             "status": "processing",
             "progress": 0,
-            "error": {"message": "error"} # 少正常
+            "error": {"message": "error"}  # 少正常
         }
 
     elif n == 4:
@@ -78,7 +90,7 @@ async def create_video(  # todo 通用型
             "created_at": 1640995200,
             "status": "processing",
             "progress": 0,
-            "error": {"code": 4, "message": "error"} # code 必须字符串
+            "error": {"code": 4, "message": "error"}  # code 必须字符串
         }
 
     elif n == 5:
@@ -134,6 +146,15 @@ async def create_video(  # todo 通用型
 
         api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
+
+        # 额外参数
+        enhance_prompt: Optional[bool] = Form(None),
+        generate_audio: Optional[bool] = Form(None),
+
+        template: Optional[str] = Form(None),  # 视频特效模板
+        style: Optional[str] = Form(None),
+        callback_url: Optional[str] = Form(None),
+
 ):
     # logger.debug(image)  # ['image1', 'image2'] ['image1']
     logger.debug(input_reference)  # None [""] [UploadFile()]
@@ -177,31 +198,15 @@ async def create_video(  # todo 通用型
             image=image,
             audio=audio,
             video=video,
-        )
 
-    #
-    # if (input_reference and (file := input_reference[0])):  # todo 统一处理
-    #     if isinstance(file, str):  # url
-    #         request.input_reference = input_reference
-    #
-    #     elif (isinstance(file, _UploadFile) and file.filename):  # file
-    #
-    #         # 内部 'content-type': 'application/octet-stream'
-    #         content_type = guess_mime_type(file.filename, default='image/png')  # seedance newapi内部都是 application/octet-stream
-    #         logger.debug(f"content_type: {content_type}")
-    #
-    #         if input_reference_format in {"base64", "b64"}:
-    #
-    #             tasks = [to_base64(await file.read(), content_type=content_type) for file in input_reference]
-    #             request.input_reference = await asyncio.gather(*tasks)
-    #
-    #         elif input_reference_format == "oss":  # to url todo海外服务器
-    #             tasks = [to_url(await file.read(), content_type=content_type) for file in input_reference]
-    #             request.input_reference = await asyncio.gather(*tasks)
-    #
-    #         else:  # fal url
-    #             tasks = [to_url_fal(await file.read(), content_type=content_type) for file in input_reference]
-    #             request.input_reference = await asyncio.gather(*tasks)
+            # 额外参数
+            enhance_prompt=enhance_prompt,
+            generate_audio=generate_audio,
+            template=template,
+            style=style,
+
+            callback_url=callback_url
+        )
 
     if len(str(request)) < 2000: logger.debug(request)
 
