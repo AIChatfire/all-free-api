@@ -39,7 +39,7 @@ async def get_video(
         "created_at": 1640995200,
         "status": "completed",
         "progress": 0,
-        "error": {"code": "4", "message": "error"}  # code 必须字符串
+        "error": {"code": "4", "message": "error"},  # code 必须字符串
         "prompt": "火起来",
 
         "metadata": {"task_id": id}
