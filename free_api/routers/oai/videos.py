@@ -69,7 +69,7 @@ async def create_video(  # todo 通用型
             "created_at": 1640995200,
             "status": "processing",
             "progress": 0,
-            "error": {"message": "error"}
+            "error": {"message": "error"} # 少正常
         }
 
     elif n == 4:
@@ -94,7 +94,7 @@ async def create_video(  # todo 通用型
             "error": {"code": "1", "message": "error"}
         }
 
-    elif n == 5:
+    elif n == 6:
         return {
             "id": "video_123",
             "object": "video",
