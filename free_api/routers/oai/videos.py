@@ -28,6 +28,23 @@ from starlette.datastructures import UploadFile as _UploadFile
 router = APIRouter()
 TAGS = ['Videos']
 
+@router.get("/dev/v1/videos/{id:path}")
+async def get_video(
+        id: str
+):
+    return {
+        "id": id,
+        "object": "video",
+        "model": "sora-2",
+        "created_at": 1640995200,
+        "status": "completed",
+        "progress": 0,
+        "error": {"code": "4", "message": "error"}  # code 必须字符串
+        "prompt": "火起来",
+
+        "metadata": {"task_id": id}
+    }
+
 
 @router.post("/dev/v1/videos")  # 核心
 async def create_video(  # todo 通用型
