@@ -43,9 +43,7 @@ async def create_video(  # todo 通用型
 
         image: Optional[List[str]] = Form(None),
 
-        api_key: Optional[str] = Depends(get_bearer_token),
         headers: Optional[dict] = Depends(get_headers),
-
 ):
     logger.debug(image)
     logger.debug(input_reference)
