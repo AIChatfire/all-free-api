@@ -94,6 +94,17 @@ async def create_video(  # todo 通用型
             "error": {"code": "1", "message": "error"}
         }
 
+    elif n == 5:
+        return {
+            "id": "video_123",
+            "object": "video",
+            "model": "sora-2",
+            "created_at": 1640995200,
+            "status": "processing",
+            "progress": 0,
+            "error": {"code": "1", "message": "error", 'xx': 'xx'}
+        }
+
     formdata = await request.form()
     _ = form_to_dict(formdata, file2json=True)
 
