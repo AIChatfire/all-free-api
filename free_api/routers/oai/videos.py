@@ -28,6 +28,7 @@ from starlette.datastructures import UploadFile as _UploadFile
 router = APIRouter()
 TAGS = ['Videos']
 
+
 @router.get("/dev/v1/videos/{id:path}")
 async def get_video(
         id: str
@@ -62,12 +63,27 @@ async def create_video(  # todo 通用型
 
         n: Optional[int] = Form(None),
         error: Optional[str] = Form(None),
+        status: Optional[str] = Form(None),
+        progress: Optional[int] = Form(None),
 
         headers: Optional[dict] = Depends(get_headers),
 ):
     logger.debug(image)
     logger.debug(input_reference)
-    if n == 1:
+    if n == 0:
+        return Video(
+            status=status or 'failed',
+            id='9888bd5a-b87c-40e3-8bbf-c8914464ecf0',
+            completed_at=None, created_at=1769647073,
+            error={'code': '2400002', 'httpCode': 0, 'message': '文案违反社区规范，请更换文案后重试',
+                   'serviceTime': 1769647073, 'requestID': '545f3033-0e38-49cb-912d-b58a6e499fea',
+                   'debugInfo': '2400002', 'serverAlert': 0},
+            progress=progress or 0, # 100?
+            prompt=None, remixed_from_video_id=None, seconds=None, size=None, video_url=None,
+        )
+
+
+    elif n == 1:
         return {
             "id": "video_123",
             "object": "video",
