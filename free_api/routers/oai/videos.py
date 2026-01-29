@@ -38,7 +38,7 @@ async def get_video(
         "object": "video",
         "model": "sora-2",
         "created_at": 1640995200,
-        "status": "completed",
+        "status": "failed",
         "progress": 0,
         "error": {"code": "4", "message": "error"},  # code 必须字符串
         "prompt": "火起来",
@@ -65,6 +65,7 @@ async def create_video(  # todo 通用型
         error: Optional[str] = Form(None),
         status: Optional[str] = Form(None),
         progress: Optional[int] = Form(None),
+        id: Optional[str] = Form(None),
 
         headers: Optional[dict] = Depends(get_headers),
 ):
@@ -73,7 +74,7 @@ async def create_video(  # todo 通用型
     if n == 0:
         return Video(
             status=status or 'failed',
-            id='9888bd5a-b87c-40e3-8bbf-c8914464ecf0',
+            id=id or '',
             completed_at=None, created_at=1769647073,
             error={'code': '2400002', 'httpCode': 0, 'message': '文案违反社区规范，请更换文案后重试',
                    'serviceTime': 1769647073, 'requestID': '545f3033-0e38-49cb-912d-b58a6e499fea',
