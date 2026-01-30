@@ -79,7 +79,7 @@ async def create_video(  # todo 通用型
             error={'code': '2400002', 'httpCode': 0, 'message': '文案违反社区规范，请更换文案后重试',
                    'serviceTime': 1769647073, 'requestID': '545f3033-0e38-49cb-912d-b58a6e499fea',
                    'debugInfo': '2400002', 'serverAlert': 0},
-            progress=progress or 0, # 100?
+            progress=progress or 0,  # 100?
             prompt=None, remixed_from_video_id=None, seconds=None, size=None, video_url=None,
         )
 
@@ -184,6 +184,7 @@ async def create_video(  # todo 通用型
         # 额外参数
         enhance_prompt: Optional[bool] = Form(None),
         generate_audio: Optional[bool] = Form(None),
+        keep_audio: Optional[bool] = Form(None),
 
         template: Optional[str] = Form(None),  # 视频特效模板
         style: Optional[str] = Form(None),
@@ -238,6 +239,7 @@ async def create_video(  # todo 通用型
             generate_audio=generate_audio,
             template=template,
             style=style,
+            keep_audio=keep_audio,
 
             callback_url=callback_url
         )
