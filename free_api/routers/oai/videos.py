@@ -81,8 +81,17 @@ async def create_video(  # todo 通用型
                    'debugInfo': '2400002', 'serverAlert': 0},
             progress=progress or 0,  # 100?
             prompt=None, remixed_from_video_id=None, seconds=None, size=None, video_url=None,
-        )
 
+            usage={
+                "input_tokens": 100,
+                "output_tokens": 100,
+
+                "prompt_tokens": 100,
+                "completion_tokens": 100,
+                "total_tokens": 100,
+
+            }
+        )
 
     elif n == 1:
         return {
