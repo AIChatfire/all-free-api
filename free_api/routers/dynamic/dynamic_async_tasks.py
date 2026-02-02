@@ -11,12 +11,14 @@
 1. hook 输出输出映射
 2. 异步转chat
 """
+import os
 
 from meutils.pipe import *
 
 from meutils.db.redis_db import redis_aclient
 from meutils.decorators.contextmanagers import atry_catch
-from meutils.notice.feishu import send_message_for_dynamic_router as send_message, send_message_for_tasks
+from meutils.notice.feishu import send_message_for_dynamic_router as send_message, send_message_for_tasks, \
+    send_message_for_volc
 from meutils.io.files_utils import to_url, get_file_duration, to_bytes
 
 from meutils.llm.check_utils import get_valid_token_for_fal
@@ -204,16 +206,39 @@ async def create_task(
                 raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="余额不足或API-KEY限额")
 
         # 执行任务
-        response = await make_request(
-            base_url=upstream_base_url,
-            path=upstream_path,
-            payload=payload,
+        try:
+            # upstream_api_key = "c18e9ef5-b6f7-449b-897f-8004f091aad0"
+            response = await make_request(
+                base_url=upstream_base_url,
+                path=upstream_path,
+                payload=payload,
 
-            api_key=upstream_api_key,
-            method=request.method,
-            headers=headers,
-            debug=True
-        )
+                api_key=upstream_api_key,
+                method=request.method,
+                headers=headers,
+                debug=True
+            )
+
+        except Exception as e:
+            if "overdue" in str(e).lower():
+                if "volc" in upstream_base_url:  # 火山兜底重试
+                    send_message_for_volc(upstream_api_key, "欠费key")
+
+                    upstream_api_key = os.getenv('VOLC_API_KEY') or upstream_api_key
+                    response = await make_request(
+                        base_url=upstream_base_url,
+                        path=upstream_path,
+                        payload=payload,
+
+                        api_key=upstream_api_key,
+                        method=request.method,
+                        headers=headers,
+                        debug=True
+                    )
+                else:
+                    raise e
+            else:
+                raise e
 
         # 计费
         # model = "async"  # 测试
@@ -272,13 +297,11 @@ async def create_task(
             response['usage'] = usage
 
         # 备份
+        await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
         send_message_for_tasks(upstream_api_key, task_id)
 
         # todo 丢任务 redis+mysql
         await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
-        await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
-        await redis_aclient.set(task_id, upstream_api_key, ex=7 * 24 * 3600)  # 轮询任务需要
-
 
         if len(str(payload)) < 10000:  # 存储 request 方便定位问题
             await redis_aclient.set(f"request:{task_id}", json.dumps(payload), ex=7 * 24 * 3600)
@@ -475,7 +498,7 @@ curl --request GET \
 """同步任务
 UPSTREAM_BASE_URL="https://ai.gitee.com/v1"
 UPSTREAM_API_KEY="5PJFN89RSDN8CCR7CRGMKAOWTPTZO6PN4XVZV2FQ"
-API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519
+API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d65199
 
 curl -X 'POST' 'http://0.0.0.0:8000/async/gitee-sync/v1/moderations' \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
@@ -500,7 +523,7 @@ UPSTREAM_API_KEY="e130b903ab684d4fad0d35e411162e99.PqyXq4QBjfTdhyCh"
 UPSTREAM_API_KEY="feishu:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=ydUVB1"
 UPSTREAM_API_KEY="redis:https://xchatllm.feishu.cn/sheets/Z59Js10DbhT8wdt72LachSDlnlf?sheet=ydUVB1"
 
-API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519
+API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d65199
 
 curl -X 'POST' 'http://0.0.0.0:8000/async/zhipu-sync/v1/web_search' \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
@@ -511,10 +534,13 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/zhipu-sync/v1/web_search' \
     -d '{"search_query": "周杰伦",  "search_engine": "search_std", "search_intent": true}'
 
 
+    UPSTREAM_API_KEY = "85abd27e-11ac-449b-ad88-66369e320df0 "
+    # UPSTREAM_API_KEY = "c18e9ef5-b6f7-449b-897f-8004f091aad0"
+    
 UPSTREAM_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
-UPSTREAM_API_KEY=
+UPSTREAM_API_KEY=c18e9ef5-b6f7-449b-897f-8004f091aad0
 
-API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519
+API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d65199
 
 curl -X 'POST' 'http://0.0.0.0:8000/async/volc/v1/contents/generations/tasks' \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \
@@ -523,7 +549,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/volc/v1/contents/generations/tasks' \
     -H 'accept: application/json' \
     -H 'Content-Type: application/json' \
     -d '{
-        "model": "doubao-seedance-1-0-lite-t2v-250428",
+        "model": "doubao-seedance-1-5-pro-251215",
         "content": [
             {
                 "type": "text",

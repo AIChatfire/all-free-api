@@ -61,14 +61,14 @@ async def create_textin_service(
 curl -X 'POST' \
   'http://0.0.0.0:8000/v1/image%2Fwatermark_remove' \
   -H 'accept: application/json' \
-  -H 'Authorization: Bearer sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519' \
+  -H 'Authorization: Bearer sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d65199' \
   -d '{"image": "https://oss.ffire.cc/files/sese1.jpg","response_format": "url"}'
   
 
 curl -X 'POST' \
   'http://0.0.0.0:8000/v1/pdf_to_markdown' \
   -H 'accept: application/json' \
-  -H 'Authorization: Bearer sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d6519' \
+  -H 'Authorization: Bearer sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d65199' \
   -d '{"data": "https://s3.ffire.cc/files/pdf_to_markdown.jpg","response_format": "url"}'
   
   
