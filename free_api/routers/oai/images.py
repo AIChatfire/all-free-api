@@ -45,6 +45,7 @@ async def create_generations(
         headers: dict = Depends(get_headers),
 
         base_url: Optional[str] = Query(None),
+
 ):
     base_url = base_url or headers.get("x-base-url")
     http_url = headers.get("http-url")

@@ -7,7 +7,11 @@
 # @Description  :
 
 #
-ntpdate cn.pool.ntp.org
+ntpdate cn.pool.ntp.org 2>/dev/null || {
+    echo "ntpdate 失败，尝试安装..."
+    apt-get update && apt-get install -y ntpdate 2>/dev/null || yum install -y ntpdate 2>/dev/null
+    ntpdate cn.pool.ntp.org
+}
 
 # 清空docker日志
 truncate -s 0 /var/lib/docker/containers/*/*-json.log
