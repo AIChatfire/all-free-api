@@ -28,6 +28,7 @@ from meutils.apis.qwen.chat import Completions as QwenCompletions
 from meutils.apis.gradio_api import deepseek_ocr
 from meutils.apis.gitee.ocr import Completions as GiteeCompletions
 from meutils.apis.replicate.chat import Completions as ReplicateCompletions
+from meutils.apis.translate.deeplx import Completions as DeepLxCompletions
 
 from meutils.schemas.openai_types import CompletionRequest, ChatCompletionRequest, chat_completion_chunk
 
@@ -36,8 +37,6 @@ from openai.types.chat import ChatCompletion, ChatCompletionChunk
 
 from sse_starlette import EventSourceResponse
 from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, HTTPException, status, BackgroundTasks
-
-from free_api.resources.completions import sensechat, chat_qianfan
 
 router = APIRouter()
 TAGS = ["文本生成"]
@@ -67,7 +66,7 @@ async def create_chat_completions(
     # tools
     # request.messages
     if hasattr(request, 'tools') and request.tools:
-        request.model = "glm-4.5-flash"
+        request.model = "glm-4.7-flash"
         response = await zhipuai_client.chat.completions.create(**to_openai_params(request))
 
     async with atry_catch(f"{base_url}/{response_model}", api_key=api_key, request=request):
@@ -90,7 +89,8 @@ async def create_chat_completions(
         if "replicate" in base_url:
             # api_key=None
             response = ReplicateCompletions(api_key=api_key).create(request)
-
+        elif "deeplx" in base_url:
+            response = DeepLxCompletions(api_key=api_key).create(request)
         ########################################################################
 
         elif request.model.lower().startswith(("o1", "openai/o1")) and not api_key.startswith('tune'):  # 适配o1
@@ -129,11 +129,6 @@ async def create_chat_completions(
 
             response = metaso.create(request)
 
-        elif request.model.startswith(("ERNIE",)):  # 反向
-            request = ChatCompletionRequest(**request.model_dump())
-            request.model = "ERNIE-Speed-128K"
-
-            response = await chat_qianfan.Completions().create(request)
         #
         # elif api_key.startswith(("app-",)):  # 适配dify
         #     client = dify.Completions(api_key=api_key)
@@ -263,16 +258,16 @@ if __name__ == '__main__':
 
 """
 BASE_URL=http://0.0.0.0:8000/adapter
-BASE_URL=http://8.134.213.231:40003/adapter
+BASE_URL=http://videos.chatfire.ai/adapter
 curl $BASE_URL/v1/chat/completions \
   -H 'Accept: */*' \
   -H 'Accept-Language: zh-CN' \
   -H 'Proxy-Connection: keep-alive' \
   -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) CherryStudio/1.6.1 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36' \
-  -H 'authorization: Bearer null' \
+  -H 'authorization: Bearer http://172.93.108.217:1188/v1|helloxxx' \
   -H 'content-type: application/json' \
   -H 'http-referer: https://cherry-ai.com' \
-  -H 'x-title: Cherry Studio' \
+  -H 'x-base-url: deeplx' \
   --data-raw '{"model":"qwen3-vl-plus","temperature":2,"top_p":1,"enable_thinking":true,"thinking_budget":2918,"messages":[{"role":"user","content":"hi"}],"stream":false,"max_tokens":10}'
 
 

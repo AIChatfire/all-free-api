@@ -37,6 +37,8 @@ async def webhook(
         biz: str,
 
         expr: str = Query(None),
+
+        id: str = Query(None),
         task_id: str = Query(None),
         # event: str = Form(None),
         # user: str = Form(""),
@@ -45,7 +47,7 @@ async def webhook(
     # ct = request.headers.get("content-type", "")
 
     if request.method == "GET" and task_id:  # 通用接口
-        if (data := await redis_aclient.lrange(f"webhook:{biz}:{task_id}", 0, -1)):
+        if (data := await redis_aclient.lrange(f"webhook:{biz}:{task_id or id}", 0, -1)):
             return json.loads(data[0])
         else:
             raise HTTPException(status_code=404, detail="task_id not found")
