@@ -49,6 +49,8 @@ async def get_task(
         path: str = "request-path",
 
         headers: dict = Depends(get_headers),
+
+        background_tasks: BackgroundTasks = BackgroundTasks,
 ):
     logger.debug(f"biz: {biz} path: {path}")
     logger.debug(bjson(headers))
@@ -118,6 +120,7 @@ async def get_task(
             headers=headers,
         )
 
+
         # 异步任务信号
         flux_task_response = FluxTaskResponse(id=task_id, result=response)
         if flux_task_response.status in {"Ready", "Error", "Content Moderated"}:
@@ -131,6 +134,7 @@ async def get_task(
 
         # 是否需要 按量计费 todo: request model
         # await billing_for_tokens(model, api_key=api_key, n=billing_n)
+        # todo: 增加polling
 
         return response
 

@@ -275,8 +275,11 @@ async def create_video(  # todo 通用型
         if backup_api_key:
             if any(i in str(e).lower() for i in ['QuotaExceeded', "请重试"]):
                 logger.error(f"create video error: {e}, retrying with backup api key")
-                videos = OpenAIVideos(base_url=base_url, api_key=backup_api_key)
-                return await videos.create(request)
+                try:
+                    videos = OpenAIVideos(base_url=base_url, api_key=backup_api_key)
+                    return await videos.create(request)
+                except Exception as e2:
+                    raise e2  # 禁用
 
         raise e
 
