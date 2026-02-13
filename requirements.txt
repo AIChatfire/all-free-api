@@ -14,8 +14,8 @@ aiomysql
 sqlmodel
 
 jsonpath
-json_repair
-toon_python
+json-repair
+python-toon
 
 tabulate
 tenacity
