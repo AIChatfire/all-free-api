@@ -200,11 +200,16 @@ async def create_video(  # todo 通用型
         callback_url: Optional[str] = Form(None),
 
 ):
+    base_url = headers.get("base-url") or headers.get("x-base-url") or ""
+    transfer_url = headers.get("x-transfer-url")
+    return_url = headers.get("x-return-url")
+    backup_api_key = headers.get("x-backup-api-key")
+
     # logger.debug(image)  # ['image1', 'image2'] ['image1']
     logger.debug(input_reference)  # None [""] [UploadFile()]
 
     request_mode = headers.get("x-request-mode") or ""
-    base_url = headers.get("base-url") or headers.get("x-base-url") or ""
+
     input_reference_format = headers.get("input-reference-format") or ""
 
     logger.debug(headers)
@@ -250,7 +255,7 @@ async def create_video(  # todo 通用型
             style=style,
             keep_audio=keep_audio,
 
-            callback_url=callback_url
+            callback_url=callback_url,
         )
 
     if len(str(request)) < 2000: logger.debug(request)
@@ -263,9 +268,17 @@ async def create_video(  # todo 通用型
         )
         return _
     ##########################################
+    try:
+        videos = OpenAIVideos(base_url=base_url, api_key=api_key)
+        return await videos.create(request)
+    except Exception as e:
+        if backup_api_key:
+            if any(i in str(e).lower() for i in ['QuotaExceeded', "请重试"]):
+                logger.error(f"create video error: {e}, retrying with backup api key")
+                videos = OpenAIVideos(base_url=base_url, api_key=backup_api_key)
+                return await videos.create(request)
 
-    videos = OpenAIVideos(base_url=base_url, api_key=api_key)
-    return await videos.create(request)
+        raise e
 
 
 @router.get("/videos/{id:path}")
@@ -277,7 +290,7 @@ async def get_video(
 ):
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
-    logger.debug(f"get base_url: {base_url}")  # 这里好像未生效
+    logger.debug(f"get base_url: {base_url}")  # 这里好像未生效 todo 确认
 
     return await OpenAIVideos().get(id)
 
@@ -320,3 +333,4 @@ if __name__ == '__main__':
     app = App()
     app.include_router(router, "/v1")
     app.run(port=8000)
+    478354211820584968

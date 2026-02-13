@@ -258,7 +258,8 @@ if __name__ == '__main__':
 
 """
 BASE_URL=http://0.0.0.0:8000/adapter
-BASE_URL=http://videos.chatfire.ai/adapter
+BASE_URL=https://images.chatfire.ai/adapter
+BASE_URL=https://test.chatfire.cc/adapter
 curl $BASE_URL/v1/chat/completions \
   -H 'Accept: */*' \
   -H 'Accept-Language: zh-CN' \

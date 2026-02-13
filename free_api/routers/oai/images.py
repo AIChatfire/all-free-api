@@ -47,6 +47,7 @@ async def create_generations(
         base_url: Optional[str] = Query(None),
 
 ):
+    backup_api_key = headers.get("x-backup-api-key")
     base_url = base_url or headers.get("x-base-url")
     http_url = headers.get("http-url")
     input_reference_format = headers.get("input-reference-format") or ""
@@ -61,7 +62,10 @@ async def create_generations(
 
             request = ImageRequest(**request)
 
+
             response = await generate(request, api_key=api_key, base_url=base_url, http_url=http_url)
+
+
 
             if not response:
                 raise HTTPException(status_code=500, detail=f"image response is null")
