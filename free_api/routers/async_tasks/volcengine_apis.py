@@ -141,7 +141,7 @@ async def create_video_task(
                     "seedance2"
                 )
 
-                if backup_api_key := redis_aclient.get("seedance2:backup-api-key"):
+                if backup_api_key := await redis_aclient.get("seedance2:backup-api-key"):
                     biz_key = backup_api_key.decode()
                     video = await videos_nx.Tasks(api_key=biz_key).create_for_volc(request)
 
