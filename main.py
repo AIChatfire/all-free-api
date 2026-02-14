@@ -77,8 +77,6 @@ app.include_router(openai_audio.router, '/openai/v1/audio', tags=openai_audio.TA
 
 # Images
 app.include_router(images.router, '/images/v1', tags=images.TAGS)  # todo：未来以这个为准
-
-app.include_router(images_biz.router, '', tags=images_biz.TAGS)  # 适配其他渠道
 app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
 
 # Videos
