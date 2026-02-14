@@ -151,6 +151,8 @@ async def create_video_task(
                         "seedance2"
                     )
                     raise HTTPException(status_code=500, detail="No available API key")
+            else:
+                raise HTTPException(status_code=500, detail=str(e))
 
         task_id = video.get("id")
         await redis_aclient.set(task_id, biz_key, ex=7 * 24 * 3600)

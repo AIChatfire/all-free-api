@@ -276,7 +276,7 @@ async def create_video(  # todo 通用型
         return await videos.create(request)
     except Exception as e:
         if backup_api_key:
-            if any(i in str(e).lower() for i in {
+            if any(i.lower() in str(e).lower() for i in {
                 'QuotaExceeded', 'rate limit', 'quota', 'insufficient funds', 'over quota', 'over limit', 'exceeded',
                 'too many requests', 'request limit', 'rate limit', 'limit exceeded', 'overloaded', 'busy',
                 'unavailable'
