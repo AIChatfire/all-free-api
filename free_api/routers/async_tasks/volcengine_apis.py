@@ -137,7 +137,7 @@ async def create_video_task(
             logger.error(f"create video task error: {e}")
             if any(i in str(e) for i in {"QuotaExceeded", "NotLogin"}):
                 send_message_for_videos(
-                    f"API key {biz_key[:128]} has no quota or not logged in, error: {e}",
+                    f"""{biz_key.split("AccountID=")[1]}\n\n{e}""",
                     "seedance2"
                 )
 
@@ -150,7 +150,7 @@ async def create_video_task(
                         f"No backup API key available for seedance2, please check the account status.",
                         "seedance2"
                     )
-                    raise HTTPException(status_code=500, detail="No available API key")
+                    raise HTTPException(status_code=500, detail="QuotaExceeded")
             else:
                 raise HTTPException(status_code=500, detail=str(e))
 
@@ -178,6 +178,6 @@ if __name__ == '__main__':
 
     app = App()
 
-    app.include_router(router, '/v1')
+    app.include_router(router, '/doubao/api/v3')
 
     app.run()
