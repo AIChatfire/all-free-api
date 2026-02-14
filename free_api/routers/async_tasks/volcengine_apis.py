@@ -7,10 +7,10 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  :
-import json
 
 from meutils.pipe import *
 from meutils.db.redis_db import redis_aclient
+from meutils.notice.feishu import send_message_for_videos
 from meutils.llm.openai_utils import ppu_flow, get_payment_times
 from meutils.llm.openai_utils.adapters import chat_for_video
 from meutils.llm.openai_utils import create_chat_completion, create_chat_completion_chunk, chat_completion
@@ -130,9 +130,30 @@ async def create_video_task(
 
     else:
         biz_key = await polling_keys("sd2")
-        video = await videos_nx.Tasks(api_key=biz_key).create_for_volc(request)
+        try:
+            video = await videos_nx.Tasks(api_key=biz_key).create_for_volc(request)
+
+        except Exception as e:
+            logger.error(f"create video task error: {e}")
+            if any(i in str(e) for i in {"QuotaExceeded", "NotLogin"}):
+                send_message_for_videos(
+                    f"API key {biz_key[:128]} has no quota or not logged in, error: {e}",
+                    "seedance2"
+                )
+
+                if backup_api_key := redis_aclient.get("seedance2:backup-api-key"):
+                    biz_key = backup_api_key.decode()
+                    video = await videos_nx.Tasks(api_key=biz_key).create_for_volc(request)
+
+                else:
+                    send_message_for_videos(
+                        f"No backup API key available for seedance2, please check the account status.",
+                        "seedance2"
+                    )
+                    raise HTTPException(status_code=500, detail="No available API key")
+
         task_id = video.get("id")
-        await redis_aclient.set(video.get("id"), biz_key, ex=7 * 24 * 3600)
+        await redis_aclient.set(task_id, biz_key, ex=7 * 24 * 3600)
 
         # 计费
         model = get_billing_model(request)
