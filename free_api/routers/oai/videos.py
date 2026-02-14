@@ -33,6 +33,9 @@ TAGS = ['Videos']
 async def get_video(
         id: str
 ):
+    if video := redis_aclient.get(f"video:{id}"):
+        return json.loads(video)
+
     return {
         "id": id,
         "object": "video",
@@ -95,7 +98,7 @@ async def create_video(  # todo 通用型
 
     elif n == 1:
         return {
-            "id": "video_123",
+            "id": "1",
             "object": "video",
             "model": "sora-2",
             "created_at": 1640995200,
@@ -273,13 +276,15 @@ async def create_video(  # todo 通用型
         return await videos.create(request)
     except Exception as e:
         if backup_api_key:
-            if any(i in str(e).lower() for i in ['QuotaExceeded', "请重试"]):
+            if any(i in str(e).lower() for i in {
+                'QuotaExceeded', 'rate limit', 'quota', 'insufficient funds', 'over quota', 'over limit', 'exceeded',
+                'too many requests', 'request limit', 'rate limit', 'limit exceeded', 'overloaded', 'busy',
+                'unavailable'
+            }):
                 logger.error(f"create video error: {e}, retrying with backup api key")
-                try:
-                    videos = OpenAIVideos(base_url=base_url, api_key=backup_api_key)
-                    return await videos.create(request)
-                except Exception as e2:
-                    raise e2  # 禁用
+
+                videos = OpenAIVideos(base_url=base_url, api_key=backup_api_key)
+                return await videos.create(request)
 
         raise e
 
