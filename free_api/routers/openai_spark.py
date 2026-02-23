@@ -28,6 +28,7 @@ TAGS = ["SparkAI"]
 
 logfire.instrument()
 
+
 @router.post("/{path:path}")
 async def create_chat_completions(
         request: CompletionRequest,
