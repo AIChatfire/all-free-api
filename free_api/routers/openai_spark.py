@@ -7,7 +7,6 @@
 # @WeChat       : meutils
 # @Software     : PyCharm
 # @Description  : 适配功能： file video image audio 等等
-
 from aiostream import stream
 
 from meutils.pipe import *
@@ -25,6 +24,9 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Depends, Request, 
 router = APIRouter()
 TAGS = ["SparkAI"]
 
+
+
+logfire.instrument()
 
 @router.post("/{path:path}")
 async def create_chat_completions(
