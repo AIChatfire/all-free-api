@@ -20,7 +20,7 @@ from meutils.apis.vidu import vidu_video
 from meutils.schemas.vidu_types import ViduRequest
 
 from meutils.apis.siliconflow.text_to_image import create
-from meutils.schemas.openai_types import ImageRequest
+from meutils.schemas.image_types import ImageRequest
 from meutils.io.image import image2nowatermark_image
 from meutils.str_utils.regular_expression import parse_url
 

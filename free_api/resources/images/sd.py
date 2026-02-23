@@ -14,7 +14,7 @@ from meutils.db.redis_db import redis_client, redis_aclient
 from meutils.config_utils.lark_utils import aget_spreadsheet_values
 
 from meutils.llm.openai_utils import to_openai_completion_params, token_encoder, token_encoder_with_cache
-from meutils.schemas.openai_types import ImageRequest
+from meutils.schemas.image_types import ImageRequest
 
 from openai import OpenAI, AsyncOpenAI, APIStatusError
 
