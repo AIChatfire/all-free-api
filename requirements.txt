@@ -42,5 +42,7 @@ google-auth
 celery
 flower
 
+logfire[httpx]
+
 
 
