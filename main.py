@@ -22,13 +22,12 @@ from free_api.routers import test
 from free_api.routers import files, tasks
 
 from free_api.routers.sys import oneapi, billing, check, kv, webhooks, redirect, keys
-from free_api.routers.async_tasks import kling, kling_pro, cogvideox, hailuo, hailuo_pro, siliconflow_videos
+from free_api.routers.async_tasks import  hailuo, siliconflow_videos
 from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, minimax
 from free_api.routers.async_tasks import fal, fal_kling, fal_ai
 from free_api.routers.dynamic import dynamic_async_tasks, dynamic_async_tasks_for_sync
 from free_api.routers.dynamic import dynamic_sync_tasks, dynamic_sync_tasks_plus
 
-from free_api.routers.images import biz as images_biz
 from free_api.routers.images import v1 as images_v1
 
 from free_api.routers.crawler import reader
@@ -106,16 +105,12 @@ app.include_router(minimax.router, '/minimax/v1', tags=minimax.TAGS)
 # 火山
 app.include_router(volcengine_apis.router, '/volc', tags=volcengine_apis.TAGS)
 
-app.include_router(cogvideox.router, '/cogvideox/v1', tags=cogvideox.TAGS)
-# app.include_router(kling.router, '/kling/v1', tags=kling.TAGS)
-# app.include_router(kling_apis.router, '/kling_apis', tags=kling_apis.TAGS)
+
 
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
-# app.include_router(hailuo_pro.router, '/hailuo-pro/v1', tags=hailuo.TAGS)
 
 app.include_router(siliconflow_videos.router, '/v1/videos', tags=siliconflow_videos.TAGS)
 
-# app.include_router(tripo3d.router, '/tripo3d/v1', tags=tripo3d.TAGS)
 
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
