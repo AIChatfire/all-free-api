@@ -544,7 +544,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/zhipu-sync/v1/web_search' \
 UPSTREAM_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
 UPSTREAM_API_KEY=c18e9ef5-b6f7-449b-897f-8004f091aad0
 
-API_KEY=sk-iPNbgHSRkQ9VUb6iAcCa7a4539D74255A6462d29619d65199
+API_KEY=sk-sAtxqoTR569T04rVp7g48TRg5vmYQhe8NTDqjTulA3aqoWME
 
 curl -X 'POST' 'http://0.0.0.0:8000/async/volc/v1/contents/generations/tasks' \
     -H "UPSTREAM_BASE_URL: $UPSTREAM_BASE_URL" \

@@ -39,10 +39,5 @@ oss2
 google-auth
 
 
-celery
-flower
-
-logfire[httpx]
-
 
 
