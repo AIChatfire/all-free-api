@@ -120,7 +120,6 @@ async def get_task(
             headers=headers,
         )
 
-
         # 异步任务信号
         flux_task_response = FluxTaskResponse(id=task_id, result=response)
         if flux_task_response.status in {"Ready", "Error", "Content Moderated"}:
@@ -197,6 +196,11 @@ async def create_task(
         # 计费模型
         if billing_model := make_billing_model(model, payload):
             model = f"{model}_{billing_model}"
+
+    # seedance
+    if model.startswith(("doubao-seedance-1-0-pro-fast",)):  # lite
+        payload['model'] = "doubao-seedance-1-0-pro-250528"
+        send_message_for_volc(upstream_api_key, f"{model} => {payload['model']}")
 
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
