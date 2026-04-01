@@ -114,7 +114,6 @@ app.include_router(siliconflow_videos.router, '/v1/videos', tags=siliconflow_vid
 
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
-app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
 
 # 小工具
 app.include_router(image_process.router, '/beta', tags=image_process.TAGS)
