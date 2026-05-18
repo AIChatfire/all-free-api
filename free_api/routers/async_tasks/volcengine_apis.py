@@ -130,6 +130,7 @@ async def create_video_task(
 
     else:
         biz_key = await polling_keys("sd2")
+
         try:
             video = await videos_nx.Tasks(api_key=biz_key).create_for_volc(request)
 

@@ -23,7 +23,7 @@ from meutils.io.files_utils import to_url, get_file_duration, to_bytes
 
 from meutils.llm.check_utils import get_valid_token_for_fal
 from meutils.apis.ppio.videos import get_valid_token as get_valid_token_for_ppio
-from meutils.apis.volcengine_apis.videos import get_valid_token as get_valid_token_for_volc
+from meutils.apis.oneapi.utils import polling_keys
 
 from meutils.apis.oneapi.user import get_user_money
 from meutils.llm.openai_utils.billing_utils import get_billing_n, billing_for_async_task, billing_for_tokens, \
@@ -162,10 +162,8 @@ async def create_task(
     upstream_api_key = await parse_token(upstream_api_key)
 
     ######## 轮询 key
-    if "volc" in upstream_base_url:  # todo get_valid_token_for_volc 包月设计 todo 修复bug
-        upstream_api_key = await get_valid_token_for_volc() or upstream_api_key
-        upstream_api_key = np.random.choice(upstream_api_key.split())  # 随机增加并发
-
+    if "volc" in upstream_base_url:
+        upstream_api_key = await polling_keys("volc")
 
     elif "ppinfra" in upstream_base_url:
         upstream_api_key = await get_valid_token_for_ppio() or upstream_api_key
@@ -197,10 +195,13 @@ async def create_task(
         if billing_model := make_billing_model(model, payload):
             model = f"{model}_{billing_model}"
 
-    # seedance
-    if model.startswith(("doubao-seedance-1-0-pro-fast",)):  # lite
+    # seedance 重定向 todo 所有模型定向到1-5
+    if model.startswith(("doubao-seedance-1-0-pro-fast",)):
         payload['model'] = "doubao-seedance-1-0-pro-250528"
         send_message_for_volc(upstream_api_key, f"{model} => {payload['model']}")
+
+    elif model.startswith(("doubao-seedance-1-0-lite",)):
+        upstream_api_key = await polling_keys("sd-r2v")
 
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
@@ -228,7 +229,7 @@ async def create_task(
             )
 
         except Exception as e:
-            if "overdue" in str(e).lower():
+            if "overdue" in str(e).lower():  # todo 未激活 or 404 获取key  lite获取新key
                 if "volc" in upstream_base_url:  # 火山兜底重试
                     send_message_for_volc(upstream_api_key, "欠费key")
 
