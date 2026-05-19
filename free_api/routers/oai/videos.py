@@ -180,7 +180,11 @@ async def create_video(  # todo 通用型
         input_reference: Optional[Union[List[UploadFile], List[str]]] = Form(None),  # [""]
 
         seconds: Optional[str] = Form(None),
+        duration: Optional[int] = Form(None),
+
         size: Optional[str] = Form(None),
+
+        extra_body: Optional[str] = Form(None),  # 额外参数，json字符串
 
         # url or base64
         first_frame_image: Optional[Union[UploadFile, str]] = Form(None),  # Part exceeded maximum size of 1024KB
@@ -241,6 +245,10 @@ async def create_video(  # todo 通用型
             model=model,
             prompt=prompt,
             seconds=seconds,
+            duration=duration,
+
+            extra_body=extra_body,
+
             size=size,
 
             # file
