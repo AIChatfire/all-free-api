@@ -591,3 +591,7 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/minimax/speech-02-hd' \
   "output_format": "url"
 }'
 """
+
+
+from openai import OpenAI
+
