@@ -77,19 +77,19 @@ async def create_channel(
     request.key = api_key
 
     ############################################### 业务定制 超刷
-    if "volc" in request.base_url or request.type == 45:  # 火山渠道 # and str(request.id) in "21222,21223,21224,21225,29483"
-
-        multi_key_status = await get_channel_info(request.id, upstream_base_url, response_format="multi_key_status")
-        if not multi_key_status:  # 不是全key正常就刷新渠道
-            from meutils.apis.volcengine_apis.videos import get_valid_token  # todo 挑选未刷的key
-
-            logger.debug(f"渠道「{request.id}」: status={multi_key_status}")
-
-            tokens = api_key and api_key.split()  # null
-            request.key = await get_valid_token(tokens, batch_size=batch_size, seed=int(time.time()))  # 动态更新 keys
-
-        else:  # 跳出
-            return {"info": f"渠道「{request.id}」: status={multi_key_status}"}
+    # if "volc" in request.base_url or request.type == 45:  # 火山渠道 # and str(request.id) in "21222,21223,21224,21225,29483"
+    #
+    #     multi_key_status = await get_channel_info(request.id, upstream_base_url, response_format="multi_key_status")
+    #     if not multi_key_status:  # 不是全key正常就刷新渠道
+    #         from meutils.apis.volcengine_apis.videos import get_valid_token  # todo 挑选未刷的key
+    #
+    #         logger.debug(f"渠道「{request.id}」: status={multi_key_status}")
+    #
+    #         tokens = api_key and api_key.split()  # null
+    #         request.key = await get_valid_token(tokens, batch_size=batch_size, seed=int(time.time()))  # 动态更新 keys
+    #
+    #     else:  # 跳出
+    #         return {"info": f"渠道「{request.id}」: status={multi_key_status}"}
 
     ###############################################
 

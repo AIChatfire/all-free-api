@@ -10,7 +10,7 @@
 import time
 
 from meutils.pipe import *
-from meutils.apis.volcengine_apis.videos import get_valid_token
+# from meutils.apis.volcengine_apis.videos import get_valid_token
 
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
 
@@ -26,12 +26,7 @@ async def get_user_info(
         biz: str,
         batch_size: Optional[int] = Query(None),
 ):
-    if biz == 'volc':
-        if tokens := await get_valid_token(batch_size=batch_size, seed=int(time.time())):
-            return {
-                'biz': biz,
-                'tokens': tokens.split(),
-            }
+
 
     return {
         'biz': biz,
