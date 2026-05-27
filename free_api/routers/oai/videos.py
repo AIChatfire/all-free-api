@@ -308,7 +308,7 @@ async def get_video(
 
     logger.debug(f"get base_url: {base_url}")  # 这里好像未生效 todo 确认
 
-    return await OpenAIVideos().get(id)
+    return await OpenAIVideos().get(id)  # video
 
 
 @router.get("/videos/{id:path}/content")
@@ -324,22 +324,50 @@ async def get_file_content(
     )
 
 
-#
+@router.post("/general/v1/videos")  # 核心
+async def create_video(  # 通用型
+        request: SoraVideoRequest,
 
-# @router.get("/files")
-# async def get_files(
-#         api_key: Optional[str] = Depends(get_bearer_token),
-# ):
-#     return client.files.list()
-#
-#
-# @router.delete("/files/{file_id}")
-# async def delete_file(
-#         file_id: str,
-#         api_key: Optional[str] = Depends(get_bearer_token),
-# ):
-#     return client.files.delete(file_id=file_id)
-#
+        api_key: Optional[str] = Depends(get_bearer_token),
+        headers: Optional[dict] = Depends(get_headers),
+
+):
+    logger.debug(headers)
+    if len(str(request)) < 2000: logger.debug(bjson(request))
+
+    base_url = headers.get("base-url") or headers.get("x-base-url") or ""
+
+    try:
+        videos = OpenAIVideos(base_url=base_url, api_key=api_key)
+        return await videos.create(request)
+    except Exception as e:  # todo
+        # if backup_api_key:
+        #     if any(i.lower() in str(e).lower() for i in {
+        #         'QuotaExceeded', 'rate limit', 'quota', 'insufficient funds', 'over quota', 'over limit', 'exceeded',
+        #         'too many requests', 'request limit', 'rate limit', 'limit exceeded', 'overloaded', 'busy',
+        #         'unavailable'
+        #     }):
+        #         logger.error(f"create video error: {e}, retrying with backup api key")
+        #
+        #         videos = OpenAIVideos(base_url=base_url, api_key=backup_api_key)
+        #         return await videos.create(request)
+
+        raise e
+
+
+@router.get("/general/v1/videos/{id:path}")
+async def get_video(
+        id: str,
+        # auth: Optional[str] = Depends(get_bearer_token),
+
+        headers: Optional[dict] = Depends(get_headers),
+):
+    base_url = headers.get("base-url") or headers.get("x-base-url") or ""
+
+    logger.debug(f"get base_url: {base_url}")  # 这里好像未生效 todo 确认
+
+    return await OpenAIVideos().get(id)  # video
+
 
 if __name__ == '__main__':
     from meutils.serving.fastapi import App

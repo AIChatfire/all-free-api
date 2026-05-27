@@ -14,3 +14,10 @@ wget -qO- bench.sh | bash
 apt install speedtest-cli -y  # Debian/Ubuntu
 #yum install speedtest-cli -y  # CentOS/RHEL
 speedtest-cli
+
+
+
+# 测速
+bash <(curl -sSL http://bash.spiritlhl.net/ecs-net)
+
+
