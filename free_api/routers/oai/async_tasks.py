@@ -39,9 +39,6 @@ async def create_task(  # 通用型
 
     base_url = headers.get("base-url") or headers.get("x-base-url") or ""
 
-    if '|' in api_key:
-        base_url, api_key = api_key.split('|', maxsplit=1)  # 区分渠道
-
     try:
         task = AsyncTasks(base_url=base_url, api_key=api_key)
         return await task.create(request)
