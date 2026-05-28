@@ -11,7 +11,7 @@
 from meutils.serving.fastapi import App
 from free_api.routers import health
 
-from free_api.routers.oai import polling as oai_polling, openai_audio, videos, images
+from free_api.routers.oai import polling as oai_polling, openai_audio, videos, images, async_tasks
 from free_api.routers.audio import v1 as audio_v1, fish, tts, elevenlabs, minimax_audio
 
 from free_api.routers import openai_spark, openai_plus, openai_deep2x, openai_assistants
@@ -22,7 +22,7 @@ from free_api.routers import test
 from free_api.routers import files, tasks
 
 from free_api.routers.sys import oneapi, billing, check, kv, webhooks, redirect, keys
-from free_api.routers.async_tasks import  hailuo, siliconflow_videos
+from free_api.routers.async_tasks import hailuo, siliconflow_videos
 from free_api.routers.async_tasks import seededit, jimeng, volcengine_apis, minimax
 from free_api.routers.async_tasks import fal, fal_kling, fal_ai
 from free_api.routers.dynamic import dynamic_async_tasks, dynamic_async_tasks_for_sync
@@ -80,6 +80,7 @@ app.include_router(images_v1.router, '/v1', tags=images_v1.TAGS)
 
 # Videos
 app.include_router(videos.router, '/videos/v1', tags=videos.TAGS)  # todo：未来以这个为准
+app.include_router(async_tasks.router, '/newapi/v1', tags=videos.TAGS)
 
 # files
 app.include_router(files.router, '/v1', tags=files.TAGS)  ########## 废弃
@@ -105,12 +106,9 @@ app.include_router(minimax.router, '/minimax/v1', tags=minimax.TAGS)
 # 火山
 app.include_router(volcengine_apis.router, '/volc', tags=volcengine_apis.TAGS)
 
-
-
 app.include_router(hailuo.router, '/hailuo/v1', tags=hailuo.TAGS)
 
 app.include_router(siliconflow_videos.router, '/v1/videos', tags=siliconflow_videos.TAGS)
-
 
 # 反代
 app.include_router(tasks.router, tags=tasks.TAGS)  # 不兼容openai
@@ -139,6 +137,7 @@ app.include_router(web_search.router, '/search/v1', tags=web_search.TAGS)
 # SyS: extra-api
 app.include_router(oneapi.router, '/oneapi', tags="sys")
 app.include_router(billing.router, '/billing', tags="sys")  # 计费系统
+
 # todo
 app.include_router(keys.router, '/sys/keys', tags="sys")
 app.include_router(oneapi.router, '/sys/oneapi', tags="sys")
