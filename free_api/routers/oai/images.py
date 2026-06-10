@@ -62,9 +62,7 @@ async def create_generations(
 
             request = ImageRequest(**request)
 
-
             response = await generate(request, api_key=api_key, base_url=base_url, http_url=http_url)
-
 
 
             if not response:

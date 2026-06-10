@@ -20,6 +20,7 @@ from free_api.routers import chat_image, chat_to_audio, chat_video, chat_suno
 
 from free_api.routers import test
 from free_api.routers import files, tasks
+from free_api.routers.atask import images as async_images
 
 from free_api.routers.sys import oneapi, billing, check, kv, webhooks, redirect, keys
 from free_api.routers.async_tasks import hailuo, siliconflow_videos
@@ -56,6 +57,7 @@ app.include_router(openai_deep2x.router, '/deep2x', tags=openai_deep2x.TAGS)
 app.include_router(openai_redirect.router, '/redirect', tags=openai_redirect.TAGS)  # todo: 更通用
 app.include_router(openai_adapter.router, '/adapter', tags=openai_adapter.TAGS)  # todo: 更通用
 
+app.include_router(async_images.router, '/async/v1')
 # polling/chat
 # polling/images
 app.include_router(oai_polling.router, '/polling/v1', tags=oai_polling.TAGS)
