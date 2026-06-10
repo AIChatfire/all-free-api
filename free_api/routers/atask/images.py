@@ -30,7 +30,7 @@ TAGS = ["tasks"]
 async def get_task(
         task_id: str,
 ):
-    return images.Tasks.get(task_id)
+    return await images.Tasks.get(task_id)
 
 
 @router.post("/{dynamic_router:path}")  # 通用类 v1/doubao-seedance-1-0-lite-i2v-250428
@@ -46,7 +46,7 @@ async def create_task(
 
     task = images.Tasks(api_key=api_key)
 
-    return task.create(request)
+    return await task.create(request)
 
 
 if __name__ == '__main__':
