@@ -20,18 +20,6 @@ from fastapi import APIRouter, File, UploadFile, Query, Form, Body, Depends, Req
 router = APIRouter()
 TAGS = ["tasks"]
 
-"""
-
-
-"""
-
-
-@router.get("/tasks/{task_id}")
-async def get_task(
-        task_id: str,
-):
-    return await images.Tasks.get(task_id)
-
 
 @router.post("/{dynamic_router:path}")  # 通用类 v1/doubao-seedance-1-0-lite-i2v-250428
 async def create_task(
@@ -44,7 +32,11 @@ async def create_task(
 ):
     logger.debug(dynamic_router)
 
-    task = images.Tasks(api_key=api_key)
+    base_url = None
+    if '|' in api_key:
+        base_url, api_key = api_key.split('|', 1)
+
+    task = images.Tasks(base_url=base_url, api_key=api_key)
 
     return await task.create(request)
 
