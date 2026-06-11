@@ -38,6 +38,8 @@ fish_audio_sdk
 oss2
 google-auth
 
+cos-python-sdk-v5
+
 
 
 
