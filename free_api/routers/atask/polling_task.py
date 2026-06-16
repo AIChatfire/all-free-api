@@ -11,6 +11,7 @@
 
 
 from meutils.apis.async_tasks import images
+from meutils.db.redis_db import redis_aclient
 
 from meutils.serving.fastapi.dependencies.auth import get_bearer_token
 from fastapi import APIRouter, File, UploadFile, Query, Form, Body, Depends, Request, HTTPException, status, \
@@ -25,4 +26,9 @@ TAGS = ["tasks"]
 async def get_task(
         task_id: str,
 ):
+    token = await redis_aclient.get(task_id)  # 绑定对应的 token
+    token = token and token.decode()
+    if not token:
+        raise HTTPException(status_code=404, detail="Task ID not found")
+
     return await images.Tasks.get(task_id)
