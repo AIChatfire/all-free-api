@@ -196,12 +196,11 @@ async def create_task(
             model = f"{model}_{billing_model}"
 
     # seedance 重定向 todo 所有模型定向到1-5
-    if model.startswith(("doubao-seedance-1-0-pro-fast",)):
-        payload['model'] = "doubao-seedance-1-0-pro-250528"
+    if model.startswith(("doubao-seedance-1-0",)):
+        payload['model'] = "doubao-seedance-1-5-pro-251215"
+        payload['generate_audio'] = False # 关闭声音
         send_message_for_volc(upstream_api_key, f"{model} => {payload['model']}")
 
-    elif model.startswith(("doubao-seedance-1-0-lite",)):
-        upstream_api_key = await polling_keys("sd-r2v")
 
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
