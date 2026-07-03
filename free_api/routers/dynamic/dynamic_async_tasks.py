@@ -198,9 +198,8 @@ async def create_task(
     # seedance 重定向 todo 所有模型定向到1-5
     if model.startswith(("doubao-seedance-1-0",)):
         payload['model'] = "doubao-seedance-1-5-pro-251215"
-        payload['generate_audio'] = False # 关闭声音
+        payload['generate_audio'] = False  # 关闭声音
         send_message_for_volc(upstream_api_key, f"{model} => {payload['model']}")
-
 
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
@@ -228,7 +227,9 @@ async def create_task(
             )
 
         except Exception as e:
-            if "overdue" in str(e).lower():  # todo 未激活 or 404 获取key  lite获取新key
+            if any(
+                    i in str(e).lower() for i in {"activated", "overdue"}
+            ):  # todo 未激活 or 404 获取key  lite获取新key
                 if "volc" in upstream_base_url:  # 火山兜底重试
                     send_message_for_volc(upstream_api_key, "欠费key")
 
@@ -591,6 +592,4 @@ curl -X 'POST' 'http://0.0.0.0:8000/async/fal-ai/v1/minimax/speech-02-hd' \
 }'
 """
 
-
 from openai import OpenAI
-
