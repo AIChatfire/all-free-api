@@ -12,7 +12,7 @@ from meutils.pipe import *
 
 from meutils.apis.oneapi.tasks import polling_tasks, refund_tasks
 from meutils.apis.oneapi.user import get_user_quota
-from meutils.apis.oneapi.channel import get_channel_info, update_channel
+from meutils.apis.oneapi.channel import get_channel_info, update_channel, enable_key_for_valid, enable_channel
 from meutils.apis.oneapi.channel import ChannelInfo, create_or_update_channel as _create_or_update_channel
 
 from meutils.serving.fastapi.dependencies import get_bearer_token, get_headers
@@ -99,6 +99,15 @@ async def create_channel(
 
     response['request'] = request
     return response
+
+
+@router.get("/enable_key")
+async def enable_key(
+        id: int,
+        batch_size: int = 1,
+        base_url: Optional[str] = Query(None)
+):
+    return await enable_key_for_valid(id, batch_size=batch_size, base_url=base_url)
 
 
 if __name__ == '__main__':
