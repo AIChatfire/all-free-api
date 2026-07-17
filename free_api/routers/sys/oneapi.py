@@ -106,10 +106,10 @@ async def enable_key(
         id: int,
         batch_size: int = 1,
         base_url: Optional[str] = Query(None),
-        taget_id: Optional[int] = Query(None),
+        target_id: Optional[int] = Query(None),
 
 ):
-    return await enable_key_for_valid(id, batch_size=batch_size, base_url=base_url, taget_id=taget_id)
+    return await enable_key_for_valid(id, batch_size=batch_size, base_url=base_url, target_id=target_id)
 
 
 if __name__ == '__main__':
