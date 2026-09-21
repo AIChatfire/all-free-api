@@ -204,6 +204,10 @@ async def create_task(
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
 
+
+    ##########
+    upstream_base_url = "https://newapi-0to1.livetest.cn/doubao/api/v3"
+    api_key="sk-1ZPWxVdbwBc8pf4o0xHMYVDXrHJ4y0JxATArWj0Z7K28kg3O"
     async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
 

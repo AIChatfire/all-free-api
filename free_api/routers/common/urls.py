@@ -1,0 +1,52 @@
+# #!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+# # @Project      : AI.  @by PyCharm
+# # @File         : urls
+# # @Time         : 2026/7/21 17:46
+# # @Author       : betterme
+# # @WeChat       : meutils
+# # @Software     : PyCharm
+# # @Description  :
+#
+#
+# from meutils.pipe import *
+#
+# from meutils.schemas.image_types import ImageRequest
+# from meutils.io.files_utils import to_url
+#
+# from meutils.serving.fastapi.dependencies.auth import get_bearer_token
+# from fastapi import APIRouter, File, UploadFile, Query, Form, Body, Depends, Request, HTTPException, status, \
+#     BackgroundTasks
+#
+# router = APIRouter()
+# TAGS = ["tasks"]
+#
+#
+# @router.post("/{url:path}")  # 通用类 v1/doubao-seedance-1-0-lite-i2v-250428
+# async def create_task(
+#         dynamic_router: str,  # /tasks
+#         request: ImageRequest,
+#
+#         api_key: Optional[str] = Depends(get_bearer_token),
+#
+#         background_tasks: BackgroundTasks = None,
+# ):
+#     logger.debug(dynamic_router)
+#
+#     base_url = None
+#     if '|' in api_key:
+#         base_url, api_key = api_key.split('|', 1)
+#
+#     # task = images.Tasks(base_url=base_url, api_key=api_key)
+#
+#     return await task.create(request)
+#
+#
+# if __name__ == '__main__':
+#     from meutils.serving.fastapi import App
+#
+#     app = App()
+#
+#     app.include_router(router, '/url')
+#
+#     app.run()
