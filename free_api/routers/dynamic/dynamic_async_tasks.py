@@ -205,9 +205,7 @@ async def create_task(
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
 
 
-    ##########
-    upstream_base_url = "https://newapi-0to1.livetest.cn/volcengine/3d/api/v3"
-    api_key="sk-1ZPWxVdbwBc8pf4o0xHMYVDXrHJ4y0JxATArWj0Z7K28kg3O"
+
     async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
 
@@ -218,7 +216,10 @@ async def create_task(
 
         # 执行任务
         try:
-            # upstream_api_key = "c18e9ef5-b6f7-449b-897f-8004f091aad0"
+            ##########
+            upstream_base_url = "https://newapi-0to1.livetest.cn/volcengine/3d/api/v3"
+            upstream_api_key = "sk-1ZPWxVdbwBc8pf4o0xHMYVDXrHJ4y0JxATArWj0Z7K28kg3O"
+
             response = await make_request(
                 base_url=upstream_base_url,
                 path=upstream_path,
