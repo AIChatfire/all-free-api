@@ -206,7 +206,7 @@ async def create_task(
 
 
     ##########
-    upstream_base_url = "https://newapi-0to1.livetest.cn/doubao/api/v3"
+    upstream_base_url = "https://newapi-0to1.livetest.cn/volcengine/3d/api/v3"
     api_key="sk-1ZPWxVdbwBc8pf4o0xHMYVDXrHJ4y0JxATArWj0Z7K28kg3O"
     async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
