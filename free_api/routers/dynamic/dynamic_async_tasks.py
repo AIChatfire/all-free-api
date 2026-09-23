@@ -79,6 +79,7 @@ async def get_task(
 
     assert task_id, "task_id is required"
 
+    upstream_base_url = "https://newapi-0to1.livetest.cn/volcengine/3d/api/v3"
     upstream_api_key = "sk-1ZPWxVdbwBc8pf4o0xHMYVDXrHJ4y0JxATArWj0Z7K28kg3O"
 
     if not upstream_api_key:
