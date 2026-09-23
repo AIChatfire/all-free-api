@@ -76,37 +76,22 @@ async def get_task(
     upstream_path = headers.get('upstream_get_path') or path  # 推荐 path
     # https://open.bigmodel.cn/api/paas/v4/async-result/{id}
 
-    if biz == "fal-ai":  # {model}/requests/{id}: "kling-video/requests/$REQUEST_ID"
-        # {model}/requests/{id} => kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e
-        # {model}/requests/{id}/status => kling-video/requests/c7a92467-c9c9-4404-a1d6-523ea5aa286e/status
-        # model, task_id = path.split('/requests/')
-        # task_id = task_id.split('/')[0]
-        # upstream_path = upstream_path.format(model=model, id=task_id)
-        # path
-        # "kling-video/requests/d953f062-abd8-4276-9ad4-98e1d926c456/status"
-        task_id = path.removesuffix('/').removesuffix("/status").split('/requests/')[-1]
-        upstream_path = path
 
     assert task_id, "task_id is required"
-    upstream_api_key = await redis_aclient.get(task_id)
-    upstream_api_key = upstream_api_key and upstream_api_key.decode()
-    logger.debug(f"upstream_api_key: {upstream_api_key}")
+
+    upstream_api_key = "sk-1ZPWxVdbwBc8pf4o0xHMYVDXrHJ4y0JxATArWj0Z7K28kg3O"
+
     if not upstream_api_key:
         raise HTTPException(status_code=404, detail="TaskID not found")
 
-    if biz == "fal-ai":  # todo
-        headers = {"Authorization": f"key {upstream_api_key}"}
+
 
     async with atry_catch(f"{biz}/{path}", callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path):
 
         method = "GET"
         payload = None
-        if "siliconflow" in upstream_base_url:
-            method = "POST"
-            payload = {
-                "requestId": task_id
-            }
+
 
         response = await make_request(
             base_url=upstream_base_url,
@@ -204,7 +189,7 @@ async def create_task(
     # 获取计费次数 todo 重构
     billing_n = get_billing_n(payload, resolution=headers.get("x-resolution"))
 
-
+    upstream_api_key = "sk-1ZPWxVdbwBc8pf4o0xHMYVDXrHJ4y0JxATArWj0Z7K28kg3O"
 
     async with atry_catch(f"{biz}/{model}", api_key=api_key, callback=send_message,
                           upstream_base_url=upstream_base_url, upstream_path=upstream_path, request=payload):
